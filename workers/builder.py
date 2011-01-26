@@ -31,6 +31,8 @@ channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 startup_message = {}
 startup_message['builder_id'] = builder_id
 startup_message['body'] = "Builder has been started"
+json_str = json.dumps(startup_message)
+
 channel.basic_publish(exchange='from_worker_exchange',
                       routing_key="key.frombuilders",
-                      body= "builder has been launched")
+                      body= json_str)
