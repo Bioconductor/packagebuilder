@@ -7,6 +7,7 @@
 import pika
 import os
 import sys
+import json
 
 BBS_home = os.environ['BBS_HOME']
 sys.path.append(BBS_home)
@@ -17,7 +18,7 @@ connection = pika.AsyncoreConnection(pika.ConnectionParameters(
         host='merlot2.fhcrc.org'))
 channel = connection.channel()
 
-
+builder_id = os.getenv("BBS_NODE")
 
 from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
 from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
@@ -27,6 +28,9 @@ from_web_queue_name = from_web_queue.queue
 
 channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
+startup_message = {}
+startup_message['builder_id'] = builder_id
+startup_message['body'] = "Builder has been started".
 channel.basic_publish(exchange='from_worker_exchange',
                       routing_key="key.frombuilders",
                       body= "builder has been launched")
