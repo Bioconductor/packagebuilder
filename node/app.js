@@ -30,7 +30,7 @@ app.get('/', function(req, response){
 
 
 
-var connection = amqp.createConnection({ host: 'localhost' });
+var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
  
  
 connection.addListener('ready', function(){

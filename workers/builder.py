@@ -14,7 +14,7 @@ sys.path.append(BBS_home)
 import BBScorevars
 
 connection = pika.AsyncoreConnection(pika.ConnectionParameters(
-        host='localhost'))
+        host='merlot2.fhcrc.org'))
 channel = connection.channel()
 
 
