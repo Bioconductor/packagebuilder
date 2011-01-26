@@ -54,7 +54,7 @@ def callback(ch, method, properties, body):
         pid = subprocess.Popen([os.getenv("BBS_PYTHON_CMD"), "builder.py", jobfilename]).pid
         msg_obj = {}
         msg_obj['builder_id'] = builder_id
-        msg_obj['body'] = "Build starting..."
+        msg_obj['body'] = "Got build request..."
         msg_obj['first_message'] = True
         json_str = json.dumps(msg_obj)
         channel.basic_publish(exchange='from_worker_exchange',
