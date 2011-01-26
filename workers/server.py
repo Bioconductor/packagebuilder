@@ -41,10 +41,11 @@ def callback(ch, method, properties, body):
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
-        if not os.path.exists(job_id):
-            os.mkdir(job_id)
+        job_dir = os.path.join("jobs", job_id)
+        if not os.path.exists(job_dir):
+            os.mkdir(job_dir)
         
-        jobfilename = os.path.join("jobs", job_id, "manifest.json")
+        jobfilename = os.path.join(job_dir, "manifest.json")
         
         jobfile = open(jobfilename, "w")
         jobfile.write(body)
