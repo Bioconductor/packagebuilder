@@ -44,7 +44,7 @@ def callback(ch, method, properties, body):
         if not os.path.exists(job_id):
             os.mkdir(job_id)
         
-        jobfilename = os.path.join(job_id, "manifest.json")
+        jobfilename = os.path.join("jobs", job_id, "manifest.json")
         
         jobfile = open(jobfilename, "w")
         jobfile.write(body)
