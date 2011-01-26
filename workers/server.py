@@ -52,7 +52,9 @@ def callback(ch, method, properties, body):
         jobfile.close
         print "Wrote job info to %s." % jobfilename
         
-        pid = subprocess.Popen([os.getenv("BBS_PYTHON_CMD"), "builder.py", jobfilename]).pid
+        builder_log = open(os.path.join(job_dir, "builder.log"), "w")
+        pid = subprocess.Popen([os.getenv("BBS_PYTHON_CMD"), "builder.py", jobfilename],
+            stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
         msg_obj = {}
         msg_obj['builder_id'] = builder_id
         msg_obj['body'] = "Got build request..."

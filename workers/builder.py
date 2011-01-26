@@ -9,6 +9,8 @@ import os
 import sys
 import json
 
+print "Builder has been started"
+
 BBS_home = os.environ['BBS_HOME']
 sys.path.append(BBS_home)
 
