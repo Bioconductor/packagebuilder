@@ -32,6 +32,7 @@ from_web_queue_name = from_web_queue.queue
 channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
+sys.stdout.flush()
 
 builder_id = os.getenv("BBS_NODE")
 
@@ -46,8 +47,8 @@ def callback(ch, method, properties, body):
         jobfilename = os.path.join(job_id, "manifest.json")
         
         jobfile = open(jobfilename, "w")
-        f.write(body)
-        f.close
+        jobfile.write(body)
+        jobfile.close
         print "Wrote job info to %s." % jobfilename
         
         pid = subprocess.Popen([os.getenv("BBS_PYTHON_CMD"), "builder.py", jobfilename]).pid
