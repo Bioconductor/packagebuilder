@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>Bioconductor Package Builder.</title>
+		<link rel="stylesheet" href="/stylesheets/style.css" />
+		<script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js">
+		</script><script type="text/javascript" src="/javascripts/socket.io.js"></script>
+		<script type="text/javascript"> 
+			io.setPath("/javascript/");</script>
+		<script type="text/javascript" src="/javascripts/packagebuilder.js"></script>
+	</head>
+	<body>
+		<h1>Bioconductor Package Builder</h1>
+		
+		
+		<div id="build_start">
+		
+			<label>SVN URL of package:</label> <br/> 
+			<input id="svn_url" name="svn_url" size="120" 
+			type="text" 
+			value="https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Courses/IWB-January-2011/IWB2011" /><br/> 
+
+			<input type=checkbox name="force" id="force" value="true"> 
+			Force build (even if version has not bumped since last build)<br/>
+
+			<button id="start_build_button">Start Build</button>
+		</div>
+		<p>&nbsp</p>
+		<div id="consoles">
+			<b><div id="a_builder_id"></div></b><br/>
+			<div id="aconsole"></div>
+			<p>&nbsp</p>
+		</div>
+			
+	</body>
+</html>
