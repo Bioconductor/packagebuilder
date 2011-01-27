@@ -8,6 +8,7 @@ import pika
 import os
 import sys
 import json
+import subprocess
 
 if (len(sys.argv) < 2):
     sys.exit("builder.py started without manifest file argument, exiting...")
