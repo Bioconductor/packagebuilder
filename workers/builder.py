@@ -76,7 +76,7 @@ def is_build_required(manifest):
             svn_version = line.split(": ")[1]
             
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
-    r_version = bioc_r_map[os.getenv["BBS_BIOC_VERSION"]]
+    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     cran_repo_map = { \
         'source': "src/contrib", \
         'win.binary': "bin/windows/contrib/" + r_version, \
