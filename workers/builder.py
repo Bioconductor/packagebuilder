@@ -171,7 +171,7 @@ send_message({"status": "svn_result", "result": sts, "body": \
     "svn export completed with status %d" % sts})
 
 
-outfile = os.path.join(working_dir, "R.out")
+outfile = "R.out"
 if (os.path.exists(outfile)):
     os.remove(outfile)
 pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
