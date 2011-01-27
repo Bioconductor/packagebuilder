@@ -93,7 +93,7 @@ def is_build_required(manifest):
     for line in packages.split("\n"):
         if line == "Package: %s" % package_name:
             inpackage = true
-        if line.startswith("Version: "):
+        if (line.startswith("Version: ") and inpackage):
             repository_version = line.split(": ")[1]
             break
     print "[%s] svn version is %s, repository version is %s" % (package_name, svn_version,
