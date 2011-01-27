@@ -162,8 +162,10 @@ def tail(filename):
 # Don't use BBS_SVN_CMD because it may not be defined on all nodes
 package_name = manifest['job_id'].split("_")[0]
 export_path = os.path.join(working_dir, package_name)
-p = subprocess.Popen("svn --non-interactive --username %s --password %s export %s %s" % \
-    (os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], export_path), shell=True)
+svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
+    os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], export_path)
+send_message({"status": "svn_cmd", "body": svn_cmd})
+p = subprocess.Popen(svn_cmd, shell=True)
 sts = os.waitpid(p.pid, 0)[1]
 send_message({"status": "svn_result", "result": sts, "body": \
     "svn export completed with status %d" % sts})
