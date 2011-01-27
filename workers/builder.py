@@ -13,7 +13,7 @@ if (len(sys.argv) < 2):
     sys.exit("builder.py started without manifest file argument, exiting...")
 
 manifest_fh = open(sys.argv[1], "r")
-manifest_json = fh.read()
+manifest_json = manifest_fh.read()
 manifest_fh.close()
 manifest = json.loads(manifest_json)
 working_dir = os.path.split(sys.argv[1])[0]
