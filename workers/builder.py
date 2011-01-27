@@ -163,7 +163,7 @@ def tail(filename):
 package_name = manifest['job_id'].split("_")[0]
 export_path = os.path.join(working_dir, package_name)
 p = subprocess.Popen("svn --non-interactive --username %s --password %s export %s %s" % \
-    (os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], export_path))
+    (os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], export_path), shell=True)
 sts = os.waitpid(p.pid, 0)[1]
 send_message({"status": "svn_result", "result": sts, "body": \
     "svn export completed with status " + sts})
@@ -181,7 +181,7 @@ out_fh = open(outfile, "w")
 start_time = datetime.datetime.now()
 thread.start_new(tail,(outfile,))
 p = subprocess.Popen(os.getenv("BBS_R_CMD") + " CMD BUILD " + flags + " " + export_path, stdout=out_fh,
-    stderr=subprocess.STDOUT)
+    stderr=subprocess.STDOUT, shell=Tr)
 sts = os.waitpid(p.pid, 0)[1]
 stop_time = datetime.datetime.now()
 elapsed_time = str(stop_time - start_time)
