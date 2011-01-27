@@ -164,6 +164,7 @@ package_name = manifest['job_id'].split("_")[0]
 export_path = os.path.join(working_dir, package_name)
 svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
     os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], package_name)
+# todo - hide SVN login and password when sending message back...
 send_message({"status": "svn_cmd", "body": svn_cmd})
 p = subprocess.Popen(svn_cmd, shell=True)
 sts = os.waitpid(p.pid, 0)[1]
@@ -176,9 +177,9 @@ if (os.path.exists(outfile)):
     os.remove(outfile)
 pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
 if pkg_type == "source":
-    flags = "--binary"
-else:
     flags = ""
+else:
+    flags = "--binary"
 out_fh = open(outfile, "w")
 start_time = datetime.datetime.now()
 thread.start_new(tail,(outfile,))
