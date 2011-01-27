@@ -92,7 +92,7 @@ def is_build_required(manifest):
     inpackage = False
     for line in packages.split("\n"):
         if line == "Package: %s" % package_name:
-            inpackage = true
+            inpackage = True
         if (line.startswith("Version: ") and inpackage):
             repository_version = line.split(": ")[1]
             break
