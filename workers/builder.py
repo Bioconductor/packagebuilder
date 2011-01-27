@@ -180,8 +180,9 @@ else:
 out_fh = open(outfile, "w")
 start_time = datetime.datetime.now()
 thread.start_new(tail,(outfile,))
-p = subprocess.Popen(os.getenv("BBS_R_CMD") + " CMD BUILD " + flags + " " + export_path, stdout=out_fh,
-    stderr=subprocess.STDOUT, shell=True)
+r_cmd = "%s CMD BUILD %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
+send_message("status": "r_cmd", "body": r_cmd)
+p = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
 sts = os.waitpid(p.pid, 0)[1]
 stop_time = datetime.datetime.now()
 elapsed_time = str(stop_time - start_time)
@@ -193,4 +194,4 @@ print "Done"
 
 
 send_message({"status": "build_complete", "result_code": sts,
-    "body": "Build completed with status " + sts, "elapsed_time": elapsed_time})
+    "body": "Build completed with status %d" % sts, "elapsed_time": elapsed_time})
