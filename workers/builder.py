@@ -69,7 +69,7 @@ def is_build_required(manifest):
     description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
     description = subprocess.Popen(["curl", "-s", 
         "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
-        description_url]) # todo - handle it if description does not exist
+        description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
         
     for line in description.split("\n"):
         if line.startswith("Version: "):
@@ -85,7 +85,8 @@ def is_build_required(manifest):
     }
     # todo - put repos url in config file (or get it from user)
     repository_url = "http://bioconductor.org/course-packages/%s/PACKAGES" % cran_repo_map[r_version]
-    packages = subprocess.Popen(["curl", "-s", repository_url])
+    packages = subprocess.Popen(["curl", "-s", repository_url],
+        stdout=subprocess.PIPE).communicate()[0]
     inpackage = False
     for line in packages.split("\n"):
         if line == "Package: %s" % package_name:
