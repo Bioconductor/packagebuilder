@@ -77,6 +77,8 @@ def is_build_required(manifest):
             
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
+    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+    
     cran_repo_map = { \
         'source': "src/contrib", \
         'win.binary': "bin/windows/contrib/" + r_version, \
@@ -84,7 +86,7 @@ def is_build_required(manifest):
         'mac.binary.leopard': "bin/macosx/leopard/contrib/" + r_version \
     }
     # todo - put repos url in config file (or get it from user)
-    repository_url = "http://bioconductor.org/course-packages/%s/PACKAGES" % cran_repo_map[r_version]
+    repository_url = "http://bioconductor.org/course-packages/%s/PACKAGES" % cran_repo_map[pkg_type]
     packages = subprocess.Popen(["curl", "-s", repository_url],
         stdout=subprocess.PIPE).communicate()[0]
     inpackage = False
