@@ -13,9 +13,11 @@ import subprocess
 if (len(sys.argv) < 2):
     sys.exit("builder.py started without manifest file argument, exiting...")
 
+print("argument is %s" % sys.argv[1])
 manifest_fh = open(sys.argv[1], "r")
 manifest_json = manifest_fh.read()
 manifest_fh.close()
+print("manifest_json is %s" % manifest_json)
 manifest = json.loads(manifest_json)
 working_dir = os.path.split(sys.argv[1])[0]
 os.chdir(working_dir)
