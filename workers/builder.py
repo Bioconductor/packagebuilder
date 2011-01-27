@@ -166,7 +166,7 @@ p = subprocess.Popen("svn --non-interactive --username %s --password %s export %
     (os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], export_path), shell=True)
 sts = os.waitpid(p.pid, 0)[1]
 send_message({"status": "svn_result", "result": sts, "body": \
-    "svn export completed with status " + sts})
+    "svn export completed with status %d" % sts})
 
 
 outfile = os.path.join(working_dir, "R.out")
