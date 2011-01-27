@@ -180,7 +180,7 @@ else:
 out_fh = open(outfile, "w")
 start_time = datetime.datetime.now()
 thread.start_new(tail,(outfile,))
-r_cmd = "%s CMD BUILD %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
+r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
 send_message({"status": "r_cmd", "body": r_cmd})
 p = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
 sts = os.waitpid(p.pid, 0)[1]
