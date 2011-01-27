@@ -9,6 +9,9 @@ import os
 import sys
 import json
 import subprocess
+import thread
+import time
+import datetime
 
 if (len(sys.argv) < 2):
     sys.exit("builder.py started without manifest file argument, exiting...")
@@ -48,6 +51,8 @@ def send_message(msg):
     global builder_id
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
+    now = datetime.datetime.now()
+    merged_dict['time'] = str(now)
     if type(msg) is dict:
         merged_dict.update(msg)
     else:
@@ -90,12 +95,15 @@ def is_build_required(manifest):
     packages = subprocess.Popen(["curl", "-s", repository_url],
         stdout=subprocess.PIPE).communicate()[0]
     inpackage = False
+    repository_version = False
     for line in packages.split("\n"):
         if line == "Package: %s" % package_name:
             inpackage = True
         if (line.startswith("Version: ") and inpackage):
             repository_version = line.split(": ")[1]
             break
+    if not repository_version:
+        return True # package hasn't been pushed to repo before
     print "[%s] svn version is %s, repository version is %s" % (package_name, svn_version,
         repository_version)
     return(svn_version != repository_version)
@@ -104,5 +112,85 @@ send_message("Builder has been started")
 if not (is_build_required(manifest)):
     send_message({"status": "build_not_required",
         "body": "Build not required (versions identical in svn and repository)."})
+    send_message({"status": "normal_end", "body": "Build process is ending normally."})
+    sys.exit(0)
 
-send_message("hello hello hello")
+
+stop_thread = False
+thread_is_done = False
+message_sequence = 1
+
+def tail(filename):
+    global thread_is_done
+    global message_sequence
+    prevsize = 0
+    while 1:
+        time.sleep(0.2)
+        #print ".",
+        if not os.path.isfile(filename):
+            continue
+        st = os.stat(filename)
+        if st.st_size == 0:
+            continue
+        if stop_thread == True:
+            num_bytes_to_read = st.st_size - prevsize
+            f = open(filename, 'r')
+            f.seek(prevsize)
+            bytes = f.read(num_bytes_to_read)
+            f.close()
+            print bytes,
+            sys.stdout.flush()
+            send_message({"status": "building", "sequence": message_sequence, "body": bytes})
+            prevsize = st.st_size
+            thread_is_done = True
+            print "Thread says I'm done"
+            break # not needed here but might be needed if program was to continue doing other stuff
+            # and we wanted the thread to exit
+
+        if (st.st_size > 0) and (st.st_size > prevsize):
+            num_bytes_to_read = st.st_size - prevsize
+            f = open(filename, 'r')
+            f.seek(prevsize)
+            bytes = f.read(num_bytes_to_read)
+            f.close()
+            print bytes,
+            sys.stdout.flush()
+            send_message({"status": "building", "sequence": message_sequence, "body": bytes})
+            message_sequence += 1
+            prevsize = st.st_size
+
+# Don't use BBS_SVN_CMD because it may not be defined on all nodes
+package_name = manifest['job_id'].split("_")[0]
+export_path = os.path.join(working_dir, package_name)
+p = subprocess.Popen("svn --non-interactive --username %s --password %s export %s %s" % \
+    (os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], export_path))
+sts = os.waitpid(p.pid, 0)[1]
+send_message({"status": "svn_result", "result": sts, "body": \
+    "svn export completed with status " + sts})
+
+
+outfile = os.path.join(working_dir, "R.out")
+if (os.path.exists(outfile)):
+    os.remove(outfile)
+pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+if pkg_type == "source":
+    flags = "--binary"
+else:
+    flags = ""
+out_fh = open(outfile, "w")
+start_time = datetime.datetime.now()
+thread.start_new(tail,(outfile,))
+p = subprocess.Popen(os.getenv("BBS_R_CMD") + " CMD BUILD " + flags + " " + export_path, stdout=out_fh,
+    stderr=subprocess.STDOUT)
+sts = os.waitpid(p.pid, 0)[1]
+stop_time = datetime.datetime.now()
+elapsed_time = str(stop_time - start_time)
+stop_thread = True # tell thread to stop
+out_fh.close()
+
+while thread_is_done == False: pass # wait till thread tells us to stop
+print "Done"
+
+
+send_message({"status": "build_complete", "result_code": sts,
+    "body": "Build completed with status " + sts, "elapsed_time": elapsed_time})
