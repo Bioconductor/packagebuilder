@@ -75,9 +75,14 @@ def is_build_required(manifest):
     print "description_url = " + description_url
     print "svn_user ="  + os.getenv("SVN_USER")
     print "svn_pass = " + os.getenv("SVN_PASS")
-    description = subprocess.Popen(["curl", "-s", 
-        "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
-        description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
+    try:
+        
+        description = subprocess.Popen(["curl", "-s", 
+            "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+            description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
+
     print "debug -- description ="
     print description
         
