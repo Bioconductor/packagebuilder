@@ -58,8 +58,17 @@ connection.addListener('ready', function(){
       sys.puts("got message: " + message.data.toString());
       var obj = JSON.parse(message.data.toString());
       if (obj['originating_host'] && obj['originating_host'] == hostname) {
-          var client_id = obj['client_id'];
-          socket.broadcast(message.data.toString(), client_id);
+          var clientId = obj['client_id'];
+          sys.puts("message came from " + clientId);
+          var deafClients = [];
+          
+          for (var i = 0; i < socket.clients.length; i++) {
+              obj = socket.clients[i];
+              if (obj.sessionId != clientId) {
+                  deafClients.push(obj.sessionId);
+              }
+          }
+          socket.broadcast(message.data.toString(), deafClients);
           fromBuildersQueue.shift()
       }
     })
@@ -67,8 +76,6 @@ connection.addListener('ready', function(){
     
      
     socket.on('connection', function(client){
-      sys.puts("the client id is " + client.sessionId);
-      sys.puts("clients.length = " + socket.clients.length);
       client.on('message', function(msg){
         try {
             obj = JSON.parse(msg);
