@@ -64,7 +64,7 @@ connection.addListener('ready', function(){
           
           for (var i = 0; i < socket.clients.length; i++) {
               obj = socket.clients[i];
-              if (obj.sessionId != clientId) {
+              if (obj != null && obj.hasOwnProperty('sessionId') && obj.sessionId != clientId) {
                   deafClients.push(obj.sessionId);
               }
           }
