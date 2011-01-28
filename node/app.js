@@ -29,6 +29,19 @@ app.get('/', function(req, response){
 });
 
 
+var obj = {foo: "bar"};
+var jsonString = JSON.stringify(obj);
+var rt = JSON.parse(jsonString);
+var js2 = JSON.stringify(rt);
+sys.puts("json string = " + js2);
+var exec = require('child_process').exec;
+
+var hostname;
+
+ exec("hostname", function (error, stdout, sterr) {
+     hostname = stdout.trim();
+     sys.puts("hostname = " + hostname);
+ });
 
 var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
  
@@ -49,6 +62,9 @@ connection.addListener('ready', function(){
     
     fromBuildersQueue.subscribe( {ack:true}, function(message){
       sys.puts("got message: " + message.data.toString());
+      if (message['originating_host'] && message['originating_host'] == hostname) {
+          
+      }
       socket.broadcast(message.data.toString())
       fromBuildersQueue.shift()
     })
@@ -57,6 +73,14 @@ connection.addListener('ready', function(){
      
     socket.on('connection', function(client){
       client.on('message', function(msg){
+        try {
+            obj = JSON.parse(msg);
+            obj['originating_host'] = hostname;
+            msg = JSON.stringify(obj);
+        } catch(err) {
+            sys.puts("error in JSON processing. Message not properly formed JSON?");
+        }
+        sys.puts("publishing " + msg);
         from_web_exchange.publish("#", msg); //key.fromweb
       })
       client.on('disconnect', function(){

@@ -56,6 +56,7 @@ def callback(ch, method, properties, body):
         pid = subprocess.Popen([os.getenv("BBS_PYTHON_CMD"), "builder.py", jobfilename],
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
         msg_obj = {}
+        msg_obj['originating_host'] = received_obj['originating_host']
         msg_obj['builder_id'] = builder_id
         msg_obj['body'] = "Got build request..."
         msg_obj['first_message'] = True

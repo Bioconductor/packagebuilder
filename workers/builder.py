@@ -49,8 +49,10 @@ channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
 def send_message(msg):
     global builder_id
+    global manifest
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
+    merged_dict['originating_host'] = manifest['originating_host']
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
