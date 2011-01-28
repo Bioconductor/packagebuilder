@@ -75,6 +75,8 @@ def is_build_required(manifest):
     description = subprocess.Popen(["curl", "-s", 
         "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
         description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
+    print "debug -- description ="
+    print description
         
     for line in description.split("\n"):
         if line.startswith("Version: "):
