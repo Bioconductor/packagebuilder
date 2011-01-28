@@ -77,7 +77,7 @@ def is_build_required(manifest):
     print "svn_pass = " + os.getenv("SVN_PASS")
     try:
         
-        description = subprocess.Popen(["curl", "-s", 
+        description = subprocess.Popen(["curl", "-k", "-s", 
             "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
             description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
     except:
@@ -103,7 +103,7 @@ def is_build_required(manifest):
     }
     # todo - put repos url in config file (or get it from user)
     repository_url = "http://bioconductor.org/course-packages/%s/PACKAGES" % cran_repo_map[pkg_type]
-    packages = subprocess.Popen(["curl", "-s", repository_url],
+    packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
         stdout=subprocess.PIPE).communicate()[0]
     inpackage = False
     repository_version = False
