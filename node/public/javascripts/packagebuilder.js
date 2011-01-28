@@ -27,10 +27,23 @@ function log(message) {
 
 
 jQuery(function(){
-    
-  var socket = new io.Socket('dhcp151078'); // todo unhardcode
-  socket.connect();
+  var socket;
+  var socketHost = 'dhcp151078'; // todo unhardcode
+  /*
+  if (jQuery.browser.mozilla) {
+      transports = ['xhr-multipart','websocket', 'flashsocket', 'htmlfile', 'xhr-polling'];
+      socket = new io.Socket(socketHost, {transports: transports});
+  } else {
+      socket = new io.Socket(socketHost);
+      
+  }*/
   
+  socket = new io.Socket(socketHost);
+  
+  socket.connect();
+
+  log("is socket connecting? " + socket.connecting);
+  log("is socket connected? " + socket.connected);
   
   var consoles = jQuery("#consoles").html();
   jQuery("#consoles").html("");
@@ -56,6 +69,14 @@ jQuery(function(){
     jQuery("#build_start").html("<p><a href='/'>New Build</a><p>\n")
    socket.send(jsonStr); 
   })
+  
+  
+  socket.on('connect', function(data) {
+      log("in socket connect function");
+      log("\tis socket connecting? " + socket.connecting);
+      log("\tis socket connected? " + socket.connected);
+      
+  });
   
   socket.on('message', function(data){
     log("got message: " + data)

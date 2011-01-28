@@ -1,5 +1,9 @@
+
+// remember to start me with sudo so that flashpolicy file can be served on port 843
+
 require.paths.unshift(__dirname+"/lib/")
-var io = require('socket.io')
+//var io = require('socket.io')
+var io = require("/Users/dtenenba/dev/Socket.IO-node"); // unhardcode this path
 var amqp = require('amqp')
 var sys = require('sys')
 var path = require('path')
@@ -52,7 +56,6 @@ connection.addListener('ready', function(){
     console.log('listening for connections on port 3000')
     var socket = io.listen(app);
     
-    //socket.broadcast("hi there");
     
     fromBuildersQueue.subscribe( {ack:true}, function(message){
       sys.puts("got message: " + message.data.toString());
@@ -62,21 +65,34 @@ connection.addListener('ready', function(){
           sys.puts("message came from " + clientId);
           var deafClients = [];
           
-          for (var i = 0; i < socket.clients.length; i++) {
-              obj = socket.clients[i];
-              if (obj != null && obj.hasOwnProperty('sessionId') && obj.sessionId != clientId) {
-                  deafClients.push(obj.sessionId);
+          for (var key in socket.clients) {
+              if (key != null && key != clientId) {
+                  deafClients.push(key);
               }
           }
+          
           socket.broadcast(message.data.toString(), deafClients);
           fromBuildersQueue.shift()
       }
     })
 
     
+    socket.on('clientConnect', function(client) {
+        // an alias for socket.on('connection'), apparently.
+    });
+    
+    socket.on('clientDisconnect', function(client){
+        sys.puts("this client just disconnected: " + client.sessionId);
+        sys.puts("this brings the total number of clients to: " + numClients(socket));
+    });
      
     socket.on('connection', function(client){
+      sys.puts("new client connected with id " + client.sessionId);
+      sys.puts("this brings the total number of clients to: " + numClients(socket));
+      
+      
       client.on('message', function(msg){
+        sys.puts("in on.message");
         try {
             obj = JSON.parse(msg);
             obj['originating_host'] = hostname;
@@ -89,9 +105,19 @@ connection.addListener('ready', function(){
         from_web_exchange.publish("#", msg); //key.fromweb
       })
       client.on('disconnect', function(){
+          sys.puts("this client just disconnected: " + client.sessionId);
+          sys.puts("this brings the total number of clients to: " + numClients(socket));
+          
       })
     })
     
   });
 });
 
+var numClients = function(ioObj) {
+    var i = 0;
+    for (var key in ioObj.clients) {
+        i++;
+    }
+    return i;
+}
