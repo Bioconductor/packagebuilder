@@ -168,7 +168,7 @@ clean_svn_cmd = svn_cmd.replace(os.getenv("SVN_USER"),"xxx").replace(os.getenv("
 send_message({"status": "svn_cmd", "body": clean_svn_cmd})
 retcode = subprocess.call([svn_cmd], shell=True)
 send_message({"status": "svn_result", "result": retcode, "body": \
-    "svn export completed with status %d" % sts})
+    "svn export completed with status %d" % retcode})
 
 
 outfile = "R.out"
@@ -195,4 +195,4 @@ print "Done"
 
 
 send_message({"status": "build_complete", "result_code": retcode,
-    "body": "Build completed with status %d" % sts, "elapsed_time": elapsed_time})
+    "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
