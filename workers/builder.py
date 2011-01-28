@@ -73,6 +73,8 @@ def is_build_required(manifest):
     package_name = manifest['job_id'].split("_")[0]
     description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
     print "description_url = " + description_url
+    print "svn_user ="  + os.getenv("SVN_USER")
+    print "svn_pass = " + os.getenv("SVN_PASS")
     description = subprocess.Popen(["curl", "-s", 
         "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
         description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
