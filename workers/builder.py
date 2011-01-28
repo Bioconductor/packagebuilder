@@ -53,6 +53,7 @@ def send_message(msg):
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
     merged_dict['originating_host'] = manifest['originating_host']
+    merged_dict['client_id'] = manifest['client_id']
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:

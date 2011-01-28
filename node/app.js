@@ -52,13 +52,14 @@ connection.addListener('ready', function(){
     console.log('listening for connections on port 3000')
     var socket = io.listen(app);
     
-    socket.broadcast("hi there");
+    //socket.broadcast("hi there");
     
     fromBuildersQueue.subscribe( {ack:true}, function(message){
       sys.puts("got message: " + message.data.toString());
       var obj = JSON.parse(message.data.toString());
       if (obj['originating_host'] && obj['originating_host'] == hostname) {
-          socket.broadcast(message.data.toString())
+          var client_id = obj['client_id'];
+          socket.broadcast(message.data.toString(), client_id);
           fromBuildersQueue.shift()
       }
     })
@@ -66,10 +67,13 @@ connection.addListener('ready', function(){
     
      
     socket.on('connection', function(client){
+      sys.puts("the client id is " + client.sessionId);
+      sys.puts("clients.length = " + socket.clients.length);
       client.on('message', function(msg){
         try {
             obj = JSON.parse(msg);
             obj['originating_host'] = hostname;
+            obj['client_id'] = client.sessionId;
             msg = JSON.stringify(obj);
         } catch(err) {
             sys.puts("error in JSON processing. Message not properly formed JSON?");

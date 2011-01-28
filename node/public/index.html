@@ -3,8 +3,9 @@
 	<head>
 		<title>Bioconductor Package Builder.</title>
 		<link rel="stylesheet" href="/stylesheets/style.css" />
-		<script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js">
-		</script><script type="text/javascript" src="/javascripts/socket.io.js"></script>
+		<script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js"></script>
+		<script type="text/javascript" src="/javascripts/json2.js"></script>
+		<script type="text/javascript" src="/javascripts/socket.io.js"></script>
 		<script type="text/javascript"> 
 			io.setPath("/javascript/");</script>
 		<script type="text/javascript" src="/javascripts/packagebuilder.js"></script>
@@ -22,7 +23,18 @@
 
 			<input type=checkbox name="force" id="force" value="true"> 
 			Force build (even if version has not bumped since last build)<br/>
-
+			R Version:
+			<select id="r_version">
+				<option>2.12</option>
+				<option>2.13</option>
+			</select><br/>
+			Destination Repository:
+			<select id="repository">
+				<option value="course">Course Repository</option>
+				<option value="tarballs">Just give me the tarballs</option>
+			</select><br/>
+			
+			
 			<button id="start_build_button">Start Build</button>
 		</div>
 		<p>&nbsp</p>
