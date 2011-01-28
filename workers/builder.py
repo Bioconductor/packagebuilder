@@ -85,6 +85,7 @@ def is_build_required(manifest):
 
     print "debug -- description ="
     print description
+    print "description length = %d" % len(description)
         
     for line in description.split("\n"):
         if line.startswith("Version: "):
