@@ -82,7 +82,7 @@ connection.addListener('ready', function(){
     });
     
     socket.on('clientDisconnect', function(client){
-        sys.puts("this client just disconnected: " + client.sessionId);
+        sys.puts("this client just disconnected: " + client.sessionId); 
         sys.puts("this brings the total number of clients to: " + numClients(socket));
     });
      
