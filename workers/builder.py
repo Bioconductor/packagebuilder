@@ -166,9 +166,8 @@ svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
     os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], package_name)
 clean_svn_cmd = svn_cmd.replace(os.getenv("SVN_USER"),"xxx").replace(os.getenv("SVN_PASS"),"xxx")
 send_message({"status": "svn_cmd", "body": clean_svn_cmd})
-p = subprocess.Popen(svn_cmd, shell=True)
-sts = os.waitpid(p.pid, 0)[1]
-send_message({"status": "svn_result", "result": sts, "body": \
+retcode = subprocess.call([svn_cmd], shell=True)
+send_message({"status": "svn_result", "result": retcode, "body": \
     "svn export completed with status %d" % sts})
 
 
@@ -185,8 +184,7 @@ start_time = datetime.datetime.now()
 thread.start_new(tail,(outfile,))
 r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
 send_message({"status": "r_cmd", "body": r_cmd})
-p = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
-sts = os.waitpid(p.pid, 0)[1]
+retcode = subprocess.call([r_cmd], stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
 stop_time = datetime.datetime.now()
 elapsed_time = str(stop_time - start_time)
 stop_thread = True # tell thread to stop
@@ -196,5 +194,5 @@ while thread_is_done == False: pass # wait till thread tells us to stop
 print "Done"
 
 
-send_message({"status": "build_complete", "result_code": sts,
+send_message({"status": "build_complete", "result_code": retcode,
     "body": "Build completed with status %d" % sts, "elapsed_time": elapsed_time})
