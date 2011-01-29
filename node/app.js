@@ -1,12 +1,13 @@
 
-// remember to start me with sudo so that flashpolicy file can be served on port 843
-
+// remember to start me with sudo so that flashpolicy file can be served on port 843:
+// sudo node app.js
 require.paths.unshift(__dirname+"/lib/")
-// Install Socket.IO-node as follows:
-// git clone https://github.com/LearnBoost/Socket.IO-node.git
-// cd Socket.IO-node
-// git submodule update --init --recursive
-
+/*
+Install Socket.IO-node as follows:
+git clone https://github.com/LearnBoost/Socket.IO-node.git
+cd Socket.IO-node
+git submodule update --init --recursive
+*/
 var io = require("./Socket.IO-node"); 
 var amqp = require('amqp')
 var sys = require('sys')
