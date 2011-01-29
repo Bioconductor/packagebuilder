@@ -2,8 +2,12 @@
 // remember to start me with sudo so that flashpolicy file can be served on port 843
 
 require.paths.unshift(__dirname+"/lib/")
-//var io = require('socket.io')
-var io = require("/Users/dtenenba/dev/Socket.IO-node"); // unhardcode this path
+// Install Socket.IO-node as follows:
+// git clone https://github.com/LearnBoost/Socket.IO-node.git
+// cd Socket.IO-node
+// git submodule update --init --recursive
+
+var io = require("./Socket.IO-node"); 
 var amqp = require('amqp')
 var sys = require('sys')
 var path = require('path')
@@ -82,7 +86,7 @@ connection.addListener('ready', function(){
     });
     
     socket.on('clientDisconnect', function(client){
-        sys.puts("this client just disconnected: " + client.sessionId); 
+        sys.puts("this client just disconnected: " + client.sessionId);
         sys.puts("this brings the total number of clients to: " + numClients(socket));
     });
      
