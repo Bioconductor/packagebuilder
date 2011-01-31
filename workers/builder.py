@@ -93,6 +93,7 @@ def is_build_required(manifest):
 
 def tail(filename):
     global thread_is_done
+    global message_sequence
     prevsize = 0
     while 1:
         time.sleep(0.2)
