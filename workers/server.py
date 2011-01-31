@@ -24,7 +24,7 @@ channel = connection.channel()
 
 hostname = platform.node()
 shell_ext = None
-if (platform.system() == Darwin or platform.system() == "Linux"):
+if (platform.system() == "Darwin" or platform.system() == "Linux"):
     shell_ext = ".sh"
 else:
     shell_ext = ".bat"
