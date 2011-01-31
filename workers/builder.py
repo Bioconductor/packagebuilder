@@ -40,7 +40,7 @@ def is_build_required(manifest):
     if ("force" in manifest.keys()):
         if (manifest['force'] == True):
             return(True)
-    
+    global package_name
     package_name = manifest['job_id'].split("_")[0]
     description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
     print "description_url = " + description_url
