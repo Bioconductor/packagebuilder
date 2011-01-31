@@ -17,7 +17,7 @@ if (len(sys.argv) < 2):
     sys.exit("builder.py started without manifest file argument, exiting...")
 
 print("argument is %s" % sys.argv[1])
-print("cwd is " % os.getcwd())
+print("cwd is " %s os.getcwd())
 manifest_fh = open(sys.argv[1], "r")
 manifest_json = manifest_fh.read()
 manifest_fh.close()
