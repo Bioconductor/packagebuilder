@@ -18,8 +18,6 @@ import datetime
 
 
 def send_message(msg):
-    global builder_id
-    global manifest
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
     merged_dict['originating_host'] = manifest['originating_host']
@@ -136,6 +134,7 @@ def tail(filename):
 def setup():
     global manifest
     global working_dir
+    global builder_id
     print("argument is %s" % sys.argv[1])
     print("cwd is %s" % os.getcwd())
     manifest_fh = open(sys.argv[1], "r")
