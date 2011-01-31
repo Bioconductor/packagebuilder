@@ -11,17 +11,25 @@ import time
 import tempfile
 import os
 import subprocess
+import platform
 
-BBS_home = os.environ['BBS_HOME']
-sys.path.append(BBS_home)
+#BBS_home = os.environ['BBS_HOME']
+#sys.path.append(BBS_home)
 
-import BBScorevars
+#import BBScorevars
 
 connection = pika.AsyncoreConnection(pika.ConnectionParameters(
         host='merlot2.fhcrc.org'))
 channel = connection.channel()
 
+hostname = platform.node()
+shell_ext = None
+if (platform.system() == Darwin or platform.system() == "Linux"):
+    shell_ext = ".sh"
+else:
+    shell_ext = ".bat"
 
+r_bioc_map = {"2.12": "2.7", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine bioc version
 
 from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
 from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
@@ -37,10 +45,13 @@ sys.stdout.flush()
 builder_id = os.getenv("BBS_NODE")
 
 def callback(ch, method, properties, body):
+    global r_bioc_map
     print " [x] Received %r" % (body,)
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
+        r_version = received_obj['r_version']
+        bioc_version = r_bioc_map[r_version]
         job_dir = os.path.join("jobs", job_id)
         if not os.path.exists(job_dir):
             os.mkdir(job_dir)
@@ -52,8 +63,9 @@ def callback(ch, method, properties, body):
         jobfile.close
         print "Wrote job info to %s." % jobfilename
         
+        shell_cmd = "%s%s" % (hostname, bioc_version)
         builder_log = open(os.path.join(job_dir, "builder.log"), "w")
-        pid = subprocess.Popen([os.getenv("BBS_PYTHON_CMD"), "builder.py", jobfilename],
+        pid = subprocess.Popen([shell_cmd,jobfilename, bioc_version,],
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
         msg_obj = {}
         msg_obj['originating_host'] = received_obj['originating_host']
@@ -65,6 +77,7 @@ def callback(ch, method, properties, body):
         channel.basic_publish(exchange='from_worker_exchange',
                               routing_key="key.frombuilders",
                               body= json_str)
+        time.sleep(0.5)
 
 channel.basic_consume(callback,
                       queue=from_web_queue.queue,

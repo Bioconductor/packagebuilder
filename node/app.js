@@ -17,6 +17,7 @@ var fs = require("fs")
 var fu = require("./fu")
 var uuid = require('node-uuid');
 var exec = require('child_process').exec;
+var packagebuilder = require('./packagebuilder');
 
 
 var app = require('appserver').createServer()
@@ -46,8 +47,8 @@ var hostname;
      sys.puts("hostname = " + hostname);
  });
 
-var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
- 
+//var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
+var connection = amqp.createConnection({ host: packagebuilder.socketServer }); 
  
 connection.addListener('ready', function(){
   var from_web_exchange = connection.exchange('from_web_exchange', {type: 'fanout', autoDelete: false});

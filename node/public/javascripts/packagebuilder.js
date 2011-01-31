@@ -28,15 +28,6 @@ function log(message) {
 
 jQuery(function(){
   var socket;
-  var socketHost = 'dhcp151078'; // todo unhardcode
-  /*
-  if (jQuery.browser.mozilla) {
-      transports = ['xhr-multipart','websocket', 'flashsocket', 'htmlfile', 'xhr-polling'];
-      socket = new io.Socket(socketHost, {transports: transports});
-  } else {
-      socket = new io.Socket(socketHost);
-      
-  }*/
   
   socket = new io.Socket(socketHost);
   
