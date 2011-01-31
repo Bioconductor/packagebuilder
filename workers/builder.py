@@ -59,7 +59,7 @@ def is_build_required(manifest):
     print "description length = %d" % len(description)
     
     dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
-    svn_version = dcf.getValue("Version")
+    svn_version = dcf_file.getValue("Version")
     #for line in description.split("\n"):
     #    if line.startswith("Version: "):
     #        svn_version = line.split(": ")[1]
