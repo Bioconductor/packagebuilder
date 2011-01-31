@@ -182,6 +182,7 @@ def svn_export():
         "svn export completed with status %d" % retcode})
     
 def build_package():
+    global stop_thread
     stop_thread = False
     thread_is_done = False
     message_sequence = 1
