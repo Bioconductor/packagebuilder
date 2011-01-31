@@ -1,4 +1,8 @@
 set packagebuilderhome=e:\packagebuilder
+
+set PACKAGEBUILDER_RSAKEY=e:\pkgbuild\packagebuilder\.packagebuilder.private_key.rsa
+
+
 E:
 cd e:\biocbld\bbs\%2\bioc\liverpool
 call config.bat
@@ -10,8 +14,6 @@ set BBS_USER=pkgbuild
 set SVN_USER=pkgbuild
 set SVN_PASS=buildpkg
 
-set BBS_RSAKEY=e:\pkgbuild\packagebuilder\.packagebuilder.private_key.rsa
-set RSAKEY=e:\pkgbuild\packagebuilder\.packagebuilder.private_key.rsa
 
 
 
