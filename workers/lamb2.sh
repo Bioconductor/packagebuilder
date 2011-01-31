@@ -2,7 +2,7 @@
 
 echo "in lamb2.sh"
 
-cd /home//pkgbuild/packagebuilder 
+cd /home/pkgbuild/packagebuilder 
 
 pushd /home/biocbuild/BBS/$2/bioc/lamb2
 
