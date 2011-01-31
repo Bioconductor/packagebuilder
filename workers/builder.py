@@ -57,10 +57,12 @@ def is_build_required(manifest):
     print "debug -- description ="
     print description
     print "description length = %d" % len(description)
-        
-    for line in description.split("\n"):
-        if line.startswith("Version: "):
-            svn_version = line.split(": ")[1]
+    
+    dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    svn_version = dcf.getValue("Version")
+    #for line in description.split("\n"):
+    #    if line.startswith("Version: "):
+    #        svn_version = line.split(": ")[1]
             
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
@@ -135,6 +137,7 @@ def setup():
     global manifest
     global working_dir
     global BBScorevars
+    global dcf
     print("argument is %s" % sys.argv[1])
     print("cwd is %s" % os.getcwd())
     manifest_fh = open(sys.argv[1], "r")
@@ -147,7 +150,8 @@ def setup():
     BBS_home = os.environ['BBS_HOME']
     sys.path.append(BBS_home)
     import BBScorevars
-    
+    sys.path.append(os.path.join(BBS_home, "test/python"))
+    import dcf
 
 def setup_pika():
     global channel
@@ -218,6 +222,9 @@ def build_package():
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
     
 
+def svn_info():
+    
+
 if __name__ == "__main__":
     if (len(sys.argv) < 2):
         sys.exit("builder.py started without manifest file and R version arguments, exiting...")
@@ -225,6 +232,7 @@ if __name__ == "__main__":
     print "Builder has been started"
     setup()
     setup_pika()
+    svn_info()
     
     send_message("Builder has been started")
     if not (is_build_required(manifest)):
