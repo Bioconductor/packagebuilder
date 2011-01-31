@@ -170,6 +170,7 @@ def setup_pika():
 
 def svn_export():
     # Don't use BBS_SVN_CMD because it may not be defined on all nodes
+    global package_name
     package_name = manifest['job_id'].split("_")[0]
     export_path = os.path.join(working_dir, package_name)
     svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
