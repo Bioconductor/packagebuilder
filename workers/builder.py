@@ -12,7 +12,7 @@ import subprocess
 import thread
 import time
 import datetime
-
+import shlex
 
     
 
@@ -135,6 +135,15 @@ def setup():
     global working_dir
     global BBScorevars
     global dcf
+    global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd
+    
+    packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
+    packagebuilder_rsync_cmd = BBScorevars.rsync_cmd.replace(os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
+    packagebuilder_rsync_rsh_cmd = BBScorevars.rsync_rsh_cmd.replace(os.environ["BBS_RSAKEY"], \
+        os.environ["PACKAGEBUILDER_RSAKEY"])
+    packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
+
+
     print("argument is %s" % sys.argv[1])
     print("cwd is %s" % os.getcwd())
     manifest_fh = open(sys.argv[1], "r")
@@ -233,7 +242,50 @@ def svn_info():
     send_message(svn_hash)
 
 def propagate_package():
-    pass
+    global build_product
+    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+    ext = BBScorevars.pkgType2FileExt[pkg_type]
+    files = os.listdir(working_dir)
+    build_product = filter(lambda x: x.endswith(ext), files)[0]
+    
+    repos_map = dante
+    if (platform.system() == "Darwin"):
+        os_seg = "bin/macosx/leopard/contrib/%s" % manifest['r_version']
+    elif (platform.system() == "Linux"):
+        os_seg = "src/contrib"
+    else:
+        os_seg = "bin/windows/contrib/%s" % manifest['r_version']
+    
+    
+    repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
+    
+    files_to_delete = "%s/*.%s" % (repos, ext)
+    
+    retcode = ssh("rm %s" % files_to_delete)
+    print("result of deleting files: %d" % retcode)
+    
+    retcode = scp(build_product, repos)
+    print("result of copying file: %d" % retcode)
+    
+    
+def ssh(command, user='biocbuild', host='merlot2'):
+    command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
+    print("ssh command: %s" % command)
+    args = shlex.split(command)
+    retcode = subprocess.call(args, shell=True)
+    return(retcode)
+
+def scp(src, dest, srcLocal=True, user='biocbuild', host='merlot2'):
+    if (srcLocal):
+        command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
+    else:
+        command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
+    print("scp command: %s" % command)
+    args = shlex.split(command)
+    retcode = subprocess.call(args, shell=True)
+    return(retcode)
+
+
 
 def update_packages_file():
     pass
