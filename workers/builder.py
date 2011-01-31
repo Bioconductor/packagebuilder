@@ -42,11 +42,11 @@ def send_message(msg, status=None):
                           body= json_str)
 
 def is_build_required(manifest):
+    global package_name
+    package_name = manifest['job_id'].split("_")[0]
     if ("force" in manifest.keys()):
         if (manifest['force'] == True):
             return(True)
-    global package_name
-    package_name = manifest['job_id'].split("_")[0]
     description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
     print "description_url = " + description_url
     print "svn_user ="  + os.getenv("SVN_USER")
@@ -268,7 +268,7 @@ def propagate_package():
     
     repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
     
-    files_to_delete = "%s/*.%s" % (repos, ext)
+    files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
     retcode = ssh("rm %s" % files_to_delete)
     print("result of deleting files: %d" % retcode)
