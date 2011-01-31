@@ -65,6 +65,7 @@ def callback(ch, method, properties, body):
         print "Wrote job info to %s." % jobfilename
         
         shell_cmd = "%s%s" % (hostname, shell_ext)
+        print "shell_cmd = %s" % shell_cmd
         builder_log = open(os.path.join(job_dir, "builder.log"), "w")
         pid = subprocess.Popen([shell_cmd,jobfilename, bioc_version,],
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
