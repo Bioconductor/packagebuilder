@@ -220,7 +220,6 @@ if __name__ == "__main__":
     print "Builder has been started"
     setup()
     setup_pika()
-    svn_export()
     
     send_message("Builder has been started")
     if not (is_build_required(manifest)):
@@ -229,5 +228,5 @@ if __name__ == "__main__":
         send_message({"status": "normal_end", "body": "Build process is ending normally."})
         sys.exit(0)
 
-
+    svn_export()
     build_package()
