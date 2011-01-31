@@ -61,7 +61,7 @@ def callback(ch, method, properties, body):
         jobfile.write(body)
         jobfile.close
         print "Wrote job info to %s." % jobfilename
-        shelL_cmd = os.path.join(packagebuilder_home, "%s%s" % (builder_id, shell_ext))
+        shell_cmd = os.path.join(packagebuilder_home, "%s%s" % (builder_id, shell_ext))
         print "shell_cmd = %s" % shell_cmd
         builder_log = open(os.path.join(job_dir, "builder.log"), "w")
         pid = subprocess.Popen([shell_cmd,jobfilename, bioc_version,],
