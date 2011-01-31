@@ -22,7 +22,7 @@ connection = pika.AsyncoreConnection(pika.ConnectionParameters(
         host='merlot2.fhcrc.org'))
 channel = connection.channel()
 
-hostname = platform.node()
+builder_id = platform.node()
 shell_ext = None
 if (platform.system() == "Darwin" or platform.system() == "Linux"):
     shell_ext = ".sh"
@@ -42,7 +42,6 @@ channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 print ' [*] Waiting for messages. To exit press CTRL+C'
 sys.stdout.flush()
 
-builder_id = os.getenv("BBS_NODE")
 
 def callback(ch, method, properties, body):
     global r_bioc_map
@@ -64,7 +63,7 @@ def callback(ch, method, properties, body):
         jobfile.close
         print "Wrote job info to %s." % jobfilename
         
-        shell_cmd = "./%s%s" % (hostname, shell_ext)
+        shell_cmd = "./%s%s" % (builder_id, shell_ext)
         print "shell_cmd = %s" % shell_cmd
         builder_log = open(os.path.join(job_dir, "builder.log"), "w")
         pid = subprocess.Popen([shell_cmd,jobfilename, bioc_version,],
