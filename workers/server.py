@@ -46,6 +46,7 @@ builder_id = os.getenv("BBS_NODE")
 
 def callback(ch, method, properties, body):
     global r_bioc_map
+    global shell_ext
     print " [x] Received %r" % (body,)
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
@@ -63,7 +64,7 @@ def callback(ch, method, properties, body):
         jobfile.close
         print "Wrote job info to %s." % jobfilename
         
-        shell_cmd = "%s%s" % (hostname, bioc_version)
+        shell_cmd = "%s%s" % (hostname, shell_ext)
         builder_log = open(os.path.join(job_dir, "builder.log"), "w")
         pid = subprocess.Popen([shell_cmd,jobfilename, bioc_version,],
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
