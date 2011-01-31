@@ -78,7 +78,6 @@ def callback(ch, method, properties, body):
         channel.basic_publish(exchange='from_worker_exchange',
                               routing_key="key.frombuilders",
                               body= json_str)
-        time.sleep(0.5)
 
 channel.basic_consume(callback,
                       queue=from_web_queue.queue,
