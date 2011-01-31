@@ -223,7 +223,7 @@ def build_package():
     
 
 def svn_info():
-    
+    pass
 
 if __name__ == "__main__":
     if (len(sys.argv) < 2):
