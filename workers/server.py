@@ -44,13 +44,14 @@ sys.stdout.flush()
 def callback(ch, method, properties, body):
     global r_bioc_map
     global shell_ext
+    global packagebuilder_home
     print " [x] Received %r" % (body,)
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
         r_version = received_obj['r_version']
         bioc_version = r_bioc_map[r_version]
-        job_dir = os.path.join("jobs", job_id)
+        job_dir = os.path.join(packagebuilder_home, "jobs", job_id)
         if not os.path.exists(job_dir):
             os.mkdir(job_dir)
         
