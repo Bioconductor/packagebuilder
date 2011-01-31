@@ -15,5 +15,7 @@ popd
 export BBS_USER="pkgbuild"
 export SVN_USER="pkgbuild"
 export SVN_PASS="buildpkg"
+export BBS_RSAKEY="/home/pkgbuild/packagebuilder/.packagebuilder.private_key.rsa"
+export RSAKEY="/home/pkgbuild/packagebuilder/.packagebuilder.private_key.rsa"
  
 $BBS_PYTHON_CMD builder.py $1

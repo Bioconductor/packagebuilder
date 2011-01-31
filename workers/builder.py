@@ -60,9 +60,6 @@ def is_build_required(manifest):
     
     dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
     svn_version = dcf_file.getValue("Version")
-    #for line in description.split("\n"):
-    #    if line.startswith("Version: "):
-    #        svn_version = line.split(": ")[1]
             
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
@@ -220,11 +217,28 @@ def build_package():
 
     send_message({"status": "build_complete", "result_code": retcode,
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
-    
+    return (retcode == 0)
 
 def svn_info():
+    svn_info = subprocess.Popen(["svn", "info", manifest['svn_url']], \
+        stdout=subprocess.PIPE).communicate()[0]
+    dcf_records = dcf.DcfRecordParser(svn_info.rstrip.split("\n"))
+    keys = ['Path', 'URL', 'Repository Root', 'Repository UUID', 'Revision', 'Node Kind',
+        'Last Changed Author', 'Last Changed Rev', 'Last Changed Date']
+    svn_hash = {}
+    for key in keys:
+        svn_hash[key] = dcf_records.getValue(key)
+    svn_hash['status'] = "svn_info"
+    svn_hash['body'] = "svn info"
+    send_message(svn_hash)
+
+def propagate_package():
     pass
 
+def update_packages_file():
+    pass
+
+## Main namespace. execution starts here.
 if __name__ == "__main__":
     if (len(sys.argv) < 2):
         sys.exit("builder.py started without manifest file and R version arguments, exiting...")
@@ -235,11 +249,15 @@ if __name__ == "__main__":
     svn_info()
     
     send_message("Builder has been started")
-    if not (is_build_required(manifest)):
+    is_build_required = is_build_required(manifest)
+    if not (is_build_required):
         send_message({"status": "build_not_required",
             "body": "Build not required (versions identical in svn and repository)."})
         send_message({"status": "normal_end", "body": "Build process is ending normally."})
         sys.exit(0)
 
     svn_export()
-    build_package()
+    if (build_package()):
+        propagate_package()
+        if (is_build_required):
+            update_packages_file()
