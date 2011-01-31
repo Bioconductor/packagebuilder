@@ -184,6 +184,7 @@ def svn_export():
 def build_package():
     global stop_thread
     global message_sequence
+    global thread_is_done
     stop_thread = False
     thread_is_done = False
     message_sequence = 1
