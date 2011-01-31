@@ -232,6 +232,7 @@ def build_package():
     return (retcode == 0)
 
 def svn_info():
+    global manifest
     svn_info = subprocess.Popen(["svn", "info", manifest['svn_url']], \
         stdout=subprocess.PIPE).communicate()[0]
     dcf_records = dcf.DcfRecordParser(svn_info.rstrip.split("\n"))
