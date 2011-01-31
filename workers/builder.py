@@ -134,6 +134,7 @@ def tail(filename):
 def setup():
     global manifest
     global working_dir
+    global BBScorevars
     print("argument is %s" % sys.argv[1])
     print("cwd is %s" % os.getcwd())
     manifest_fh = open(sys.argv[1], "r")
