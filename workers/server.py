@@ -20,7 +20,9 @@ connection = pika.AsyncoreConnection(pika.ConnectionParameters(
         host='merlot2.fhcrc.org'))
 channel = connection.channel()
 
-builder_id = platform.node()
+builder_id = platform.node().replace(".fhcrc.org","")
+
+
 shell_ext = None
 if (platform.system() == "Darwin" or platform.system() == "Linux"):
     shell_ext = ".sh"
