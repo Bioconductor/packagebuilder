@@ -17,7 +17,7 @@ import shlex
     
 
 
-def send_message(msg):
+def send_message(msg, status=None):
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
     merged_dict['originating_host'] = manifest['originating_host']
@@ -26,8 +26,13 @@ def send_message(msg):
     merged_dict['time'] = str(now)
     if type(msg) is dict:
         merged_dict.update(msg)
+        if not ('status' in merged_dict.keys()):
+            if not (status == None):
+                merged_dict['status'] = status
     else:
         merged_dict['body'] = msg
+        if not (status == None):
+            merged_dict['status'] = status
     json_str = json.dumps(merged_dict)
     print "sending message:"
     print json_str
@@ -253,7 +258,6 @@ def propagate_package():
     files = os.listdir(working_dir)
     build_product = filter(lambda x: x.endswith(ext), files)[0]
     
-    repos_map = dante
     if (platform.system() == "Darwin"):
         os_seg = "bin/macosx/leopard/contrib/%s" % manifest['r_version']
     elif (platform.system() == "Linux"):
@@ -268,10 +272,12 @@ def propagate_package():
     
     retcode = ssh("rm %s" % files_to_delete)
     print("result of deleting files: %d" % retcode)
+    send_message({"body": "pruned repos", "status": "pruned_repos_retcode", "retcode": retcode})
     
     retcode = scp(build_product, repos)
     print("result of copying file: %d" % retcode)
-    
+    send_message({"body": "copied file", "status": "copied_file_retcode", "retcode": retcode,
+        "build_product": build_product})
     
 def ssh(command, user='biocbuild', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
