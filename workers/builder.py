@@ -136,6 +136,14 @@ def setup():
     global BBScorevars
     global dcf
     global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd
+
+    ## BBS-specific imports
+    BBS_home = os.environ['BBS_HOME']
+    sys.path.append(BBS_home)
+    import BBScorevars
+    sys.path.append(os.path.join(BBS_home, "test/python"))
+    import dcf
+
     
     packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
     packagebuilder_rsync_cmd = BBScorevars.rsync_cmd.replace(os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
@@ -153,11 +161,6 @@ def setup():
     manifest = json.loads(manifest_json)
     working_dir = os.path.split(sys.argv[1])[0]
     os.chdir(working_dir)
-    BBS_home = os.environ['BBS_HOME']
-    sys.path.append(BBS_home)
-    import BBScorevars
-    sys.path.append(os.path.join(BBS_home, "test/python"))
-    import dcf
 
 def setup_pika():
     global channel
