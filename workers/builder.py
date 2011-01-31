@@ -134,7 +134,6 @@ def tail(filename):
 def setup():
     global manifest
     global working_dir
-    global builder_id
     print("argument is %s" % sys.argv[1])
     print("cwd is %s" % os.getcwd())
     manifest_fh = open(sys.argv[1], "r")
@@ -151,6 +150,8 @@ def setup():
 
 def setup_pika():
     global channel
+    global builder_id
+    
     connection = pika.AsyncoreConnection(pika.ConnectionParameters(
             host='merlot2.fhcrc.org'))
     channel = connection.channel()
