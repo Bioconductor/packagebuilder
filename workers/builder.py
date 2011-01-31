@@ -93,7 +93,6 @@ def is_build_required(manifest):
 
 def tail(filename):
     global thread_is_done
-    global message_sequence
     prevsize = 0
     while 1:
         time.sleep(0.2)
@@ -183,6 +182,7 @@ def svn_export():
     
 def build_package():
     global stop_thread
+    global message_sequence
     stop_thread = False
     thread_is_done = False
     message_sequence = 1
