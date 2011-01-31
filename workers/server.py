@@ -14,10 +14,8 @@ import subprocess
 import platform
 
 #BBS_home = os.environ['BBS_HOME']
-#sys.path.append(BBS_home)
 
-#import BBScorevars
-
+packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 connection = pika.AsyncoreConnection(pika.ConnectionParameters(
         host='merlot2.fhcrc.org'))
 channel = connection.channel()
@@ -56,7 +54,7 @@ def callback(ch, method, properties, body):
         if not os.path.exists(job_dir):
             os.mkdir(job_dir)
         
-        jobfilename = os.path.join(job_dir, "manifest.json")
+        jobfilename = os.path.join(packagebuilder_home, job_dir, "manifest.json")
         
         jobfile = open(jobfilename, "w")
         jobfile.write(body)
