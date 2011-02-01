@@ -357,7 +357,7 @@ def update_packages_file():
     global repos
     global pkg_type
     command = \
-        "%s biocadmin@merlot2 'R -f /loc/www/bioconductor-test.fhcrc.org/course-packages/update-course-repo.R %s %s'" \
+        "%s biocadmin@merlot2 'R -f /loc/www/bioconductor-test.fhcrc.org/course-packages/update-course-repo.R --args %s %s'" \
         % (packagebuilder_ssh_cmd, repos, pkg_type)
     print("update packages command: ")
     print(command)
