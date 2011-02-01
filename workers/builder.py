@@ -293,7 +293,7 @@ def propagate_package():
         "build_product": build_product})
 
 def _call(command_str, shell):
-    if (platform.system == "Windows"):
+    if (platform.system() == "Windows"):
         #args = shlex.split(command_str)
         #return(subprocess.call(args, shell=shell))
         stdout_fn = os.path.join(working_dir, "%dout.txt" % callcount)
