@@ -291,7 +291,7 @@ def _call(command_str, shell):
         args = shlex.split(command_str)
         return(subprocess.call(args, shell=shell))
     else:
-        return(subprocess.call([command_str], shell=shell))
+        return(subprocess.call(command_str, shell=shell))
 
 def ssh(command, user='biocadmin', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
