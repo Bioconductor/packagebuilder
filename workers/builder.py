@@ -388,6 +388,8 @@ def update_packages_file():
         sys.exit("Updating packages failed")
     
     command = "%s biocadmin@merlot2 'cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production'"
+    print("sync command = ")
+    print(command)
     retcode = subprocess.call(command, shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website"})
     if retcode != 0:
