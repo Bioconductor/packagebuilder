@@ -282,8 +282,7 @@ def propagate_package():
 def ssh(command, user='biocadmin', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
     print("ssh command: %s" % command)
-    args = shlex.split(command)
-    retcode = subprocess.call(args, shell=True)
+    retcode = subprocess.call([command], shell=True)
     return(retcode)
 
 def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
