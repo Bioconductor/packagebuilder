@@ -356,6 +356,8 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
 def update_packages_file():
     global repos
     global pkg_type
+    if pkg_type == "mac.binary.leopard":
+        pkg_type = "mac.binary"
     command = \
         "%s biocadmin@merlot2 'R -f /loc/www/bioconductor-test.fhcrc.org/course-packages/update-course-repo.R --args %s %s'" \
         % (packagebuilder_ssh_cmd, repos, pkg_type)
