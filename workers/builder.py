@@ -160,9 +160,9 @@ def setup():
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
     
     if (platform.system() == "Windows"):
-        packagebuilder_scp_cmd = "c:\\cygwin\\bin\\scp.exe -qi %s -o StrictHostKeyChecking=no" % \
+        packagebuilder_scp_cmd = "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
             os.environ["PACKAGEBUILDER_RSAKEY"]
-        packagebuilder_ssh_cmd = "c:\\cygwin\\bin\\ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
+        packagebuilder_ssh_cmd = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
             os.environ["PACKAGEBUILDER_RSAKEY"]
 
 
