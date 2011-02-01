@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Bioconductor Package Builder.</title>
-		<link rel="stylesheet" href="/stylesheets/style.css" />
+		<LINK rel="stylesheet" href="/css/2.7/report.css" type="text/css"> 
 		<script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js"></script>
 		<script type="text/javascript" src="/javascripts/json2.js"></script>
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -35,12 +35,85 @@
 			
 			<button id="start_build_button">Start Build</button>
 		</div>
-		<p>&nbsp</p>
-		<div id="consoles">
-			<b><div id="a_builder_id"></div></b><br/>
-			<div id="aconsole"></div>
-			<p>&nbsp</p>
+
+		<div id="initially_hidden">
+		<BR> 
+		<TABLE class="mainrep"> 
+		<TR class="odd ok header">
+			<TD>Package<TD style="text-align: left">Hostname</TD>
+			<TD style="text-align: left">OS&nbsp;/&nbsp;Arch</TD>
+			<TD class="stagecmd buildsrc" style="text-align: center; width: 96px">BUILD</TD>
+		<TR class="odd ok">
+			<TD ROWSPAN="4" style="padding-left: 12px; vertical-align: top;"><B>
+				<span id="package_name"></span>&nbsp;<span id="package_version"></span></B><BR><span id="package_maintainer"></span>
+					<BR>
+		<TABLE class="svn_info">
+			<TR>
+				<TD class="svn_info">Snapshot&nbsp;Date:&nbsp;
+					<SPAN class="svn_info" id="svn_info_snapshot_date"></SPAN>
+				</TD>
+			</TR>
+			<TR>
+				<TD class="svn_info">URL:&nbsp;
+					<SPAN class="svn_info" id="svn_info_svn_url"></SPAN>
+				</TD>
+			</TR>
+			<TR>
+				<TD class="svn_info">Last&nbsp;Changed&nbsp;Rev:&nbsp;
+					<SPAN class="svn_info" id="svn_last_changed_rev"></SPAN>
+					 / Revision:&nbsp;
+					<SPAN class="svn_info" id="svn_revision"></SPAN>
+				</TD>
+			</TR>
+			<TR>
+				<TD class="svn_info">Last&nbsp;Changed&nbsp;Date:&nbsp;
+					<SPAN class="svn_info" id="svn_last_changed_date"></SPAN>
+				</TD>
+			</TR>
+		</TABLE>
+		</TD>
+		<td id="nodeinfo_append_to_me">
+		</td>
+		
+				
+		</TR> 
+		</TABLE>
+
 		</div>
+			
+		<div id="summaries">
+		</div>
+			
+		<div id="summary_template">
+			<hr>
+			<a name="NODENAME_anchor"></a>
+			<H2>NODENAME Summary</H2> 
+			<DIV class="NODENAME" style="margin-left: 12px;"> 
+				<TABLE> 
+					<TR><TD><B>Package</B>: <span id="NODENAME_package_name">ABarray</span></TD></TR> 
+					<TR><TD><B>Version</B>: <span id="NODENAME_version">1.18.0</span></TD></TR> 
+					<TR><TD><B>Command</B>: <span id="NODENAME_command">/home/biocbuild/bbs-2.7-bioc/R/bin/R CMD build ABarray</span></TD></TR> 
+					<TR><TD><B>StartedAt</B>: <span id="NODENAME_started_at">2011-01-31 01:44:00 -0800 (Mon, 31 Jan 2011)</span></TD></TR> 
+					<TR><TD><B>EndedAt</B>: <span id="NODENAME_ended_at">2011-01-31 01:44:05 -0800 (Mon, 31 Jan 2011)</span></TD></TR> 
+					<TR><TD><B>ElapsedTime</B>: <span id="NODENAME_elapsed_time">4.5 seconds</span></TD></TR> 
+					<TR><TD><B>RetCode</B>: <span id="NODENAME_ret_code">0</span></TD></TR> 
+					<TR><TD><B>Status</B>: <SPAN id="NODENAME_status" class="IN_PROGRESS NODENAME_EVENT">&nbsp;IN&nbsp;PROGRESS&nbsp;</SPAN></TD></TR> 
+					<TR><TD><B>PackageFile</B>: <span id="NODENAME_build_product">ABarray_1.18.0.tar.gz</span></TD></TR> 
+					<TR><TD><B>PackageFileSize</B>: <span id="NODENAME_file_size">422.7</span> <A href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</A></TD></TR> 
+					<TR><TD><B>PostProcessing</B>: <span id="NODENAME_post_processing">ABarray_1.18.0.tar.gz</span></TD></TR> 
+				</TABLE> 
+			</DIV> 
+			<HR> 
+				<H3>NODENAME Command output</H3> 
+				<DIV class="NODENAME" style="margin-left: 12px;"> 
+					<PRE id="NODENAME_console" style="font-size: smaller; padding: 2px;"></PRE>
+				</DIV> 
+			</div>
+		
+		</div>
+	
+	
+		
 			
 	</body>
 </html>
