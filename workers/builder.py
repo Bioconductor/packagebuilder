@@ -295,7 +295,9 @@ def propagate_package():
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
         send_message("chmod_retcode=%d" % chmod_retcode)
-        retcode = subprocess.call("c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s  biocadmin@merlot2:/loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/" % os.path.join(working_dir, package_name))
+        command = "c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s  biocadmin@merlot2:/loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/" % os.path.join(working_dir, package_name))
+        print("command = %s" % command)
+        retcode = subprocess.call(command)
     else:
         retcode = scp(build_product, repos)
     
