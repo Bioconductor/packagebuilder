@@ -288,8 +288,9 @@ def propagate_package():
 
 def _call(command_str, shell):
     if (platform.system == "Windows"):
-        args = shlex.split(command_str)
-        return(subprocess.call(args, shell=shell))
+        #args = shlex.split(command_str)
+        #return(subprocess.call(args, shell=shell))
+        return(subprocess.call(command_str, shell=shell))
     else:
         return(subprocess.call(command_str, shell=shell))
 
