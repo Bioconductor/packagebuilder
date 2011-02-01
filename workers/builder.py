@@ -156,6 +156,12 @@ def setup():
     packagebuilder_rsync_rsh_cmd = BBScorevars.rsync_rsh_cmd.replace(os.environ["BBS_RSAKEY"], \
         os.environ["PACKAGEBUILDER_RSAKEY"])
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
+    
+    if (platform.system() == "Windows"):
+        packagebuilder_scp_cmd = "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
+            os.environ["PACKAGEBUILDER_RSAKEY"]
+        packagebuilder_ssh_cmd = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
+            os.environ["PACKAGEBUILDER_RSAKEY"]
 
 
     print("argument is %s" % sys.argv[1])
@@ -271,25 +277,25 @@ def propagate_package():
     
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
-    retcode = ssh("rm -f %s" % files_to_delete)
+    retcode = ssh("rm -f %s" % files_to_delete) #todo abort build if retcode != 0
     print("result of deleting files: %d" % retcode)
     send_message({"body": "pruned repos", "status": "pruned_repos_retcode", "retcode": retcode})
     
     retcode = scp(build_product, repos)
-    print("result of copying file: %d" % retcode)
+    print("result of copying file: %d" % retcode) #todo abort build if retcode != 0
     send_message({"body": "copied file", "status": "copied_file_retcode", "retcode": retcode,
         "build_product": build_product})
     
 def ssh(command, user='biocadmin', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
     print("ssh command: %s" % command)
-    retcode = subprocess.call([command], shell=True)
+    retcode = subprocess.call([command], shell=True) 
     return(retcode)
 
 def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
-        chmod_retcode = subprocess.call([chmod_cmd], shell=True)
+        chmod_retcode = subprocess.call([chmod_cmd], shell=True) #todo abort build if retcode != 0
         print("chmod retcode: %s" % chmod_retcode)
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
     else:
