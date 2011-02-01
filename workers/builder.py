@@ -361,7 +361,7 @@ def update_packages_file():
         % (packagebuilder_ssh_cmd, repos, pkg_type)
     print("update packages command: ")
     print(command)
-    retcode = subprocess.call(command)
+    retcode = subprocess.call(command, shell=True) ## todo abort build if retcode != 0
     print "retcode for update packages: %d" % retcode
     send_message("update_packages retcode = %d" % retcode)
 
