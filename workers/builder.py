@@ -255,7 +255,7 @@ def build_package():
 
     send_message({"status": "build_complete", "result_code": retcode,
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
-    return (retcode == 0)
+    return (retcode)
 
 def svn_info():
     #global manifest
@@ -296,10 +296,12 @@ def propagate_package():
     if (platform.system() == "Windows"):
         retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % package_name)
     else:
-        retcode = ssh("rm -f %s" % files_to_delete) #todo abort build if retcode != 0
+        retcode = ssh("rm -f %s" % files_to_delete) 
 
     print("result of deleting files: %d" % retcode)
-    send_message({"body": "pruned repos with retcode %d" % retcode, "status": "pruned_repos_retcode", "retcode": retcode})
+    send_message({"body": "Pruning older packages from repository", "status": "post_processing", "retcode": retcode})
+    if retcode != 0:
+        sys.exit("repos prune failed")
 
     if (platform.system() == "Windows"):
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
@@ -311,9 +313,11 @@ def propagate_package():
     else:
         retcode = scp(build_product, repos)
     
-    print("result of copying file: %d" % retcode) #todo abort build if retcode != 0
-    send_message({"body": "copied file with retcode %d" % retcode, "status": "copied_file_retcode", "retcode": retcode,
+    print("result of copying file: %d" % retcode) 
+    send_message({"body": "Copied build file to repository", "status": "post_processing", "retcode": retcode,
         "build_product": build_product})
+    if retcode != 0:
+        sys.exit("copying file to repository failed")
 
 def _call(command_str, shell):
     global callcount
@@ -350,6 +354,10 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
         chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
+        send_message({"status": "post_processing", "retcode": chmod_retcode, "body": \
+            "Set read permissions on build product"})
+        if chmod_retcode != 0:
+            sys.exit("chmod failed")
         print("chmod retcode: %s" % chmod_retcode)
         send_message("chmod_retcode = %d" % chmod_retcode)
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
@@ -357,6 +365,8 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
         command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
     print("scp command: %s" % command)
     retcode = _call([command], shell=True)
+    
+    
     return(retcode)
 
 
@@ -371,9 +381,19 @@ def update_packages_file():
         % (packagebuilder_ssh_cmd, repos, pkg_type)
     print("update packages command: ")
     print(command)
-    retcode = subprocess.call(command, shell=True) ## todo abort build if retcode != 0
+    retcode = subprocess.call(command, shell=True) 
     print "retcode for update packages: %d" % retcode
-    send_message("update_packages retcode = %d" % retcode)
+    send_message({"status": "post_processing", "retcode": retcode, "body": "Updated packages list"})
+    if retcode != 0:
+        sys.exit("Updating packages failed")
+    
+    command = "%s biocadmin@merlot2 'cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production'"
+    retcode = subprocess.call(command, shell=True)
+    send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website"})
+    if retcode != 0:
+        sys.exit("Sync to website failed")
+    
+    
 
 def get_r_version():
     print("BBS_R_CMD == %s" % os.getenv("BBS_R_CMD"))
@@ -412,9 +432,12 @@ if __name__ == "__main__":
         sys.exit(0)
 
     svn_export()
-    if (build_package()):
+    result = build_package()
+    if (result == 0):
         propagate_package()
         if (is_build_required):
             update_packages_file()
-    send_message({"status": "complete", "result": 0, "body": "All build processes have finished successfully."})
+        send_message({"status": "complete", "result": result, "body": "All build processes have finished successfully."})
+    else:
+        send_message({"status": "build failed", "result": result, "body": "build failed"})
     
