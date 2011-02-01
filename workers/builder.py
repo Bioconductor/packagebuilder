@@ -41,12 +41,14 @@ def send_message(msg, status=None):
                           routing_key="key.frombuilders",
                           body= json_str)
 
+
+def send_dcf_info(dcf_file):
+    send_message({"status": "dcf_info", "package_name": dcf_file.getValue("Package"),
+        "maintainer": dcf_file.getValue("Maintainer"), "version": dcf_file.getValue("Version")})
+
 def is_build_required(manifest):
     global package_name
     package_name = manifest['job_id'].split("_")[0]
-    if ("force" in manifest.keys()):
-        if (manifest['force'] == True):
-            return(True)
     description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
     print "description_url = " + description_url
     print "svn_user ="  + os.getenv("SVN_USER")
@@ -64,6 +66,12 @@ def is_build_required(manifest):
     print "description length = %d" % len(description)
     
     dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    send_dcf_info(dcf_file)
+    
+    if ("force" in manifest.keys()):
+        if (manifest['force'] == True):
+            return(True)
+
     svn_version = dcf_file.getValue("Version")
             
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
