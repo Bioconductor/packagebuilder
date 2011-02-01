@@ -439,5 +439,5 @@ if __name__ == "__main__":
             update_packages_file()
         send_message({"status": "complete", "result": result, "body": "All build processes have finished successfully."})
     else:
-        send_message({"status": "build failed", "result": result, "body": "build failed"})
+        send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
     
