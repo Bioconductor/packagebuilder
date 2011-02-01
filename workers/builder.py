@@ -359,6 +359,8 @@ def update_packages_file():
     command = \
         "%s biocadmin@merlot2 'R -f /loc/www/bioconductor-test.fhcrc.org/course-packages/update-course-repo.R %s %s'" \
         % (packagebuilder_ssh_cmd, repos, pkg_type)
+    print("update packages command: ")
+    print(command)
     retcode = subprocess.call(command)
     print "retcode for update packages: %d" % retcode
     send_message("update_packages retcode = %d" % retcode)
