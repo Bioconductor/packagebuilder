@@ -368,7 +368,7 @@ def update_packages_file():
     send_message("update_packages retcode = %d" % retcode)
 
 def get_r_version():
-    r_version_raw = subprocess.Popen(["R","--version"], stdout=subprocess.PIPE).communicate[0]
+    r_version_raw = subprocess.Popen([os.getenv("BBS_R_CMD"),"--version"], stdout=subprocess.PIPE).communicate[0]
     lines = r_version_raw.split("\n")
     r_version_line = lines[0]
     return r_version_line.replace("R version ", "")
