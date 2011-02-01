@@ -140,7 +140,8 @@ def setup():
     global working_dir
     global BBScorevars
     global dcf
-    global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd
+    global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd,
+        packagebuilder_scp_cmd
 
     ## BBS-specific imports
     BBS_home = os.environ['BBS_HOME']
@@ -287,15 +288,14 @@ def ssh(command, user='biocadmin', host='merlot2'):
 
 def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
     if (srcLocal):
-        chmod_cmd = ["chmod", "a+r", src]
-        chmod_retcode = subprocess.call(chmod_cmd, shell=True)
+        chmod_cmd = "chmod a+r %s" % src
+        chmod_retcode = subprocess.call([chmod_cmd], shell=True)
         print("chmod retcode: %s" % chmod_retcode)
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
     else:
         command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
     print("scp command: %s" % command)
-    args = shlex.split(command)
-    retcode = subprocess.call(args, shell=True)
+    retcode = subprocess.call([command], shell=True)
     return(retcode)
 
 
