@@ -294,7 +294,7 @@ def _call(command_str, shell):
         #return(subprocess.call(args, shell=shell))
         stdout_fh = "%dout.txt" % callcount
         stderr_fh = "%derr.txt" % callcount
-        callcount++
+        callcount += 1
         retcode = subprocess.call(command_str, shell=shell, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
         stderr_fh.close()
