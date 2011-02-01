@@ -293,6 +293,7 @@ def propagate_package():
         "build_product": build_product})
 
 def _call(command_str, shell):
+    global callcount
     if (platform.system() == "Windows"):
         #args = shlex.split(command_str)
         #return(subprocess.call(args, shell=shell))
