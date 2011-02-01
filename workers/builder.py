@@ -306,7 +306,7 @@ def _call(command_str, shell):
         callcount += 1
         # ignore shell arg
         #retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
-        retcode = subprocess.call("ls", shell=False, stdout=stdout_fh, stderr=stderr_fh)
+        retcode = subprocess.call("ssh", shell=False, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
         stderr_fh.close()
         return(retcode)
