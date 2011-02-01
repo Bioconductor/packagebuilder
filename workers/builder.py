@@ -140,7 +140,7 @@ def setup():
     global working_dir
     global BBScorevars
     global dcf
-    global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd,
+    global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd, \
         packagebuilder_scp_cmd
 
     ## BBS-specific imports
