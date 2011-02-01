@@ -296,8 +296,12 @@ def _call(command_str, shell):
     if (platform.system == "Windows"):
         #args = shlex.split(command_str)
         #return(subprocess.call(args, shell=shell))
-        stdout_fh = os.path.join(working_dir, "%dout.txt" % callcount)
-        stderr_fh = os.path.join(working_dir, "%derr.txt" % callcount)
+        stdout_fn = os.path.join(working_dir, "%dout.txt" % callcount)
+        stderr_fn = os.path.join(working_dir, "%derr.txt" % callcount)
+        
+        stdout_fh = open(stdout_fn, "w")
+        stdout_fh = open(stdout_fn, "w")
+        
         callcount += 1
         retcode = subprocess.call(command_str, shell=shell, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
