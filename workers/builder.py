@@ -270,7 +270,7 @@ def propagate_package():
     
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
-    retcode = ssh("rm %s" % files_to_delete)
+    retcode = ssh("rm -f %s" % files_to_delete)
     print("result of deleting files: %d" % retcode)
     send_message({"body": "pruned repos", "status": "pruned_repos_retcode", "retcode": retcode})
     
