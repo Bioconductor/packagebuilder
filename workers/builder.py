@@ -286,12 +286,12 @@ def propagate_package():
     send_message({"body": "copied file", "status": "copied_file_retcode", "retcode": retcode,
         "build_product": build_product})
 
-def _call(command_str):
+def _call(command_str, shell):
     if (platform.system == "Windows"):
         args = shlex.split(command_str)
-        return(subprocess.call(args, shell=True))
+        return(subprocess.call(args, shell=shell))
     else:
-        return(subprocess.call([command_str], shell=True))
+        return(subprocess.call([command_str], shell=shell))
 
 def ssh(command, user='biocadmin', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
