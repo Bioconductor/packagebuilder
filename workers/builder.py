@@ -290,8 +290,15 @@ def propagate_package():
 
     print("result of deleting files: %d" % retcode)
     send_message({"body": "pruned repos with retcode %d" % retcode, "status": "pruned_repos_retcode", "retcode": retcode})
+
+    if (platform.system() == "Windows"):
+        chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
+        print("chmod_retcode = %d" % chmod_retcode)
+        send_message("chmod_retcode=%d" % chmod_retcode)
+        retcode = subprocess.call("scp -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2:/loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/" % package_name)
+    else:
+        retcode = scp(build_product, repos)
     
-    retcode = scp(build_product, repos)
     print("result of copying file: %d" % retcode) #todo abort build if retcode != 0
     send_message({"body": "copied file with retcode %d" % retcode, "status": "copied_file_retcode", "retcode": retcode,
         "build_product": build_product})
