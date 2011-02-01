@@ -285,23 +285,30 @@ def propagate_package():
     print("result of copying file: %d" % retcode) #todo abort build if retcode != 0
     send_message({"body": "copied file", "status": "copied_file_retcode", "retcode": retcode,
         "build_product": build_product})
-    
+
+def _call(command_str):
+    if (platform.system == "Windows"):
+        args = shlex.split(command_str)
+        return(subprocess.call(args, shell=True))
+    else:
+        return(subprocess.call([command_str], shell=True))
+
 def ssh(command, user='biocadmin', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
     print("ssh command: %s" % command)
-    retcode = subprocess.call([command], shell=True) 
+    retcode = _call([command], shell=True) 
     return(retcode)
 
 def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
-        chmod_retcode = subprocess.call([chmod_cmd], shell=True) #todo abort build if retcode != 0
+        chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
         print("chmod retcode: %s" % chmod_retcode)
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
     else:
         command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
     print("scp command: %s" % command)
-    retcode = subprocess.call([command], shell=True)
+    retcode = _call([command], shell=True)
     return(retcode)
 
 
