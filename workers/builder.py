@@ -387,7 +387,8 @@ def update_packages_file():
     if retcode != 0:
         sys.exit("Updating packages failed")
     
-    command = "%s biocadmin@merlot2 'cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production'"
+    command = "%s biocadmin@merlot2 'cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production'" % \
+        packagebuilder_ssh_cmd
     print("sync command = ")
     print(command)
     retcode = subprocess.call(command, shell=True)
