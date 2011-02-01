@@ -306,7 +306,9 @@ def _call(command_str, shell):
         callcount += 1
         # ignore shell arg
         #retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
-        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/AdvancedR2011_*.zip'", shell=False, stdout=stdout_fh, stderr=stderr_fh)
+        print("right before _call, command_str is")
+        print(command_str)
+        retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
         stderr_fh.close()
         return(retcode)
