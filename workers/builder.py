@@ -304,7 +304,8 @@ def _call(command_str, shell):
         stderr_fh = open(stderr_fn, "w")
         
         callcount += 1
-        retcode = subprocess.call(command_str, shell=shell, stdout=stdout_fh, stderr=stderr_fh)
+        # ignore shell arg
+        retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
         stderr_fh.close()
         return(retcode)
