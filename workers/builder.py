@@ -307,6 +307,7 @@ def _call(command_str, shell):
         # ignore shell arg
         #retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
         print("right before _call, command_str is")
+        command_str = command_str.encode()
         print(command_str)
         retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
