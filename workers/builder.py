@@ -279,15 +279,18 @@ def propagate_package():
     send_message({"body": "copied file", "status": "copied_file_retcode", "retcode": retcode,
         "build_product": build_product})
     
-def ssh(command, user='biocbuild', host='merlot2'):
+def ssh(command, user='biocadmin', host='merlot2'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
     print("ssh command: %s" % command)
     args = shlex.split(command)
     retcode = subprocess.call(args, shell=True)
     return(retcode)
 
-def scp(src, dest, srcLocal=True, user='biocbuild', host='merlot2'):
+def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
     if (srcLocal):
+        chmod_cmd = ["chmod", "a+r", src]
+        chmod_retcode = subprocess.call(chmod_cmd, shell=True)
+        print("chmod retcode: %s" % chmod_retcode)
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
     else:
         command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
