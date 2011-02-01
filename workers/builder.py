@@ -301,7 +301,7 @@ def _call(command_str, shell):
         stderr_fn = os.path.join(working_dir, "%derr.txt" % callcount)
         
         stdout_fh = open(stdout_fn, "w")
-        stdout_fh = open(stdout_fn, "w")
+        stderr_fh = open(stderr_fn, "w")
         
         callcount += 1
         retcode = subprocess.call(command_str, shell=shell, stdout=stdout_fh, stderr=stderr_fh)
