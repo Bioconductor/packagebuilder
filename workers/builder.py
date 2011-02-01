@@ -226,6 +226,10 @@ def build_package():
         flags = ""
     else:
         flags = "--binary"
+        
+        
+    flags += " --no-vignettes"  ## todo remove this line!!!!!!!
+    
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
     thread.start_new(tail,(outfile,))
@@ -292,8 +296,8 @@ def _call(command_str, shell):
     if (platform.system == "Windows"):
         #args = shlex.split(command_str)
         #return(subprocess.call(args, shell=shell))
-        stdout_fh = "%dout.txt" % callcount
-        stderr_fh = "%derr.txt" % callcount
+        stdout_fh = os.path.join(working_dir, "%dout.txt" % callcount)
+        stderr_fh = os.path.join(working_dir, "%derr.txt" % callcount)
         callcount += 1
         retcode = subprocess.call(command_str, shell=shell, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
