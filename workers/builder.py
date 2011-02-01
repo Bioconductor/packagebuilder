@@ -142,6 +142,8 @@ def setup():
     global dcf
     global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd, \
         packagebuilder_scp_cmd
+    global callcount
+    callcount = 1
 
     ## BBS-specific imports
     BBS_home = os.environ['BBS_HOME']
@@ -290,7 +292,13 @@ def _call(command_str, shell):
     if (platform.system == "Windows"):
         #args = shlex.split(command_str)
         #return(subprocess.call(args, shell=shell))
-        return(subprocess.call(command_str, shell=shell))
+        stdout_fh = "%dout.txt" % callcount
+        stderr_fh = "%derr.txt" % callcount
+        callcount++
+        retcode = subprocess.call(command_str, shell=shell, stdout=stdout_fh, stderr=stderr_fh)
+        stdout_fh.close()
+        stderr_fh.close()
+        return(retcode)
     else:
         return(subprocess.call(command_str, shell=shell))
 
