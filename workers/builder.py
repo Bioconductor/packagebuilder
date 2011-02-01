@@ -284,7 +284,7 @@ def propagate_package():
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
     if (platform.system() == "Windows"):
-        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % package_name)
+        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % build_product)
     else:
         retcode = ssh("rm -f %s" % files_to_delete) #todo abort build if retcode != 0
 
