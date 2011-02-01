@@ -266,6 +266,8 @@ def svn_info():
 
 def propagate_package():
     global build_product
+    global repos
+    global pkg_type
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
@@ -352,7 +354,14 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
 
 
 def update_packages_file():
-    pass
+    global repos
+    global pkg_type
+    command = \
+        "%s biocadmin@merlot2 'R -f /loc/www/bioconductor-test.fhcrc.org/course-packages/update-course-repo.R %s %s'" \
+        % (packagebuilder_ssh_cmd, repos, pkg_type)
+    retcode = subprocess.call(command)
+    print "retcode for update packages: %d" % retcode
+    send_message("update_packages retcode = %d" % retcode)
 
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
@@ -375,5 +384,5 @@ if __name__ == "__main__":
     svn_export()
     if (build_package()):
         propagate_package()
-        if (is_build_required):
-            update_packages_file()
+        #if (is_build_required):
+        update_packages_file()
