@@ -388,5 +388,7 @@ if __name__ == "__main__":
     svn_export()
     if (build_package()):
         propagate_package()
-        #if (is_build_required):
-        update_packages_file()
+        if (is_build_required):
+            update_packages_file()
+    send_message({"status": "complete", "result": 0, "body": "All build processes have finished successfully."})
+    
