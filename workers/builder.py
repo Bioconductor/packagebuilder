@@ -367,6 +367,22 @@ def update_packages_file():
     print "retcode for update packages: %d" % retcode
     send_message("update_packages retcode = %d" % retcode)
 
+def get_r_version():
+    r_version_raw = subprocess.Popen(["R","--version"], stdout=subprocess.PIPE).communicate[0]
+    lines = r_version_raw.split("\n")
+    r_version_line = lines[0]
+    return r_version_line.replace("R version ", "")
+
+def get_node_info():
+    r_version = get_r_version()
+    os = BBScorevars.getNodeSpec(builder_id, "OS")
+    arch = BBScorevars.getNodeSpec(builder_id, "Arch")
+    plat = BBScorevars.getNodeSpec(builder_id, "Platform")
+    send_message("status": "node_info", "r_version": r_version,
+        "os": os, "arch": arch, "platform": plat, "body": "node_info")
+    
+       
+
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
     if (len(sys.argv) < 2):
@@ -375,6 +391,7 @@ if __name__ == "__main__":
     print "Builder has been started"
     setup()
     setup_pika()
+    get_node_info()
     svn_info()
     
     send_message("Builder has been started")
