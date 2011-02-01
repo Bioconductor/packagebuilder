@@ -279,11 +279,11 @@ def propagate_package():
     
     retcode = ssh("rm -f %s" % files_to_delete) #todo abort build if retcode != 0
     print("result of deleting files: %d" % retcode)
-    send_message({"body": "pruned repos", "status": "pruned_repos_retcode", "retcode": retcode})
+    send_message({"body": "pruned repos with retcode %d" % retcode, "status": "pruned_repos_retcode", "retcode": retcode})
     
     retcode = scp(build_product, repos)
     print("result of copying file: %d" % retcode) #todo abort build if retcode != 0
-    send_message({"body": "copied file", "status": "copied_file_retcode", "retcode": retcode,
+    send_message({"body": "copied file with retcode %d" % retcode, "status": "copied_file_retcode", "retcode": retcode,
         "build_product": build_product})
 
 def _call(command_str, shell):
@@ -304,6 +304,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
         chmod_cmd = "chmod a+r %s" % src
         chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
         print("chmod retcode: %s" % chmod_retcode)
+        send_message("chmod_retcode = %d" % chmod_retcode)
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
     else:
         command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
