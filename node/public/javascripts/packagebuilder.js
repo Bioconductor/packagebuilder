@@ -31,7 +31,6 @@ var gotDcfInfo = false;
 var nodes = [];
 
 jQuery(function(){
-    
   setupUI();
     
   var socket;
@@ -219,9 +218,12 @@ var handlePostProcessing = function(message) {
     }
     selector = "#" + nodeName + "_post_processing";
     jQuery(selector).html(message['body']);
-    if (message['build_product']) {
-        //todo - make it into a link
-        jQuery("#" + nodeName + "_build_product").html(message['build_product']);
+    if (message['build_product'] && message['url']) {
+        var url = "<a href='"+ message['url']  + "'>" + message['build_product'] + "</a>"
+        jQuery("#" + nodeName + "_build_product").html(url);
+    }
+    if (message['filesize']) {
+        jQuery("#" + nodeName + "_file_size").html(message['filesize']);
     }
 }
 

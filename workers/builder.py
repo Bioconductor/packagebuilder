@@ -236,7 +236,7 @@ def build_package():
         flags = "--binary"
         
         
-    flags += " --no-vignettes"  ## todo remove this line!!!!!!!
+    #flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
