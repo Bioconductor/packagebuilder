@@ -111,7 +111,9 @@ connection.addListener('ready', function(){
             sys.puts("error in JSON processing. Message not properly formed JSON?");
         }
         sys.puts("publishing " + msg);
-        from_web_exchange.publish("#", msg); //key.fromweb
+        var routingKey = uuid();
+        sys.puts("routing key = " + routingKey)
+        from_web_exchange.publish(routingKey, msg); //key.fromweb
       })
       client.on('disconnect', function(){
           sys.puts("this client just disconnected: " + client.sessionId);
