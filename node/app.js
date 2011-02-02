@@ -106,6 +106,8 @@ connection.addListener('ready', function(){
             obj = JSON.parse(msg);
             obj['originating_host'] = hostname;
             obj['client_id'] = client.sessionId;
+            var d = new Date();
+            obj['time'] = "" + d;
             msg = JSON.stringify(obj);
         } catch(err) {
             sys.puts("error in JSON processing. Message not properly formed JSON?");
