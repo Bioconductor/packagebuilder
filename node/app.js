@@ -9,7 +9,8 @@ cd Socket.IO-node
 git submodule update --init --recursive
 */
 var io = require("./Socket.IO-node"); 
-var amqp = require('amqp')
+//var amqp = require('amqp')
+var amqp = require('./node-amqp/amqp')
 var sys = require('sys')
 var path = require('path')
 var http = require('http')
@@ -55,7 +56,7 @@ connection.addListener('ready', function(){
   var from_worker_exchange = connection.exchange('from_worker_exchange', {type: 'fanout', autoDelete: false});
   var queueName = uuid();
   sys.puts("fromBuilders queue name is " + queueName);
-  var fromBuildersQueue = connection.queue(queueName, {exclusive: true}) //frombuilders
+  var fromBuildersQueue = connection.queue(queueName, {exclusive: true, autoDelete:false}) //frombuilders
   fromBuildersQueue.bind('from_worker_exchange', '#')
   
   var port = 4000;
