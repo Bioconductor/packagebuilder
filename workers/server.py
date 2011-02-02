@@ -48,7 +48,9 @@ def callback(ch, method, properties, body):
     global r_bioc_map
     global shell_ext
     global packagebuilder_home
+    sys.stdout.flush()
     print " [x] Received %r" % (body,)
+    sys.stdout.flush()
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
