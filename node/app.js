@@ -66,7 +66,7 @@ connection.addListener('ready', function(){
     var socket = io.listen(app);
     
     
-    fromBuildersQueue.subscribe( {ack:false}, function(message){
+    fromBuildersQueue.subscribe( {ack:true}, function(message){
       sys.puts("got message: " + message.data.toString());
       var obj = JSON.parse(message.data.toString());
       if (obj['originating_host'] && obj['originating_host'] == hostname) {

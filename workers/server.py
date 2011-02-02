@@ -84,7 +84,7 @@ def callback(ch, method, properties, body):
 
 channel.basic_consume(callback,
                       queue=from_web_queue.queue,
-                      no_ack=True)
+                      no_ack=False)
 
 pika.asyncore_loop()
 
