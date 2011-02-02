@@ -34,9 +34,8 @@ r_bioc_map = {"2.12": "2.7", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # nee
 from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
 from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
 
-from_web_queue = channel.queue_declare(exclusive=True, auto_delete=False)
+from_web_queue = channel.queue_declare(exclusive=True)
 from_web_queue_name = from_web_queue.queue
-print "From web queue name = %s" % from_web_queue_name
 
 channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
@@ -48,9 +47,7 @@ def callback(ch, method, properties, body):
     global r_bioc_map
     global shell_ext
     global packagebuilder_home
-    sys.stdout.flush()
     print " [x] Received %r" % (body,)
-    sys.stdout.flush()
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
@@ -73,7 +70,6 @@ def callback(ch, method, properties, body):
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
         msg_obj = {}
         msg_obj['originating_host'] = received_obj['originating_host']
-        msg_obj['job_id'] = received_obj['job_id']
         msg_obj['client_id'] = received_obj['client_id']
         msg_obj['builder_id'] = builder_id
         msg_obj['body'] = "Got build request..."
@@ -85,8 +81,7 @@ def callback(ch, method, properties, body):
 
 channel.basic_consume(callback,
                       queue=from_web_queue.queue,
-                      no_ack=True,
-                      consumer_tag = "%s_consumer_tag" % builder_id)
+                      no_ack=True)
 
 pika.asyncore_loop()
 

@@ -22,8 +22,6 @@ def send_message(msg, status=None):
     merged_dict['builder_id'] = builder_id
     merged_dict['originating_host'] = manifest['originating_host']
     merged_dict['client_id'] = manifest['client_id']
-    merged_dict['job_id'] = manifest['job_id']
-    
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
@@ -199,10 +197,10 @@ def setup_pika():
     from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
     from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
 
-#    from_web_queue = channel.queue_declare(exclusive=True)
-#    from_web_queue_name = from_web_queue.queue
+    from_web_queue = channel.queue_declare(exclusive=True)
+    from_web_queue_name = from_web_queue.queue
 
-#    channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
+    channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
         
 
 def svn_export():

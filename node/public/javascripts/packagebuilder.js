@@ -149,20 +149,20 @@ var gotNewNode = function(message) {
     var arch = message['arch'];
     
     //todo- grab this from html file instead of constructing string in js
+	//<!-- change to e.g. nodeinfo_lamb2 -->
 	var s = "";
-	s += '<tr id="insertAfterMe_' + (nodes.length +1) + '">\n';
+	s += '<tr id="nodeinfo_' + nodeName + '">\n';
+	//<!-- class should be e.g. "node lamb2" -->
 	s += '<TD colspan="4" class="node ' + nodeName + '" style="text-align: left">\n';
 	s+= '	<I id="nodeinfo_'+nodeName+'">' + nodeName + '</I>&nbsp;</TD>\n';
+	//	<!-- class should be e.g. "node lamb2"-->
 	s +='	<TD class="node ' + nodeName + '" style="text-align: left">\n';
 	s +='		<SPAN style="font-size: smaller;">' + os +  '/' + arch +  '</SPAN>\n';
 	s += '&nbsp;</TD><TD class="status ' + nodeName + ' buildsrc">\n';
 	s += '<span id="'+nodeName+'_buildstatus"><a href="#' +nodeName+'_anchor"><SPAN class="IN_PROGRESS ' + nodeName + '_EVENT">&nbsp;IN&nbsp;PROGRESS&nbsp;</SPAN></a></span></TD>\n';
 	s += '</tr>\n';
 
-    //jQuery("#nodeinfo_append_to_me").append(s);
-    var selector = "#insertAfterMe_" + nodes.length;
-     
-    jQuery(selector).after(s);
+    jQuery("#nodeinfo_append_to_me").append(s);
     
     var summaryTemplate = jQuery("#summary_template").html();
     

@@ -9,8 +9,7 @@ cd Socket.IO-node
 git submodule update --init --recursive
 */
 var io = require("./Socket.IO-node"); 
-//var amqp = require('amqp')
-var amqp = require('./node-amqp/amqp')
+var amqp = require('amqp')
 var sys = require('sys')
 var path = require('path')
 var http = require('http')
@@ -54,9 +53,7 @@ var connection = amqp.createConnection({ host: packagebuilder.socketServer });
 connection.addListener('ready', function(){
   var from_web_exchange = connection.exchange('from_web_exchange', {type: 'fanout', autoDelete: false});
   var from_worker_exchange = connection.exchange('from_worker_exchange', {type: 'fanout', autoDelete: false});
-  var queueName = uuid();
-  sys.puts("fromBuilders queue name is " + queueName);
-  var fromBuildersQueue = connection.queue(queueName, {exclusive: true, autoDelete:false}) //frombuilders
+  var fromBuildersQueue = connection.queue(uuid(), {exclusive: true}) //frombuilders
   fromBuildersQueue.bind('from_worker_exchange', '#')
   
   var port = 4000;
@@ -67,7 +64,7 @@ connection.addListener('ready', function(){
     var socket = io.listen(app);
     
     
-    fromBuildersQueue.subscribe( {ack:false}, function(message){
+    fromBuildersQueue.subscribe( {ack:true}, function(message){
       sys.puts("got message: " + message.data.toString());
       var obj = JSON.parse(message.data.toString());
       if (obj['originating_host'] && obj['originating_host'] == hostname) {
@@ -107,16 +104,12 @@ connection.addListener('ready', function(){
             obj = JSON.parse(msg);
             obj['originating_host'] = hostname;
             obj['client_id'] = client.sessionId;
-            var d = new Date();
-            obj['time'] = "" + d;
             msg = JSON.stringify(obj);
         } catch(err) {
             sys.puts("error in JSON processing. Message not properly formed JSON?");
         }
         sys.puts("publishing " + msg);
-        var routingKey = uuid();
-        sys.puts("routing key = " + routingKey)
-        from_web_exchange.publish(routingKey, msg); //key.fromweb
+        from_web_exchange.publish("#", msg); //key.fromweb
       })
       client.on('disconnect', function(){
           sys.puts("this client just disconnected: " + client.sessionId);
