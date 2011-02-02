@@ -73,6 +73,7 @@ def callback(ch, method, properties, body):
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
         msg_obj = {}
         msg_obj['originating_host'] = received_obj['originating_host']
+        msg_obj['job_id'] = received_obj['job_id']
         msg_obj['client_id'] = received_obj['client_id']
         msg_obj['builder_id'] = builder_id
         msg_obj['body'] = "Got build request..."
@@ -84,7 +85,7 @@ def callback(ch, method, properties, body):
 
 channel.basic_consume(callback,
                       queue=from_web_queue.queue,
-                      no_ack=False)
+                      no_ack=True)
 
 pika.asyncore_loop()
 

@@ -22,6 +22,8 @@ def send_message(msg, status=None):
     merged_dict['builder_id'] = builder_id
     merged_dict['originating_host'] = manifest['originating_host']
     merged_dict['client_id'] = manifest['client_id']
+    merged_dict['job_id'] = manifest['job_id']
+    
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
