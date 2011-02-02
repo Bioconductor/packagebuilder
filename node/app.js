@@ -56,10 +56,11 @@ connection.addListener('ready', function(){
   var fromBuildersQueue = connection.queue(uuid(), {exclusive: true}) //frombuilders
   fromBuildersQueue.bind('from_worker_exchange', '#')
   
+  var port = 4000;
   
-  app.listen(3000, function(){
+  app.listen(port, function(){
   
-    console.log('listening for connections on port 3000')
+    console.log('listening for connections on port ' + port);
     var socket = io.listen(app);
     
     
