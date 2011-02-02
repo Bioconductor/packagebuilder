@@ -53,7 +53,9 @@ var connection = amqp.createConnection({ host: packagebuilder.socketServer });
 connection.addListener('ready', function(){
   var from_web_exchange = connection.exchange('from_web_exchange', {type: 'fanout', autoDelete: false});
   var from_worker_exchange = connection.exchange('from_worker_exchange', {type: 'fanout', autoDelete: false});
-  var fromBuildersQueue = connection.queue(uuid(), {exclusive: true}) //frombuilders
+  var queueName = uuid();
+  sys.puts("fromBuilders queue name is " + queueName);
+  var fromBuildersQueue = connection.queue(queueName, {exclusive: true}) //frombuilders
   fromBuildersQueue.bind('from_worker_exchange', '#')
   
   var port = 4000;
