@@ -34,10 +34,10 @@ r_bioc_map = {"2.12": "2.7", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # nee
 from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
 from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
 
-from_web_queue = channel.queue_declare(exclusive=True)
-from_web_queue_name = from_web_queue.queue
+#from_web_queue = channel.queue_declare(exclusive=True)
+#from_web_queue_name = from_web_queue.queue
 
-channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
+#channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 sys.stdout.flush()
