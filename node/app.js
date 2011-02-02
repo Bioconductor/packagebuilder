@@ -80,7 +80,7 @@ connection.addListener('ready', function(){
           }
           
           socket.broadcast(message.data.toString(), deafClients);
-          fromBuildersQueue.shift()
+          //fromBuildersQueue.shift()
       }
     })
 
