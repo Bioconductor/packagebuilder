@@ -53,7 +53,10 @@ def callback(ch, method, properties, body):
         job_id = received_obj['job_id']
         r_version = received_obj['r_version']
         bioc_version = r_bioc_map[r_version]
-        job_dir = os.path.join(packagebuilder_home, "jobs", job_id)
+        jobs_dir = os.path.join(packagebuilder_home, "jobs")
+        if not os.path.exists(jobs_dir):
+            os.mkdir(jobs_dir)
+        job_dir = os.path.join(jobs_dir, job_id)
         if not os.path.exists(job_dir):
             os.mkdir(job_dir)
         
@@ -74,6 +77,7 @@ def callback(ch, method, properties, body):
         msg_obj['builder_id'] = builder_id
         msg_obj['body'] = "Got build request..."
         msg_obj['first_message'] = True
+        msg_obj['job_id'] = job_id
         json_str = json.dumps(msg_obj)
         channel.basic_publish(exchange='from_worker_exchange',
                               routing_key="key.frombuilders",

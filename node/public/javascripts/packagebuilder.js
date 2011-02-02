@@ -56,6 +56,8 @@ jQuery(function(){
     var pkg = tmp[tmp.length -1];
     var job_id = pkg + "_" + timestamp;
     obj['job_id'] = job_id;
+    d = new Date();
+    obj['time'] = "" + d;
     obj['svn_url'] = svn_url;
     obj['r_version'] = jQuery("#r_version").val();
     obj['repository'] = jQuery("#repository").val();
