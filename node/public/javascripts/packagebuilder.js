@@ -201,7 +201,11 @@ var handleBuilding = function(message) {
 
 var handleComplete = function(message) {
     var nodeName = message['builder_id'];
-    handleEvent("OK", nodeName);
+    if (message['warnings'] == true) {
+        handleEvent("WARNING", nodeName)
+    } else {
+        handleEvent("OK", nodeName);
+    }
 }
 
 var handleBuildComplete = function(message) {

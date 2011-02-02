@@ -221,6 +221,7 @@ def build_package():
     global stop_thread
     global message_sequence
     global thread_is_done
+    global warnings
     stop_thread = False
     thread_is_done = False
     message_sequence = 1
@@ -253,8 +254,15 @@ def build_package():
     while thread_is_done == False: pass # wait till thread tells us to stop
     print "Done"
 
+    # check for warnings
+    out_fh = open(outfile)
+    warnings = False
+    for line in outfile:
+        if line.lower().startswith("warning:"):
+            warnings = True
+            break
 
-    send_message({"status": "build_complete", "result_code": retcode,
+    send_message({"status": "build_complete", "result_code": retcode, "warnings": warnings,
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
     return (retcode)
 
@@ -451,7 +459,11 @@ if __name__ == "__main__":
         propagate_package()
         if (is_build_required):
             update_packages_file()
-        send_message({"status": "complete", "result": result, "body": "All build processes have finished successfully."})
+        if warnings:
+            body = "Build completed with warnings."
+        else:
+            body = "All build processes have finished successfully."
+        send_message({"status": "complete", "result": result, "body": body, "warnings": warnings})
     else:
         send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
     
