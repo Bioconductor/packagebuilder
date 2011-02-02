@@ -46,7 +46,6 @@ jQuery(function(){
   jQuery('#start_build_button').click(function(){
     // todo - make sure that svn_url points to hedgehog, otherwise it's more likely
     // we could be building a malicious package
-    window.location.href = window.location.href + "#start-build";
     initUI();
     obj = {};
     var svn_url = jQuery("#svn_url").val();
