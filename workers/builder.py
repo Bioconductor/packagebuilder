@@ -272,6 +272,8 @@ def svn_info():
     svn_hash['body'] = "svn info"
     send_message(svn_hash)
 
+
+## todo - get rid of ugly windows workarounds now that we know how
 def propagate_package():
     global build_product
     global repos
@@ -290,6 +292,14 @@ def propagate_package():
     
     
     repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
+    
+    
+    url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
+    url += "/" + build_product
+    
+    rawsize = os.path.getsize(build_product)
+    kib = rawsize / float(1024)
+    filesize = "%.2f" % kib
     
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
@@ -315,7 +325,7 @@ def propagate_package():
     
     print("result of copying file: %d" % retcode) 
     send_message({"body": "Copied build file to repository", "status": "post_processing", "retcode": retcode,
-        "build_product": build_product})
+        "build_product": build_product, "url": url, "filesize": filesize})
     if retcode != 0:
         sys.exit("copying file to repository failed")
 

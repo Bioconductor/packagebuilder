@@ -47,6 +47,7 @@ jQuery(function(){
   jQuery('#start_build_button').click(function(){
     // todo - make sure that svn_url points to hedgehog, otherwise it's more likely
     // we could be building a malicious package
+    window.location.href = window.location.href + "#start-build";
     initUI();
     obj = {};
     var svn_url = jQuery("#svn_url").val();
@@ -103,22 +104,16 @@ jQuery(function(){
         case 'build_failed':
             handleBuildFailed(obj);
             break;
+        case 'r_cmd':
+            handleBuildStart(obj);
+            break;
+        case 'build_complete':
+            handleBuildComplete(obj);
+            break;
         default:
             break;
     }
     
-    /*
-    if (obj['first_message']) {
-        var s = "<b>Node: " + obj['builder_id'] + "</b><br/>\n";
-        s += "<pre id='builder_" + obj['builder_id'] + "'>";
-        s += obj['body']
-        s += "</pre>\n<p>&nbsp;</p>\n";
-        jQuery("#consoles").append(s)
-    } else {
-        var selector = "#builder_" + obj['builder_id'];
-        jQuery(selector).append(obj['body']);
-    }
-    */
   })
   
   
@@ -135,12 +130,17 @@ var handleSvnInfo = function(message) {
 }
 
 var handleDcfInfo = function(message) {
-    if (gotDcfInfo) return;
-    gotDcfInfo = true;
-    jQuery("#package_name").html(message['package_name']);
-    jQuery("#package_version").html(message['version']);
-    var maintainer = message['maintainer'].split(" <")[0];
-    jQuery("#package_maintainer").html(maintainer);
+    if (!gotDcfInfo) {
+        gotDcfInfo = true;
+        jQuery("#package_name").html(message['package_name']);
+        jQuery("#package_version").html(message['version']);
+        var maintainer = message['maintainer'].split(" <")[0];
+        jQuery("#package_maintainer").html(maintainer);
+    }
+    var nodeName = message['builder_id'];
+    jQuery("#" + nodeName + "_package_name").html(message['package_name']);
+    jQuery("#" + nodeName + "_version").html(message['version']);
+    
 }
 
 var gotNewNode = function(message) {
@@ -202,7 +202,13 @@ var handleBuilding = function(message) {
 var handleComplete = function(message) {
     var nodeName = message['builder_id'];
     handleEvent("OK", nodeName);
-    
+}
+
+var handleBuildComplete = function(message) {
+    var nodeName = message['builder_id'];
+    jQuery("#" + nodeName + "_ended_at").html(message['time']);
+    jQuery("#" + nodeName + "_elapsed_time").html(message['elapsed_time']);
+    jQuery("#" + nodeName + "_ret_code").html(message['result_code']);
 }
 
 var handlePostProcessing = function(message) {
@@ -213,12 +219,22 @@ var handlePostProcessing = function(message) {
     }
     selector = "#" + nodeName + "_post_processing";
     jQuery(selector).html(message['body']);
+    if (message['build_product']) {
+        //todo - make it into a link
+        jQuery("#" + nodeName + "_build_product").html(message['build_product']);
+    }
 }
 
 
 var handleBuildFailed = function(message) {
     var nodeName = message['builder_id'];
     handleEvent("ERROR", nodeName);
+}
+
+var handleBuildStart = function(message) {
+    var nodeName = message['builder_id'];
+    jQuery("#" + nodeName + "_command").html(message['body'])
+    jQuery("#" + nodeName + "_started_at").html(message['time']);
 }
 
 var setupUI = function() {
