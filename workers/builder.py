@@ -257,10 +257,11 @@ def build_package():
     # check for warnings
     out_fh = open(outfile)
     warnings = False
-    for line in outfile:
+    for line in out_fh:
         if line.lower().startswith("warning:"):
             warnings = True
             break
+    out_fh.close()
 
     send_message({"status": "build_complete", "result_code": retcode, "warnings": warnings,
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
