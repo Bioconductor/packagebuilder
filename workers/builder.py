@@ -38,7 +38,10 @@ def send_message(msg, status=None):
     print "sending message:"
     print json_str
     print
-    channel.basic_publish(exchange='from_worker_exchange',
+    xname = 'from_worker_exchange'
+    if (manifest['dev'] == True):
+        xname += "_dev"
+    channel.basic_publish(exchange=xname,
                           routing_key="key.frombuilders",
                           body= json_str)
 
@@ -197,6 +200,7 @@ def setup_pika():
 
     from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
     from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
+    from_worker_exchange_dev = channel.exchange_declare(exchange="from_worker_exchange_dev", type='fanout')
 
     from_web_queue = channel.queue_declare(exclusive=True)
     from_web_queue_name = from_web_queue.queue

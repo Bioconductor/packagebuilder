@@ -47,12 +47,20 @@ var hostname;
      sys.puts("hostname = " + hostname);
  });
 
+var dev = false;
+if (process.env['PACKAGEBUILDER_DEVELOPMENT'] == 'true' || hostname == "dhcp151078.fhcrc.org") {
+    dev = true;
+}
+
+
 //var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
 var connection = amqp.createConnection({ host: packagebuilder.socketServer }); 
  
 connection.addListener('ready', function(){
   var from_web_exchange = connection.exchange('from_web_exchange', {type: 'fanout', autoDelete: false});
-  var from_worker_exchange = connection.exchange('from_worker_exchange', {type: 'fanout', autoDelete: false});
+  var from_worker_exchange_name = "from_worker_exchange";
+  if (dev) from_worker_exchange_name += "_dev";
+  var from_worker_exchange = connection.exchange(from_worker_exchange_name, {type: 'fanout', autoDelete: false});
   var queueName = hostname + "_queue";
   var fromBuildersQueue = connection.queue(queueName, {exclusive: true}) //frombuilders
   fromBuildersQueue.bind('from_worker_exchange', '#')
@@ -105,6 +113,7 @@ connection.addListener('ready', function(){
             obj = JSON.parse(msg);
             obj['originating_host'] = hostname;
             obj['client_id'] = client.sessionId;
+            obj['dev'] = dev;
             msg = JSON.stringify(obj);
         } catch(err) {
             sys.puts("error in JSON processing. Message not properly formed JSON?");
