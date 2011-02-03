@@ -445,7 +445,7 @@ def is_valid_url():
     description = subprocess.Popen(["curl", "-k", "-s", 
         "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
         description_url], stdout=subprocess.PIPE).communicate()[0]
-    if (len(description) == 0  or description.lower().contains("404 not found")):
+    if (len(description) == 0  or description.lower().find("404 not found") > -1):
         return false
     return true
     

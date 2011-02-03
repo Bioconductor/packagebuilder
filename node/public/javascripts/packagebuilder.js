@@ -248,7 +248,7 @@ var handleBuildStart = function(message) {
     jQuery("#" + nodeName + "_started_at").html(message['time']);
 }
 
-var handleInvalidUrl(message) {
+var handleInvalidUrl = function(message) {
     if (handledInvalidUrl) return;
     handledInvalidUrl = true;
     jQuery("#error").html(message['body']);
