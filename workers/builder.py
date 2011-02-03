@@ -459,8 +459,6 @@ if __name__ == "__main__":
     print "Builder has been started"
     setup()
     setup_pika()
-    get_node_info()
-    svn_info()
     
     send_message("Builder has been started")
     
@@ -468,6 +466,11 @@ if __name__ == "__main__":
     if not is_valid_url():
         send_message({"status": "invalid_url", "body": "Invalid SVN url."})
         sys.exit(0)
+
+
+    get_node_info()
+    svn_info()
+
     
     is_build_required = is_build_required(manifest)
     if not (is_build_required):
