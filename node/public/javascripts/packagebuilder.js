@@ -252,6 +252,7 @@ var handleInvalidUrl = function(message) {
     if (handledInvalidUrl) return;
     handledInvalidUrl = true;
     jQuery("#error").html(message['body']);
+    jQuery("#initially_hidden").hide();
 }
 
 var setupUI = function() {
