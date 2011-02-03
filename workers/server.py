@@ -83,6 +83,7 @@ def callback(ch, method, properties, body):
         xname = 'from_worker_exchange'
         if (received_obj['dev'] == True):
             xname += "_dev"
+        print "xname = %s" % xname
         channel.basic_publish(exchange=xname,
                               routing_key="key.frombuilders",
                               body= json_str)

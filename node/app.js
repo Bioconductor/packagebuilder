@@ -51,7 +51,7 @@ var dev = false;
 if (process.env['PACKAGEBUILDER_DEVELOPMENT'] == 'true' || hostname == "dhcp151078.fhcrc.org") {
     dev = true;
 }
-
+sys.puts("in dev mode: " + dev);
 
 //var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
 var connection = amqp.createConnection({ host: packagebuilder.socketServer }); 
@@ -63,7 +63,7 @@ connection.addListener('ready', function(){
   var from_worker_exchange = connection.exchange(from_worker_exchange_name, {type: 'fanout', autoDelete: false});
   var queueName = hostname + "_queue";
   var fromBuildersQueue = connection.queue(queueName, {exclusive: true}) //frombuilders
-  fromBuildersQueue.bind('from_worker_exchange', '#')
+  fromBuildersQueue.bind(from_worker_exchange_name, '#')
   
   var port = 4000;
   
