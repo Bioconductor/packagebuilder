@@ -437,7 +437,19 @@ def get_node_info():
     send_message({"status": "node_info", "r_version": r_version,
         "os": os, "arch": arch, "platform": plat, "body": "node_info"})
     
-       
+
+def is_valid_url():
+    if (not manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
+        return false
+    description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
+    description = subprocess.Popen(["curl", "-k", "-s", 
+        "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+        description_url], stdout=subprocess.PIPE).communicate()[0]
+    if (len(description) == 0  or description.lower().contains("404 not found")):
+        return false
+    return true
+    
+
 
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
@@ -451,6 +463,12 @@ if __name__ == "__main__":
     svn_info()
     
     send_message("Builder has been started")
+    
+    
+    if not is_valid_url():
+        send_message({"status": "invalid_url", "body": "Invalid SVN url."})
+        sys.exit(0)
+    
     is_build_required = is_build_required(manifest)
     if not (is_build_required):
         send_message({"status": "build_not_required",

@@ -29,6 +29,7 @@ function log(message) {
 var gotSvnInfo = false;
 var gotDcfInfo = false;
 var nodes = [];
+var handledInvalidUrl = false;
 
 jQuery(function(){
   setupUI();
@@ -109,6 +110,9 @@ jQuery(function(){
             break;
         case 'build_complete':
             handleBuildComplete(obj);
+            break;
+        case 'invalid_url':
+            handleInvalidUrl(obj);
             break;
         default:
             break;
@@ -242,6 +246,12 @@ var handleBuildStart = function(message) {
     var nodeName = message['builder_id'];
     jQuery("#" + nodeName + "_command").html(message['body'])
     jQuery("#" + nodeName + "_started_at").html(message['time']);
+}
+
+var handleInvalidUrl(message) {
+    if (handledInvalidUrl) return;
+    handledInvalidUrl = true;
+    jQuery("#error").html(message['body']);
 }
 
 var setupUI = function() {
