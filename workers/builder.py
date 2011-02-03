@@ -292,6 +292,7 @@ def propagate_package():
     global build_product
     global repos
     global pkg_type
+    global url
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
@@ -304,7 +305,7 @@ def propagate_package():
     else:
         os_seg = "bin/windows/contrib/%s" % manifest['r_version']
     
-    
+    # hardcoding of repo name here
     repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
     
     
@@ -339,10 +340,11 @@ def propagate_package():
     
     print("result of copying file: %d" % retcode) 
     send_message({"body": "Copied build file to repository", "status": "post_processing", "retcode": retcode,
-        "build_product": build_product, "url": url, "filesize": filesize})
+        "build_product": build_product, "filesize": filesize})
     if retcode != 0:
         sys.exit("copying file to repository failed")
 
+## todo - get rid of ugly workarounds
 def _call(command_str, shell):
     global callcount
     if (platform.system() == "Windows"):
@@ -416,7 +418,8 @@ def update_packages_file():
     print("sync command = ")
     print(command)
     retcode = subprocess.call(command, shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website"})
+    send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website",
+        "build_product": build_product, "url": url})
     if retcode != 0:
         sys.exit("Sync to website failed")
     
