@@ -440,14 +440,14 @@ def get_node_info():
 
 def is_valid_url():
     if (not manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
-        return false
+        return False
     description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
     description = subprocess.Popen(["curl", "-k", "-s", 
         "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
         description_url], stdout=subprocess.PIPE).communicate()[0]
     if (len(description) == 0  or description.lower().find("404 not found") > -1):
-        return false
-    return true
+        return False
+    return True
     
 
 
