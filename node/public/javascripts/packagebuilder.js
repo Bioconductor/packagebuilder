@@ -30,6 +30,7 @@ var gotSvnInfo = false;
 var gotDcfInfo = false;
 var nodes = [];
 var handledInvalidUrl = false;
+var packageName;
 
 jQuery(function(){
   setupUI();
@@ -136,7 +137,8 @@ var handleSvnInfo = function(message) {
 var handleDcfInfo = function(message) {
     if (!gotDcfInfo) {
         gotDcfInfo = true;
-        jQuery("#package_name").html(message['package_name']);
+        packageName = message['package_name'];
+        jQuery("#package_name").html(packageName);
         jQuery("#package_version").html(message['version']);
         var maintainer = message['maintainer'].split(" <")[0];
         jQuery("#package_maintainer").html(maintainer);
@@ -173,7 +175,7 @@ var gotNewNode = function(message) {
     var summaryTemplate = jQuery("#summary_template").html();
     
     jQuery("#summaries").append(summaryTemplate.replace(/NODENAME/g, nodeName));
-    
+    jQuery("#" + nodeName + "_r_version").html(message['r_version']);
     
 }
 
@@ -230,6 +232,9 @@ var handlePostProcessing = function(message) {
     if (message['build_product'] && message['url']) {
         var url = "<a href='"+ message['url']  + "'>" + message['build_product'] + "</a>"
         jQuery("#" + nodeName + "_build_product").html(url);
+        var script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
+            'installCoursePackage("' + packageName + '")';
+        jQuery("#" + nodeName + "_install_command").html(script);
     }
     if (message['filesize']) {
         jQuery("#" + nodeName + "_file_size").html(message['filesize']);
