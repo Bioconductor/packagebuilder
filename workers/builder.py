@@ -427,7 +427,8 @@ def update_packages_file():
 
 def get_r_version():
     print("BBS_R_CMD == %s" % os.getenv("BBS_R_CMD"))
-    r_version_raw = subprocess.Popen([os.getenv("BBS_R_CMD"),"--version"], stdout=subprocess.PIPE).communicate()[0]
+    r_version_raw, stderr = subprocess.Popen([os.getenv("BBS_R_CMD"),"--version"], stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT).communicate()
     lines = r_version_raw.split("\n")
     r_version_line = lines[0]
     return r_version_line.replace("R version ", "")
