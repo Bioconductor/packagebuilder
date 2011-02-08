@@ -341,6 +341,7 @@ def propagate_package():
         remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'chmod a+r /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % package_name)
         print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
+        print("chmod code not run, because platform.system() == %s" % platform.system())
         retcode = scp(build_product, repos)
     
     print("result of copying file: %d" % retcode) 
