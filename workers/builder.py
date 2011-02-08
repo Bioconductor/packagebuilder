@@ -187,6 +187,7 @@ def setup():
     manifest = json.loads(manifest_json)
     working_dir = os.path.split(sys.argv[1])[0]
     os.chdir(working_dir)
+    print("working dir is %s" % working_dir)
 
 def setup_pika():
     global channel
@@ -249,6 +250,7 @@ def build_package():
     thread.start_new(tail,(outfile,))
     r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     send_message({"status": "r_cmd", "body": r_cmd})
+    print("before build, working dir is %s" % working_dir)
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
