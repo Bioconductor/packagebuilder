@@ -335,6 +335,8 @@ def propagate_package():
         command = "c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no  %s biocadmin@merlot2:/loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/" % build_product
         print("command = %s" % command)
         retcode = subprocess.call(command)
+        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'chmod a+r /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % package_name)
+        print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
         retcode = scp(build_product, repos)
     
