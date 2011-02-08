@@ -331,6 +331,7 @@ def propagate_package():
         sys.exit("repos prune failed")
 
     if (platform.system() == "Windows"):
+        print("platform.system() == 'Windows', running chmod commands...")
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
         send_message("chmod_retcode=%d" % chmod_retcode)
