@@ -233,7 +233,7 @@ var handlePostProcessing = function(message) {
         var url = "<a href='"+ message['url']  + "'>" + message['build_product'] + "</a>"
         jQuery("#" + nodeName + "_build_product").html(url);
         var script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
-            'installCoursePackage("' + packageName + '")';
+            'courseInstall("' + packageName + '")';
         jQuery("#" + nodeName + "_install_command").html(script);
     }
     if (message['filesize']) {
