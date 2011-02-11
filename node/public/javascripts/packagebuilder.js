@@ -195,9 +195,9 @@ var handleBuildNotRequired = function(message) {
     var nodeName = message['builder_id'];
     var selector = "#" + nodeName + "_console"
     jQuery(selector).append(message['body']);
-    var script = '<pre>source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
-        'courseInstall("' + packageName + '")</pre>';
-    selector = "#" + nodeName + "_post_processing";
+    var script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
+        'courseInstall("' + packageName + '")';
+    selector = "#" + nodeName + "_install_command";
     jQuery(selector).html(script); //dante
     handleEvent("skipped", nodeName);
 }
