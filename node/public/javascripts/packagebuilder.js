@@ -176,6 +176,7 @@ var gotNewNode = function(message) {
     
     jQuery("#summaries").append(summaryTemplate.replace(/NODENAME/g, nodeName));
     jQuery("#" + nodeName + "_r_version").html(message['r_version']);
+    jQuery("#" + nodeName + "_build_id").html(message['job_id']);
     
 }
 
