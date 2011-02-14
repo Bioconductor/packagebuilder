@@ -271,6 +271,8 @@ def build_package():
 
     send_message({"status": "build_complete", "result_code": retcode, "warnings": warnings,
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
+        
+        
     return (retcode)
 
 def svn_info():
@@ -299,6 +301,18 @@ def propagate_package():
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
     build_product = filter(lambda x: x.endswith(ext), files)[0]
+    
+    
+    # now install the package
+    r_cmd = "%s CMD INSTALL %s" % (os.getenv(BBS_R_CMD), dante)
+    
+    retcode = subprocess.call(r_cmd, shell=True)
+    
+    send_message({"body": "Installing package", "status": "post_processing", "retcode": retcode})
+    
+    if retcode != 0:
+        sys.exit("package install failed")
+    
     
     if (platform.system() == "Darwin"):
         os_seg = "bin/macosx/leopard/contrib/%s" % manifest['r_version']
