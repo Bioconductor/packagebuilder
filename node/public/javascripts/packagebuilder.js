@@ -233,7 +233,7 @@ var handlePostProcessing = function(message) {
         message['body'] = "ERROR during step: " + message['body'];
     }
     selector = "#" + nodeName + "_post_processing";
-    jQuery(selector).html(message['body']);
+    jQuery(selector).append(message['body'] + "...");
     if (message['build_product'] && message['url']) {
         var url = "<a href='"+ message['url']  + "'>" + message['build_product'] + "</a>"
         jQuery("#" + nodeName + "_build_product").html(url);
