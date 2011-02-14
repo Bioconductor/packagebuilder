@@ -304,7 +304,7 @@ def propagate_package():
     
     
     # now install the package
-    r_cmd = "%s CMD INSTALL %s" % (os.getenv(BBS_R_CMD), dante)
+    r_cmd = "%s CMD INSTALL %s" % (os.getenv("BBS_R_CMD"), dante)
     
     retcode = subprocess.call(r_cmd, shell=True)
     
