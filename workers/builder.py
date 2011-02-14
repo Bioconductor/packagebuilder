@@ -305,10 +305,12 @@ def propagate_package():
     
     # now install the package
     r_cmd = "%s CMD INSTALL %s" % (os.getenv("BBS_R_CMD"), build_product)
+
+    send_message({"body": "Installing package", "status": "post_processing"})
     
     retcode = subprocess.call(r_cmd, shell=True)
     
-    send_message({"body": "Installing package", "status": "post_processing", "retcode": retcode})
+    send_message({"body": "Installed package", "status": "post_processing", "retcode": retcode})
     
     if retcode != 0:
         sys.exit("package install failed")
