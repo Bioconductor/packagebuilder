@@ -234,6 +234,9 @@ var handlePostProcessing = function(message) {
     }
     selector = "#" + nodeName + "_post_processing";
     jQuery(selector).append(message['body'] + "...");
+    if (message['body'] == 'Synced repository to website') {
+        jQuery(selector).append("DONE.");
+    }
     if (message['build_product'] && message['url']) {
         var url = "<a href='"+ message['url']  + "'>" + message['build_product'] + "</a>"
         jQuery("#" + nodeName + "_build_product").html(url);
