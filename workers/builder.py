@@ -306,7 +306,7 @@ def propagate_package():
     # now install the package
     r_cmd = "%s CMD INSTALL %s" % (os.getenv("BBS_R_CMD"), build_product)
 
-    send_message({"body": "Installing package", "status": "post_processing"})
+    send_message({"body": "Installing package", "status": "post_processing", "retcode": 0})
     
     retcode = subprocess.call(r_cmd, shell=True)
     
