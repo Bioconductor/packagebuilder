@@ -218,9 +218,13 @@ def svn_export():
         os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], package_name)
     clean_svn_cmd = svn_cmd.replace(os.getenv("SVN_USER"),"xxx").replace(os.getenv("SVN_PASS"),"xxx")
     send_message({"status": "svn_cmd", "body": clean_svn_cmd})
+    send_message({"status": "post_processing", retcode: 0, "body": "starting svn export"})
     retcode = subprocess.call(svn_cmd, shell=True)
+    send_message({"status": "post_processing", retcode: retcode, "body": "finished svn export"})
     send_message({"status": "svn_result", "result": retcode, "body": \
         "svn export completed with status %d" % retcode})
+    if (not retcode == 0):
+        sys.exit("svn export failed")
     
 def build_package():
     global stop_thread
