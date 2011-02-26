@@ -440,7 +440,7 @@ def update_packages_file():
         pkg_type = "mac.binary"
     command = \
         "%s biocadmin@merlot2 'R -f %s/update-repo.R --args %s %s'" \
-        % (repos, packagebuilder_ssh_cmd, repos, pkg_type)
+        % (packagebuilder_ssh_cmd, repos, repos, pkg_type)
     print("update packages command: ")
     print(command)
     retcode = subprocess.call(command, shell=True) 
