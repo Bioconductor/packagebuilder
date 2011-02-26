@@ -365,7 +365,7 @@ def propagate_package():
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
         send_message("chmod_retcode=%d" % chmod_retcode)
-        command = "c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no  %s biocadmin@merlot2:%s/" % (repos, build_product)
+        command = "c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2:%s/ %s" % (repos, build_product)
         print("command = %s" % command)
         retcode = subprocess.call(command)
         remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'chmod a+r %s/%s_*.zip'" % (repos, package_name))
