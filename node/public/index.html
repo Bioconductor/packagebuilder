@@ -18,18 +18,20 @@
 		
 			<label>SVN URL of package:</label> <br/> 
 			<input id="svn_url" name="svn_url" size="120" 
-			type="text" 
-			value="https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Courses/Seattle-Feb-2011/AdvancedR2011" /><br/> 
+			type="text"/><br/> 
 
 			<input type=checkbox name="force" id="force" value="true"> 
 			Force build (even if version has not bumped since last build)<br/>
 			R Version:
 			<select id="r_version">
 				<option>2.12</option>
+				<option>2.13</option>
 			</select><br/>
 			Destination Repository:
 			<select id="repository">
 				<option value="course">Course Repository</option>
+				<option value="scratch">Scratch Repository</option>
+				
 			</select><br/>
 			
 			

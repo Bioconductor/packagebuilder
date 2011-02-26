@@ -89,7 +89,13 @@ def is_build_required(manifest):
         'mac.binary.leopard': "bin/macosx/leopard/contrib/" + r_version \
     }
     # todo - put repos url in config file (or get it from user)
-    repository_url = "http://bioconductor.org/course-packages/%s/PACKAGES" % cran_repo_map[pkg_type]
+    if (manifest['repository'] == 'course'):
+        base_repo_url = "http://bioconductor.org/course-packages"
+    elif (manifest['repository'] == 'scratch'):
+        base_repo_url = "http://bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['r_version']
+        
+    repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
+    # What if there is no file at this url?
     packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
         stdout=subprocess.PIPE).communicate()[0]
     inpackage = False
@@ -327,11 +333,15 @@ def propagate_package():
     else:
         os_seg = "bin/windows/contrib/%s" % manifest['r_version']
     
-    # hardcoding of repo name here
-    repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
+    if (manifest['repository'] == 'course'):
+        repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
+    elif (manifest['repository'] == 'scratch'):
+        repos = '/loc/www/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
+        url = repos.replace("/loc/www/scratch-repos/","http://bioconductor-test.fhcrc.org/")
     
     
-    url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
+    
     url += "/" + build_product
     
     rawsize = os.path.getsize(build_product)
@@ -341,7 +351,7 @@ def propagate_package():
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
     if (platform.system() == "Windows"):
-        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % package_name)
+        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f %s/%s_*.zip'" % (repos, package_name))
     else:
         retcode = ssh("rm -f %s" % files_to_delete) 
 
@@ -355,10 +365,10 @@ def propagate_package():
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
         send_message("chmod_retcode=%d" % chmod_retcode)
-        command = "c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no  %s biocadmin@merlot2:/loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/" % build_product
+        command = "c:/cygwin/bin/scp.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no  %s biocadmin@merlot2:%s/" % (repos, build_product)
         print("command = %s" % command)
         retcode = subprocess.call(command)
-        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'chmod a+r /loc/www/bioconductor-test.fhcrc.org/course-packages/bin/windows/contrib/2.12/%s_*.zip'" % package_name)
+        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi e:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'chmod a+r %s/%s_*.zip'" % (repos, package_name))
         print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
         print("chmod code not run, because platform.system() == %s" % platform.system())
@@ -429,8 +439,8 @@ def update_packages_file():
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
     command = \
-        "%s biocadmin@merlot2 'R -f /loc/www/bioconductor-test.fhcrc.org/course-packages/update-course-repo.R --args %s %s'" \
-        % (packagebuilder_ssh_cmd, repos, pkg_type)
+        "%s biocadmin@merlot2 'R -f %s/update-repo.R --args %s %s'" \
+        % (repos, packagebuilder_ssh_cmd, repos, pkg_type)
     print("update packages command: ")
     print(command)
     retcode = subprocess.call(command, shell=True) 
@@ -438,17 +448,19 @@ def update_packages_file():
     send_message({"status": "post_processing", "retcode": retcode, "body": "Updated packages list"})
     if retcode != 0:
         sys.exit("Updating packages failed")
-    
-    command = "%s biocadmin@merlot2 \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
-        packagebuilder_ssh_cmd
-    print("sync command = ")
-    print(command)
-    retcode = subprocess.call(command, shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website",
-        "build_product": build_product, "url": url})
-    if retcode != 0:
-        sys.exit("Sync to website failed")
-    
+    if (manifest['repository'] == 'course'):
+        command = "%s biocadmin@merlot2 \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
+            packagebuilder_ssh_cmd
+        print("sync command = ")
+        print(command)
+        retcode = subprocess.call(command, shell=True)
+        send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website",
+            "build_product": build_product, "url": url})
+        if retcode != 0:
+            sys.exit("Sync to website failed")
+    elif (manifest['repository'] == 'scratch'):
+        send_message({"status": "post_processing", "retcode": 0, "body": "Skipped synchronization step",
+            "build_product": build_product, "url": url})
     
 
 def get_r_version():

@@ -46,10 +46,18 @@ jQuery(function(){
   
   
   jQuery('#start_build_button').click(function(){
-    // todo - make sure that svn_url points to hedgehog, otherwise it's more likely
-    // we could be building a malicious package
-    initUI();
     obj = {};
+    obj['r_version'] = jQuery("#r_version").val();
+    obj['repository'] = jQuery("#repository").val();
+
+    if (obj['r_version'] == "2.13" && obj['repository'] == 'course') {
+        alert("Packages in the course repository can only be built with R 2.12.");
+        return;
+    }
+
+    
+    
+    initUI();
     var svn_url = jQuery("#svn_url").val();
     var d = new Date();
     var timestamp = "" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
@@ -61,11 +69,8 @@ jQuery(function(){
     d = new Date();
     obj['time'] = "" + d;
     obj['svn_url'] = svn_url;
-    obj['r_version'] = jQuery("#r_version").val();
-    obj['repository'] = jQuery("#repository").val();
     obj['force'] = (jQuery("#force:checked").val() == 'true') ? true : false;
-    var jsonStr = JSON.stringify(obj); // todo - make sure browser has this method, if not use Douglas Crockford's
-    //log("sending json:\n" + jsonStr);
+    var jsonStr = JSON.stringify(obj); 
     jQuery("#build_start").html("<p><a href='/'>New Build</a><p>\n")
    socket.send(jsonStr); 
   })
@@ -234,7 +239,7 @@ var handlePostProcessing = function(message) {
     }
     selector = "#" + nodeName + "_post_processing";
     jQuery(selector).append(message['body'] + "...");
-    if (message['body'] == 'Synced repository to website') {
+    if (message['body'] == 'Synced repository to website' || message['body'] == "Skipped synchronization step") {
         jQuery(selector).append("DONE.");
     }
     if (message['build_product'] && message['url']) {
