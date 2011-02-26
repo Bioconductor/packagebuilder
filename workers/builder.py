@@ -338,7 +338,7 @@ def propagate_package():
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
     elif (manifest['repository'] == 'scratch'):
         repos = '/loc/www/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
-        url = repos.replace("/loc/www/scratch-repos/","http://bioconductor-test.fhcrc.org/")
+        url = repos.replace("/loc/www/scratch-repos/","http://bioconductor-test.fhcrc.org/scratch-repos/")
     
     
     
