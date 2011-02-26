@@ -436,11 +436,17 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
 def update_packages_file():
     global repos
     global pkg_type
+    
+    if (manifest['repository'] == 'course'):
+        script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
+    elif (manifest['repository'] == 'scratch'):
+        script_loc = "/loc/www/scratch-repos/%s" % manifest['r_version']
+    
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
     command = \
         "%s biocadmin@merlot2 'R -f %s/update-repo.R --args %s %s'" \
-        % (packagebuilder_ssh_cmd, repos, repos, pkg_type)
+        % (packagebuilder_ssh_cmd, script_loc, repos, pkg_type)
     print("update packages command: ")
     print(command)
     retcode = subprocess.call(command, shell=True) 
