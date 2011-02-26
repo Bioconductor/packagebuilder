@@ -29,7 +29,7 @@ if (platform.system() == "Darwin" or platform.system() == "Linux"):
 else:
     shell_ext = ".bat"
 
-r_bioc_map = {"2.12": "2.7", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine bioc version
+r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10"} # need a better way to determine bioc version
 
 from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
 from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
