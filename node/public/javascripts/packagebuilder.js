@@ -245,8 +245,14 @@ var handlePostProcessing = function(message) {
     if (message['build_product'] && message['url']) {
         var url = "<a href='"+ message['url']  + "'>" + message['build_product'] + "</a>"
         jQuery("#" + nodeName + "_build_product").html(url);
-        var script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
-            'courseInstall("' + packageName + '")';
+        var script;
+        if (message['url'].match(/scratch/)) {
+            script = 'source("http://bioconductor-test.fhcrc.org/scratch-repos/pkgInstall.R")\n' +
+                'pkgInstall("' + packageName + '")';
+        } else {
+            script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
+                'courseInstall("' + packageName + '")';
+        }
         jQuery("#" + nodeName + "_install_command").html(script);
     }
     if (message['filesize']) {
