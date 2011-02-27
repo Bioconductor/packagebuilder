@@ -33,6 +33,8 @@ var handledInvalidUrl = false;
 var packageName;
 
 jQuery(function(){
+  
+  jQuery("#svn_url").focus();
   setupUI();
     
   var socket;
