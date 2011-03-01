@@ -378,3 +378,14 @@ TABLE.mainrep .odd .petty {
 TABLE.mainrep .even .petty {
     background: #BAC;
 }
+
+/* lamb1 */
+DIV.lamb1,
+TR.lamb1 TD,
+TABLE.mainrep .lamb1,
+TABLE.mainrep .odd .lamb1 {
+    background: #BCC;
+}
+TABLE.mainrep .even .lamb1 {
+    background: #9AA;
+}
