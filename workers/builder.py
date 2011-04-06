@@ -454,7 +454,7 @@ def update_packages_file():
     send_message({"status": "post_processing", "retcode": retcode, "body": "Updated packages list"})
     if retcode != 0:
         sys.exit("Updating packages failed")
-    if (manifest['repository'] == 'course' || manifest['repository'] == 'scratch'):
+    if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
         command = "%s biocadmin@merlot2 \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
             packagebuilder_ssh_cmd
         print("sync command = ")
