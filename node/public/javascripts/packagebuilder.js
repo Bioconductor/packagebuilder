@@ -249,7 +249,7 @@ var handlePostProcessing = function(message) {
         jQuery("#" + nodeName + "_build_product").html(url);
         var script;
         if (message['url'].match(/scratch/)) {
-            script = 'source("http://bioconductor-test.fhcrc.org/scratch-repos/pkgInstall.R")\n' +
+            script = 'source("http://bioconductor.org/scratch-repos/pkgInstall.R")\n' +
                 'pkgInstall("' + packageName + '")';
         } else {
             script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
