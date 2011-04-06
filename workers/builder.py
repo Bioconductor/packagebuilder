@@ -92,7 +92,7 @@ def is_build_required(manifest):
     if (manifest['repository'] == 'course'):
         base_repo_url = "http://bioconductor.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
-        base_repo_url = "http://bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['r_version']
+        base_repo_url = "http://bioconductor.org/scratch-repos/%s" % manifest['r_version']
         
     repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
     # What if there is no file at this url?
@@ -337,8 +337,8 @@ def propagate_package():
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
     elif (manifest['repository'] == 'scratch'):
-        repos = '/loc/www/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
-        url = repos.replace("/loc/www/scratch-repos/","http://bioconductor-test.fhcrc.org/scratch-repos/")
+        repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor-test.org/scratch-repos/")
     
     
     
@@ -440,7 +440,7 @@ def update_packages_file():
     if (manifest['repository'] == 'course'):
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
-        script_loc = "/loc/www/scratch-repos/%s" % manifest['r_version']
+        script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['r_version']
     
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
@@ -454,7 +454,7 @@ def update_packages_file():
     send_message({"status": "post_processing", "retcode": retcode, "body": "Updated packages list"})
     if retcode != 0:
         sys.exit("Updating packages failed")
-    if (manifest['repository'] == 'course'):
+    if (manifest['repository'] == 'course' || manifest['repository'] == 'scratch'):
         command = "%s biocadmin@merlot2 \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
             packagebuilder_ssh_cmd
         print("sync command = ")
@@ -464,9 +464,6 @@ def update_packages_file():
             "build_product": build_product, "url": url})
         if retcode != 0:
             sys.exit("Sync to website failed")
-    elif (manifest['repository'] == 'scratch'):
-        send_message({"status": "post_processing", "retcode": 0, "body": "Skipped synchronization step",
-            "build_product": build_product, "url": url})
     
 
 def get_r_version():
