@@ -52,11 +52,12 @@ jQuery(function(){
     obj['r_version'] = jQuery("#r_version").val();
     obj['repository'] = jQuery("#repository").val();
 
-    if (obj['r_version'] == "2.13" && obj['repository'] == 'course') {
-        alert("Packages in the course repository can only be built with R 2.12.");
+    /*
+    if (obj['r_version'] == "2.14" && obj['repository'] == 'course') {
+        alert("Packages in the course repository can only be built with R 2.13.");
         return;
     }
-
+    */
     
     
     initUI();
