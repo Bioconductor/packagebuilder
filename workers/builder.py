@@ -247,10 +247,7 @@ def build_package():
     if (os.path.exists(outfile)):
         os.remove(outfile)
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
-    if pkg_type == "source":
-        flags = ""
-    else:
-        flags = "--binary"
+    flags = "--keep-empty-dirs --no-resave-data"
         
         
     #flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
@@ -258,7 +255,11 @@ def build_package():
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
     thread.start_new(tail,(outfile,))
-    r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
+    if (pkg_type == "source"):
+        r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
+    else:
+        os.mkdir("libdir")
+        r_cmd = "%s CMD INSTALL --build --library=libdir %s" % (os.getenv("BBS_R_CMD", package_name))
     send_message({"status": "r_cmd", "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
