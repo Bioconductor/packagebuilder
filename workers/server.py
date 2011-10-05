@@ -21,7 +21,9 @@ connection = pika.AsyncoreConnection(pika.ConnectionParameters(
 channel = connection.channel()
 
 builder_id = platform.node().replace(".fhcrc.org","")
-
+## Temporary hack
+if (builder_id.lower().startswith("dhcp")):
+    builder_id = "macmini"
 
 shell_ext = None
 if (platform.system() == "Darwin" or platform.system() == "Linux"):
