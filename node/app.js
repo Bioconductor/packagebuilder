@@ -71,7 +71,7 @@ connection.addListener('ready', function(){
   
     console.log('listening for connections on port ' + port);
     var socket = io.listen(app);
-    
+     
     
     fromBuildersQueue.subscribe( {ack:true}, function(message){
       sys.puts("got message: " + message.data.toString());
