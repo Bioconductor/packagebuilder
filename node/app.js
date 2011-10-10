@@ -2,43 +2,112 @@
 // remember to start me with sudo so that flashpolicy file can be served on port 843:
 // sudo node app.js
 require.paths.unshift(__dirname+"/lib/")
-/*
-Install Socket.IO-node as follows:
-git clone https://github.com/LearnBoost/Socket.IO-node.git
-cd Socket.IO-node
-git submodule update --init --recursive
-*/
-var io = require("./Socket.IO-node"); 
-var amqp = require('amqp')
 var sys = require('sys')
 var path = require('path')
-var http = require('http')
-var fs = require("fs")
+var url = require("url")
 var fu = require("./fu")
 var uuid = require('node-uuid');
 var exec = require('child_process').exec;
 var packagebuilder = require('./packagebuilder');
+var stomp = require("./stomp");
+var express = require("express")
 
 
-var app = require('appserver').createServer()
+var port = 4000;
+
+var app = require("http").createServer(handler),
+ io = require("socket.io").listen(app),
+ fs = require("fs");
+
+app.listen(port);
 
 
-app.get('/', function(req, response){
-    var filename = path.join(process.cwd(), "public/index.html");
+
+
+function handler(request, response) {
+
+  var uri = url.parse(request.url).pathname
+    , filename = path.join(process.cwd() + "/public/", uri);
+  
+  path.exists(filename, function(exists) {
+    if(!exists) {
+      response.writeHead(404, {"Content-Type": "text/plain"});
+      response.write("404 Not Found\n");
+      response.end();
+      return;
+    }
+
+	if (fs.statSync(filename).isDirectory()) filename += '/index.html';
+
     fs.readFile(filename, "binary", function(err, file) {
-		if(err) {
-			response.writeHead(500, {"Content-Type": "text/plain"});
-			response.write(err + "\n");
-			response.end();
-			return;
-		}
+      if(err) {        
+        response.writeHead(500, {"Content-Type": "text/plain"});
+        response.write(err + "\n");
+        response.end();
+        return;
+      }
 
-		response.writeHead(200);
-		response.write(file, "binary");
-		response.end();
-	});
+      response.writeHead(200);
+      response.write(file, "binary");
+      response.end();
+    });
+  });
+}
+
+
+io.sockets.on('connection', function (socket) {
+  sys.puts("in connection");
+  sys.puts("socket.id = " + socket.id); //yes
+  
+  socket.on('disconnect', function(){
+      sys.puts("this client just disconnected: " + socket.id);
+      sys.puts("removing " + socket.id + " from clients")
+  })
+  socket.on('message', function(msg){
+    sys.puts("in on.message");
+    try {
+        obj = JSON.parse(msg);
+        obj['originating_host'] = hostname;
+        obj['client_id'] = socket.id;
+        obj['originating_host'] = "TODO ADD ORIGINATING HOST";
+        obj['dev'] = dev;
+        msg = JSON.stringify(obj);
+    } catch(err) {
+        sys.puts("error in JSON processing. Message not properly formed JSON?");
+    }
+    sys.puts("publishing " + msg);
+    client.publish("/topic/buildjobs", msg);
+  })
+  
+  
 });
 
+var client = new stomp.Client("merlot2.fhcrc.org", 61613);
+
+sys.puts("before subscribing to queue");
+client.subscribe("/queue/builderevents", function(data){
+    sys.puts("got message: " + data.body);
+    try {
+        var obj = JSON.parse(data.body);
+    } catch(err) {
+        sys.puts("error in JSON processing. Message not properly formed JSON?");
+      }
+    var clientId = obj['client_id'];
+      
+    sys.puts("now what is clientId? " + clientId)
+
+    for (var i = 0; i < io.sockets.clients().length; i++) {
+      sys.puts("id of client is " + io.sockets.clients()[i].id)
+      if (io.sockets.clients()[i].id == clientId) {
+          sys.puts("a match!")
+          io.sockets.clients()[i].emit("message", data.body)
+          break;
+      }
+    }
+});
+sys.puts("after subscribing to queue");
+
+console.log("Static file server running...\n =>\nCTRL + C to shutdown");
 
 
 var hostname;
@@ -53,88 +122,5 @@ if (process.env['PACKAGEBUILDER_DEVELOPMENT'] == 'true' || hostname == "dhcp1510
 }
 sys.puts("in dev mode: " + dev);
 
-//var connection = amqp.createConnection({ host: 'merlot2.fhcrc.org' });
-var connection = amqp.createConnection({ host: packagebuilder.socketServer }); 
- 
-connection.addListener('ready', function(){
-  var from_web_exchange = connection.exchange('from_web_exchange', {type: 'fanout', autoDelete: false});
-  var from_worker_exchange_name = "from_worker_exchange";
-  if (dev) from_worker_exchange_name += "_dev";
-  var from_worker_exchange = connection.exchange(from_worker_exchange_name, {type: 'fanout', autoDelete: false});
-  var queueName = hostname + "_queue";
-  var fromBuildersQueue = connection.queue(queueName, {exclusive: true}) //frombuilders
-  fromBuildersQueue.bind(from_worker_exchange_name, '#')
-  
-  var port = 4000;
-  
-  app.listen(port, function(){
-  
-    console.log('listening for connections on port ' + port);
-    var socket = io.listen(app);
-     
-    
-    fromBuildersQueue.subscribe( {ack:true}, function(message){
-      sys.puts("got message: " + message.data.toString());
-      var obj = JSON.parse(message.data.toString());
-      if (obj['originating_host'] && obj['originating_host'] == hostname) {
-          var clientId = obj['client_id'];
-          sys.puts("message came from " + clientId);
-          var deafClients = [];
-          
-          for (var key in socket.clients) {
-              if (key != null && key != clientId) {
-                  deafClients.push(key);
-              }
-          }
-          
-          socket.broadcast(message.data.toString(), deafClients);
-          fromBuildersQueue.shift()
-      }
-    })
 
-    
-    socket.on('clientConnect', function(client) {
-        // an alias for socket.on('connection'), apparently.
-    });
-    
-    socket.on('clientDisconnect', function(client){
-        sys.puts("this client just disconnected: " + client.sessionId);
-        sys.puts("this brings the total number of clients to: " + numClients(socket));
-    });
-     
-    socket.on('connection', function(client){
-      sys.puts("new client connected with id " + client.sessionId);
-      sys.puts("this brings the total number of clients to: " + numClients(socket));
-      
-      
-      client.on('message', function(msg){
-        sys.puts("in on.message");
-        try {
-            obj = JSON.parse(msg);
-            obj['originating_host'] = hostname;
-            obj['client_id'] = client.sessionId;
-            obj['dev'] = dev;
-            msg = JSON.stringify(obj);
-        } catch(err) {
-            sys.puts("error in JSON processing. Message not properly formed JSON?");
-        }
-        sys.puts("publishing " + msg);
-        from_web_exchange.publish("#", msg); //key.fromweb
-      })
-      client.on('disconnect', function(){
-          sys.puts("this client just disconnected: " + client.sessionId);
-          sys.puts("this brings the total number of clients to: " + numClients(socket));
-          
-      })
-    })
-    
-  });
-});
 
-var numClients = function(ioObj) {
-    var i = 0;
-    for (var key in ioObj.clients) {
-        i++;
-    }
-    return i;
-}

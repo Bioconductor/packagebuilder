@@ -39,10 +39,15 @@ jQuery(function(){
     
   var socket;
   
-  socket = new io.Socket(socketHost);
+  //socket = new io.Socket(socketHost);
   
-  socket.connect();
+  //socket.connect();
+  
+  socket = io.connect("http://" + socketHost + ":4000");
 
+
+  // doesn't work. var session = socket.listener.server.viewHelpers;
+  log("socket id = " + socket.id);
   log("is socket connecting? " + socket.connecting);
   log("is socket connected? " + socket.connected);
   
@@ -52,6 +57,7 @@ jQuery(function(){
     obj['r_version'] = jQuery("#r_version").val();
     obj['repository'] = jQuery("#repository").val();
 
+    obj['client_id'] = "TODO ADD A CLIENT ID";
     /*
     if (obj['r_version'] == "2.14" && obj['repository'] == 'course') {
         alert("Packages in the course repository can only be built with R 2.13.");
@@ -75,12 +81,15 @@ jQuery(function(){
     obj['force'] = (jQuery("#force:checked").val() == 'true') ? true : false;
     var jsonStr = JSON.stringify(obj); 
     jQuery("#build_start").html("<p><a href='/'>New Build</a><p>\n")
+    log("sending message: " + jsonStr);
    socket.send(jsonStr); 
   })
   
   
   socket.on('connect', function(data) {
       log("in socket connect function");
+      log("socket id = " + socket.clientId);
+      
       log("\tis socket connecting? " + socket.connecting);
       log("\tis socket connected? " + socket.connected);
       
