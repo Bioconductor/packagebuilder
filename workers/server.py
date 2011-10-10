@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
 
-## Assume this script is started by a shell script which has read 
-## BBS variables and also changed to the correct directory.
 
-import pika
 import sys
 import json
 import time
@@ -12,18 +9,34 @@ import tempfile
 import os
 import subprocess
 import platform
+from stompy import Stomp
 
-#BBS_home = os.environ['BBS_HOME']
+
+try:
+    stomp = Stomp("merlot2.fhcrc.org", 61613)
+    # optional connect keyword args "username" and "password" like so:
+    # stomp.connect(username="user", password="pass")
+    stomp.connect()
+except:
+    print("Cannot connect")
+    raise
+
+stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
+
+
+
 
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
-connection = pika.AsyncoreConnection(pika.ConnectionParameters(
-        host='merlot2.fhcrc.org'))
-channel = connection.channel()
 
 builder_id = platform.node().replace(".fhcrc.org","")
 ## Temporary hack
-if (builder_id.lower().startswith("dhcp")):
-    builder_id = "macmini"
+if (builder_id.lower().startswith("dhcp") or \
+  builder_id == 'PHS-ITs-Lion-Test-MacBook.local'):
+    if ("PACKAGEBUILDER_HOST" in os.environ.keys()):
+        builder_id = os.environ["PACKAGEBUILDER_HOST"]
+    else:
+        print "who ami i?"
+        raise
 
 shell_ext = None
 if (platform.system() == "Darwin" or platform.system() == "Linux"):
@@ -33,20 +46,12 @@ else:
 
 r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10"} # need a better way to determine bioc version
 
-from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
-from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
-from_worker_exchange_dev = channel.exchange_declare(exchange="from_worker_exchange_dev", type='fanout')
-
-from_web_queue = channel.queue_declare(exclusive=True)
-from_web_queue_name = from_web_queue.queue
-
-channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 sys.stdout.flush()
 
 
-def callback(ch, method, properties, body):
+def callback(body):
     global r_bioc_map
     global shell_ext
     global packagebuilder_home
@@ -76,23 +81,25 @@ def callback(ch, method, properties, body):
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
         msg_obj = {}
         msg_obj['originating_host'] = received_obj['originating_host']
-        msg_obj['client_id'] = received_obj['client_id']
+        #msg_obj['client_id'] = received_obj['client_id']
         msg_obj['builder_id'] = builder_id
         msg_obj['body'] = "Got build request..."
         msg_obj['first_message'] = True
         msg_obj['job_id'] = job_id
         json_str = json.dumps(msg_obj)
-        xname = 'from_worker_exchange'
-        if (received_obj['dev'] == True):
-            xname += "_dev"
-        print "xname = %s" % xname
-        channel.basic_publish(exchange=xname,
-                              routing_key="key.frombuilders",
-                              body= json_str)
+        this_frame = stomp.send({'destination': "/queue/builderevents",
+          'body': json_str,
+          'persistent': 'true'})
+        print("Receipt: %s" % this_frame.headers.get('receipt-id'))
 
-channel.basic_consume(callback,
-                      queue=from_web_queue.queue,
-                      no_ack=True)
-
-pika.asyncore_loop()
+while True:
+    try:
+        frame = stomp.receive_frame()
+        stomp.ack(frame) # do this?
+        #print(frame.headers.get('message-id'))
+        #print(frame.body)
+        callback(frame.body)
+    except KeyboardInterrupt:
+        stomp.disconnect()
+        break
 

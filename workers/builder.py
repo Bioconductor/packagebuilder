@@ -4,7 +4,6 @@
 ## Assume this script is started by a shell script which has read 
 ## BBS variables and also changed to the correct directory.
 
-import pika
 import os
 import sys
 import json
@@ -14,7 +13,7 @@ import time
 import datetime
 import shlex
 import platform
-    
+from stompy import Stomp    
 
 
 def send_message(msg, status=None):
@@ -38,12 +37,10 @@ def send_message(msg, status=None):
     print "sending message:"
     print json_str
     print
-    xname = 'from_worker_exchange'
-    if (manifest['dev'] == True):
-        xname += "_dev"
-    channel.basic_publish(exchange=xname,
-                          routing_key="key.frombuilders",
-                          body= json_str)
+    this_frame = stomp.send({'destination': "/queue/builderevents",
+      'body': json_str,
+      'persistent': 'true'})
+    print("Receipt: %s" % this_frame.headers.get('receipt-id'))
 
 
 def send_dcf_info(dcf_file):
@@ -161,6 +158,10 @@ def setup():
     global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, packagebuilder_rsync_rsh_cmd, \
         packagebuilder_scp_cmd
     global callcount
+    global builder_id
+    
+    builder_id = os.getenv("BBS_NODE")
+    
     callcount = 1
 
     ## BBS-specific imports
@@ -195,24 +196,20 @@ def setup():
     os.chdir(working_dir)
     print("working dir is %s" % working_dir)
 
-def setup_pika():
-    global channel
-    global builder_id
+
+def setup_stomp():
+    global stomp
+    try:
+        stomp = Stomp("merlot2.fhcrc.org", 61613)
+        # optional connect keyword args "username" and "password" like so:
+        # stomp.connect(username="user", password="pass")
+        stomp.connect()
+    except:
+        print("Cannot connect")
+        raise
     
-    connection = pika.AsyncoreConnection(pika.ConnectionParameters(
-            host='merlot2.fhcrc.org'))
-    channel = connection.channel()
+    
 
-    builder_id = os.getenv("BBS_NODE")
-
-    from_web_exchange = channel.exchange_declare(exchange="from_web_exchange",type="fanout")
-    from_worker_exchange = channel.exchange_declare(exchange="from_worker_exchange", type='fanout')
-    from_worker_exchange_dev = channel.exchange_declare(exchange="from_worker_exchange_dev", type='fanout')
-
-    from_web_queue = channel.queue_declare(exclusive=True)
-    from_web_queue_name = from_web_queue.queue
-
-    channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
         
 
 def svn_export():
@@ -504,7 +501,7 @@ if __name__ == "__main__":
 
     print "Builder has been started"
     setup()
-    setup_pika()
+    setup_stomp()
     
     send_message("Builder has been started")
     
