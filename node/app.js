@@ -67,7 +67,6 @@ io.sockets.on('connection', function (socket) {
     sys.puts("in on.message");
     try {
         obj = JSON.parse(msg);
-        obj['originating_host'] = hostname;
         obj['client_id'] = socket.id;
         obj['originating_host'] = "TODO ADD ORIGINATING HOST";
         obj['dev'] = dev;
@@ -107,19 +106,9 @@ client.subscribe("/queue/builderevents", function(data){
 });
 sys.puts("after subscribing to queue");
 
-console.log("Static file server running...\n =>\nCTRL + C to shutdown");
+console.log("Static file server running => CTRL + C to shutdown");
 
 
-var hostname;
- exec("hostname", function (error, stdout, sterr) {
-     hostname = stdout.trim();
-     sys.puts("hostname = " + hostname);
- });
-
-var dev = false;
-if (process.env['PACKAGEBUILDER_DEVELOPMENT'] == 'true' || hostname == "dhcp151078.fhcrc.org") {
-    dev = true;
-}
 sys.puts("in dev mode: " + dev);
 
 
