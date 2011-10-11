@@ -15,4 +15,7 @@ set SVN_PASS=buildpkg
 
 set BBS_HOME=c:\biocbuild\BBS
 
+set BBS_SSH_CMD=c:/cygwin/bin/ssh.exe
+set BBS_RSYNC_CMD=c:/rtools213/bin/rsync.exe
+
 %BBS_PYTHON_CMD% builder.py %1
