@@ -57,7 +57,6 @@ jQuery(function(){
     obj['r_version'] = jQuery("#r_version").val();
     obj['repository'] = jQuery("#repository").val();
 
-    obj['client_id'] = "TODO ADD A CLIENT ID";
     /*
     if (obj['r_version'] == "2.14" && obj['repository'] == 'course') {
         alert("Packages in the course repository can only be built with R 2.13.");
