@@ -235,14 +235,14 @@ TABLE.mainrep .even .lamb2 {
     background: #9AB;
 }
 
-/* wilson2 */
-DIV.wilson2,
-TR.wilson2 TD,
-TABLE.mainrep .wilson2,
-TABLE.mainrep .odd .wilson2 {
+/* wilson1 */
+DIV.wilson1,
+TR.wilson1 TD,
+TABLE.mainrep .wilson1,
+TABLE.mainrep .odd .wilson1 {
     background: #BDD;
 }
-TABLE.mainrep .even .wilson2 {
+TABLE.mainrep .even .wilson1 {
     background: #9BB;
 }
 
@@ -290,14 +290,14 @@ TABLE.mainrep .even .lemming {
     background: #CBB;
 }
 
-/* liverpool */
-DIV.liverpool,
-TR.liverpool TD,
-TABLE.mainrep .liverpool,
-TABLE.mainrep .odd .liverpool {
+/* cyclonus */
+DIV.cyclonus,
+TR.cyclonus TD,
+TABLE.mainrep .cyclonus,
+TABLE.mainrep .odd .cyclonus {
     background: #ECA;
 }
-TABLE.mainrep .even .liverpool {
+TABLE.mainrep .even .cyclonus {
     background: #CA8;
 }
 
@@ -368,14 +368,14 @@ TABLE.mainrep .even .pelham {
 }
 
 
-/* petty */
-DIV.petty,
-TR.petty TD,
-TABLE.mainrep .petty,
-TABLE.mainrep .odd .petty {
+/* montagu */
+DIV.montagu,
+TR.montagu TD,
+TABLE.mainrep .montagu,
+TABLE.mainrep .odd .montagu {
     background: #DCE;
 }
-TABLE.mainrep .even .petty {
+TABLE.mainrep .even .montagu {
     background: #BAC;
 }
 
