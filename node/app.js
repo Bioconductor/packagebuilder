@@ -86,20 +86,23 @@ var client = new stomp.Client("merlot2.fhcrc.org", 61613);
 sys.puts("before subscribing to queue");
 client.subscribe("/queue/builderevents", function(data){
     sys.puts("got message: " + data.body);
+    var obj;
     try {
-        var obj = JSON.parse(data.body);
+        obj = JSON.parse(data.body);
     } catch(err) {
         sys.puts("error in JSON processing. Message not properly formed JSON?");
-      }
+    }
+    sys.puts("after json processing")
     var clientId = obj['client_id'];
       
     sys.puts("now what is clientId? " + clientId)
 
     for (var i = 0; i < io.sockets.clients().length; i++) {
-      sys.puts("id of client is " + io.sockets.clients()[i].id)
-      if (io.sockets.clients()[i].id == clientId) {
+        var cl = io.sockets.clients()[i];
+      sys.puts("id of client is " + cl.id)
+      if (cl.id == clientId) {
           sys.puts("a match!")
-          io.sockets.clients()[i].emit("message", data.body)
+          cl.emit("message", data.body)
           break;
       }
     }
