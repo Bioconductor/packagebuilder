@@ -15,6 +15,7 @@ export BBS_USER="pkgbuild"
 export SVN_USER="pkgbuild"
 export SVN_PASS="buildpkg"
 
+export BBS_PYTHON_CMD=/usr/local/bin/python
 
 $BBS_PYTHON_CMD builder.py $1
  
