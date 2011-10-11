@@ -81,7 +81,7 @@ io.sockets.on('connection', function (socket) {
   
 });
 
-var client = new stomp.Client("localhost", 61613);
+var client = new stomp.Client("merlot2.fhcrc.org", 61613);
 
 sys.puts("before subscribing to queue");
 client.subscribe("/queue/builderevents", function(data){
