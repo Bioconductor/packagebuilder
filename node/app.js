@@ -67,8 +67,9 @@ io.sockets.on('connection', function (socket) {
     sys.puts("in on.message");
     try {
         obj = JSON.parse(msg);
-        sys.puts("setting client_id to " + socket.id)
-        obj['client_id'] = socket.id;
+        var clientId = "_" + socket.id + "_"
+        sys.puts("setting client_id to " + clientId)
+        obj['client_id'] = clientId;
         msg = JSON.stringify(obj);
     } catch(err) {
         sys.puts("error in JSON processing. Message not properly formed JSON?");
@@ -92,16 +93,14 @@ client.subscribe("/queue/builderevents", function(data){
         sys.puts("error in JSON processing. Message not properly formed JSON?");
     }
     sys.puts("after json processing")
-    sys.puts("client id as int: " + obj['client_id'])
-    var clientId = "" + parseInt(obj['client_id']);
-    sys.puts("client id as str: " + clientId)
       
     sys.puts("now what is clientId? " + clientId)
 
     for (var i = 0; i < io.sockets.clients().length; i++) {
         var cl = io.sockets.clients()[i];
       sys.puts("id of client is " + cl.id)
-      if (cl.id == clientId) {
+      var m = "_" + cl.id + "_";
+      if (m == clientId) {
           sys.puts("a match!")
           cl.emit("message", data.body)
           break;
