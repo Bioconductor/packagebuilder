@@ -4,7 +4,7 @@ export PACKAGEBUILDER_RSAKEY="/Users/dtenenba/dev/packagebuilder/.packagebuilder
 
 
 cd /Users/dtenenba/dev/packagebuilder/workers
-pushd /Users/dtenenba/dev/BBS/$2/bioc/montagu
+pushd /Users/dtenenba/BBS/$2/bioc/montagu
 
 . config.sh
 
