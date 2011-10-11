@@ -28,7 +28,7 @@ stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
 
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
-builder_id = platform.node().replace(".fhcrc.org","")
+builder_id = platform.node().lower().replace(".fhcrc.org","")
 ## Temporary hack
 if (builder_id.lower().startswith("dhcp") or \
   builder_id == 'PHS-ITs-Lion-Test-MacBook.local'):
