@@ -109,7 +109,4 @@ sys.puts("after subscribing to queue");
 console.log("Static file server running => CTRL + C to shutdown");
 
 
-sys.puts("in dev mode: " + dev);
-
-
 
