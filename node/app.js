@@ -69,8 +69,6 @@ io.sockets.on('connection', function (socket) {
         obj = JSON.parse(msg);
         sys.puts("setting client_id to " + socket.id)
         obj['client_id'] = socket.id;
-        obj['originating_host'] = "TODO ADD ORIGINATING HOST";
-        obj['dev'] = dev;
         msg = JSON.stringify(obj);
     } catch(err) {
         sys.puts("error in JSON processing. Message not properly formed JSON?");
