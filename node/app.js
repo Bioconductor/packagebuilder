@@ -93,13 +93,13 @@ client.subscribe("/queue/builderevents", function(data){
         sys.puts("error in JSON processing. Message not properly formed JSON?");
     }
     sys.puts("after json processing")
-      
+    var clientId = obj['client_id'];  
     sys.puts("now what is clientId? " + clientId)
 
     for (var i = 0; i < io.sockets.clients().length; i++) {
         var cl = io.sockets.clients()[i];
-      sys.puts("id of client is " + cl.id)
       var m = "_" + cl.id + "_";
+      sys.puts("id of client is " + m)
       if (m == clientId) {
           sys.puts("a match!")
           cl.emit("message", data.body)
