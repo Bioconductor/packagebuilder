@@ -254,13 +254,8 @@ def build_package():
     if (pkg_type == "source"):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        if builder_id == "cyclonus":
-            libdir = "C:/Users/pkgbuild/Documents/R/win-library/2.14"
-        else:
-            os.mkdir("libdir")
-            libdir = "libdir"
-        r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
-          libdir, package_name)
+        os.mkdir("libdir")
+        r_cmd = "%s CMD INSTALL --build --library=libdir %s" % (os.getenv("BBS_R_CMD"), package_name)
     send_message({"status": "r_cmd", "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
