@@ -3,7 +3,7 @@ set packagebuilderhome=c:\packagebuilder
 set PACKAGEBUILDER_RSAKEY=c:/packagebuilder/.packagebuilder.private_key.rsa
 
 
-cd c:\biocbld\BBS\%2\bioc\cyclonus
+cd c:\biocbuild\BBS\%2\bioc\cyclonus
 call config.bat
 
 cd %packagebuilderhome%
