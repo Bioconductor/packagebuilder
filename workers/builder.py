@@ -19,7 +19,6 @@ from stompy import Stomp
 def send_message(msg, status=None):
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
-    merged_dict['originating_host'] = manifest['originating_host']
     merged_dict['client_id'] = manifest['client_id']
     merged_dict['job_id'] = manifest['job_id']
     now = datetime.datetime.now()
