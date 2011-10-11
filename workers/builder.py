@@ -255,7 +255,7 @@ def build_package():
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
         os.mkdir("libdir")
-        r_cmd = "%s CMD INSTALL --build %s" % (os.getenv("BBS_R_CMD"), package_name)
+        r_cmd = "%s CMD INSTALL --build --library=libdir %s" % (os.getenv("BBS_R_CMD"), package_name)
     send_message({"status": "r_cmd", "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
