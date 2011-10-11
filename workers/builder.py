@@ -353,7 +353,7 @@ def propagate_package():
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
     if (platform.system() == "Windows"):
-        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'rm -f %s/%s_*.zip'" % (repos, package_name))
+        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'rm -f %s/%s_*.zip'" % (repos, package_name))
     else:
         retcode = ssh("rm -f %s" % files_to_delete) 
 
@@ -367,10 +367,10 @@ def propagate_package():
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
         send_message("chmod_retcode=%d" % chmod_retcode)
-        command = "c:/cygwin/bin/scp.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2:%s/" % (build_product, repos)
+        command = "c:/cygwin/bin/scp.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2.fhcrc.org:%s/" % (build_product, repos)
         print("command = %s" % command)
         retcode = subprocess.call(command)
-        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2 'chmod a+r %s/%s_*.zip'" % (repos, package_name))
+        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'chmod a+r %s/%s_*.zip'" % (repos, package_name))
         print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
         print("chmod code not run, because platform.system() == %s" % platform.system())
@@ -408,13 +408,13 @@ def _call(command_str, shell):
     else:
         return(subprocess.call(command_str, shell=shell))
 
-def ssh(command, user='biocadmin', host='merlot2'):
+def ssh(command, user='biocadmin', host='merlot2.fhcrc.org'):
     command = "%s %s@%s '%s'" % (packagebuilder_ssh_cmd, user, host, command)
     print("ssh command: %s" % command)
     retcode = _call([command], shell=True) 
     return(retcode)
 
-def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2'):
+def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
         chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
@@ -447,7 +447,7 @@ def update_packages_file():
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
     command = \
-        "%s biocadmin@merlot2 'R -f %s/update-repo.R --args %s %s'" \
+        "%s biocadmin@merlot2.fhcrc.org 'R -f %s/update-repo.R --args %s %s'" \
         % (packagebuilder_ssh_cmd, script_loc, repos, pkg_type)
     print("update packages command: ")
     print(command)
@@ -457,7 +457,7 @@ def update_packages_file():
     if retcode != 0:
         sys.exit("Updating packages failed")
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
-        command = "%s biocadmin@merlot2 \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
+        command = "%s biocadmin@merlot2.fhcrc.org \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
             packagebuilder_ssh_cmd
         print("sync command = ")
         print(command)
