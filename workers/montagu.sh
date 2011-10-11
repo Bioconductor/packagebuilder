@@ -3,7 +3,7 @@
 export PACKAGEBUILDER_RSAKEY="/Users/pkgbuild/packagebuilder/.packagebuilder.private_key.rsa"
 
 
-cd /Users/pkgbuild/dev/packagebuilder/workers
+cd /Users/pkgbuild/packagebuilder/workers
 pushd /Users/pkgbuild/BBS/$2/bioc/montagu
 
 . config.sh
