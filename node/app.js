@@ -67,6 +67,7 @@ io.sockets.on('connection', function (socket) {
     sys.puts("in on.message");
     try {
         obj = JSON.parse(msg);
+        sys.puts("setting client_id to " + socket.id)
         obj['client_id'] = socket.id;
         obj['originating_host'] = "TODO ADD ORIGINATING HOST";
         obj['dev'] = dev;
