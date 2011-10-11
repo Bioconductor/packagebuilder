@@ -92,7 +92,7 @@ client.subscribe("/queue/builderevents", function(data){
         sys.puts("error in JSON processing. Message not properly formed JSON?");
     }
     sys.puts("after json processing")
-    var clientId = obj['client_id'];
+    var clientId = "" + parseInt(obj['client_id']);
       
     sys.puts("now what is clientId? " + clientId)
 
