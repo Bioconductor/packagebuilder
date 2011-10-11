@@ -94,12 +94,11 @@ client.subscribe("/queue/builderevents", function(data){
     }
     sys.puts("after json processing")
     try {
-        
+        var clientId = obj['client_id'];  
     } catch (err) {
         sys.puts("object does not include client_id, bailing...")
         return;
     }
-    var clientId = obj['client_id'];  
     sys.puts("now what is clientId? " + clientId)
 
     for (var i = 0; i < io.sockets.clients().length; i++) {
