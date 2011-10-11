@@ -84,6 +84,7 @@ def callback(body):
         msg_obj['body'] = "Got build request..."
         msg_obj['first_message'] = True
         msg_obj['job_id'] = job_id
+        msg_obj['client_id'] = received_obj['client_id']
         json_str = json.dumps(msg_obj)
         this_frame = stomp.send({'destination': "/queue/builderevents",
           'body': json_str,
