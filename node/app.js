@@ -19,6 +19,10 @@ var app = require("http").createServer(handler),
  io = require("socket.io").listen(app),
  fs = require("fs");
 
+ io.configure(function () {
+   io.set('transports', ["websocket", "htmlfile", "xhr-polling", "jsonp-polling"]);
+ });
+
 app.listen(port);
 
 
