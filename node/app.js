@@ -1,6 +1,4 @@
 
-// remember to start me with sudo so that flashpolicy file can be served on port 843:
-// sudo node app.js
 require.paths.unshift(__dirname+"/lib/")
 var sys = require('sys')
 var path = require('path')
