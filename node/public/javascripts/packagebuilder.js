@@ -43,7 +43,8 @@ jQuery(function(){
   
   //socket.connect();
   
-  socket = io.connect("http://" + socketHost + ":4000");
+  socket = io.connect("http://" + socketHost + ":4000",
+    {transports: ["websocket", "htmlfile", "xhr-polling", "jsonp-polling"]});
 
 
   // doesn't work. var session = socket.listener.server.viewHelpers;
