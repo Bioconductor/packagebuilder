@@ -228,6 +228,27 @@ def svn_export():
     if (not retcode == 0):
         sys.exit("svn export failed")
     
+
+def install_pkg_deps():
+    f = open("%s/DESCRIPTION" % working_dir)
+    description = f.read()
+    f.close()
+    desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    fields = ("Depends", "Imports", "Suggests", "Enhances")
+    args = ""
+    for field in fields:
+        try:
+            args += '%s="%s" ' % (field, desc.getValue(field))
+        except KeyError:
+            pass
+    r_script = "%s/../installPkgDeps.R" % working_dir
+    log = "%s/installDeps.log" % working_dir
+    cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore '--args %s' %s %s" % \
+      (os.getenv("BBS_R_CMD"), args.strip(), r_script, log)
+    print(cmd)
+    # dante
+    
+
 def build_package():
     global stop_thread
     global message_sequence
@@ -527,6 +548,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     svn_export()
+    install_pkg_deps()
     result = build_package()
     if (result == 0):
         propagate_package()
