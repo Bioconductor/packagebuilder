@@ -1,6 +1,6 @@
 
 # run me like this:
-# /path/to/R CMD BATCH -q --vanilla --no-save --no-restore '--args Depends="R (>= 2.10), utils" Imports="methods" Suggests="tools, tkWidgets, ALL"' /working_dir/../installPkgDeps.R /working_dir/installDeps.log
+# /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave '--args Depends="R (>= 2.10), utils"; Imports="methods"; Suggests="tools, tkWidgets, ALL";' /working_dir/../installPkgDeps.R /working_dir/installDeps.log
 
 args <- (commandArgs(TRUE))
 if (length(args) == 0) {
@@ -8,12 +8,20 @@ if (length(args) == 0) {
     q("no")
 }
 
-#cmds = args[1:4] # modify if # of args changes
+s <- paste(args, collapse=" ")
+segs <- strsplit(s, ";", fixed=TRUE)
 
-for (i in 1:length(cmds)) {
-    eval(parse(text=cmds[i]))
+
+
+for (i in 1:length(args)) {
+    eval(parse(text=args[i]))
 }
 
+fields <- c("Depends", "Imports", "Suggests", "Enhances")
+
+for (field in fields) {
+    installDeps(field)
+}
 
 
 cat(args, "\n")
