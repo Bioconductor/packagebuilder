@@ -230,7 +230,7 @@ def svn_export():
     
 
 def install_pkg_deps():
-    f = open("%s/DESCRIPTION" % working_dir)
+    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
