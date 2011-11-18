@@ -245,9 +245,13 @@ def install_pkg_deps():
     log = "%s/installDeps.log" % working_dir
     cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore '--args %s' %s %s" % \
       (os.getenv("BBS_R_CMD"), args.strip(), r_script, log)
-    print(cmd)
-    # dante
+    send_message({"body": "Installing dependencies...", "status": "preprocessing", "retcode": 0})
+    retcode = subprocess.call(cmd, shell=True)
+    send_message({"body": "Result of installing dependencies",
+      "status": "preprocessing", "retcode": retcode})
+    return retcode
     
+    #dante
 
 def build_package():
     global stop_thread
@@ -548,7 +552,10 @@ if __name__ == "__main__":
         sys.exit(0)
 
     svn_export()
-    install_pkg_deps()
+    result = install_pkg_deps()
+    if (result != 0):
+        return
+        
     result = build_package()
     if (result == 0):
         propagate_package()

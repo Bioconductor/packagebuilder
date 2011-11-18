@@ -4,7 +4,7 @@
 
 args <- (commandArgs(TRUE))
 if (length(args) == 0) {
-    print("No arguments supplied.") #todo - more useful usage message
+    print("No arguments supplied.")
     q("no")
 }
 
@@ -26,15 +26,13 @@ trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 installPkg <- function(pkg)
 {
-    lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "Rlibs")
-    if (!file.exists(lib))
-        dir.create(lib)
+    if (pkg == "multicore" && .Platform$OS.type == "windows")
+        return()
     if (!getOption("pkgType") == "source")
-        tryCatch(biocLite(pkg, lib=lib, suppressUpdates=TRUE),
-            error=biocLite(pkg, type="source", lib=lib,
-            suppressUpdates=TRUE))
+        tryCatch(biocLite(pkg, suppressUpdates=TRUE),
+            error=biocLite(pkg, type="source", suppressUpdates=TRUE))
     else
-        biocLite(pkg, lib=lib, suppressUpdates=TRUE)
+        biocLite(pkg, suppressUpdates=TRUE)
 }
 
 installDeps <- function(depStr)
@@ -66,7 +64,6 @@ installDeps <- function(depStr)
                 }
             }
         } else {
-            message(paste("diag:", pkg, "\n"))
             if (builtIn(pkg)) next
             if (!pkg %in% installed.packages())
                 installPkg(pkg)
