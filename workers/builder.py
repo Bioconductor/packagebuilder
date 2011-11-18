@@ -554,7 +554,7 @@ if __name__ == "__main__":
     svn_export()
     result = install_pkg_deps()
     if (result != 0):
-        return
+        sys.exit(0)
         
     result = build_package()
     if (result == 0):
