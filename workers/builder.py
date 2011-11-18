@@ -241,7 +241,7 @@ def install_pkg_deps():
             args += '%s="%s" ' % (field, desc.getValue(field))
         except KeyError:
             pass
-    r_script = "%s/../installPkgDeps.R" % working_dir
+    r_script = "%s/../../installPkgDeps.R" % working_dir
     log = "%s/installDeps.log" % working_dir
     cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore '--args %s' %s %s" % \
       (os.getenv("BBS_R_CMD"), args.strip(), r_script, log)
