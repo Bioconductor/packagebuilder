@@ -48,8 +48,8 @@ def send_dcf_info(dcf_file):
 
 def is_build_required(manifest):
     global package_name
+    package_name = manifest['job_id'].split("_")[0]
     if (is_svn_package()):
-        package_name = manifest['job_id'].split("_")[0]
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
         print "description_url = " + description_url
         print "svn_user ="  + os.getenv("SVN_USER")
