@@ -241,7 +241,7 @@ def extract_tarball():
     retcode = subprocess.call("curl --cookie-jar cookies.txt -d "
       "'__login_name=%s&__login_password=%s"
       "&__came_from=http://tracker.fhcrc.org/roundup/bioc_submit/"
-      "&@action=login'"
+      "&@action=login' "
       "http://tracker.fhcrc.org/roundup/bioc_submit/" % \
       (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD")), shell=True)
     send_message({"status": "curl_cookie_result", "result": retcode, "body": \
