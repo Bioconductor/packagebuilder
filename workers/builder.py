@@ -529,9 +529,9 @@ def get_node_info():
     
 
 def is_valid_url():
-    if (manifest['svn_url'].lower().startsWith("https://hedgehog.fhcrc.org")):
+    if (manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
         svn_url = True
-    elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1):
+    elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1): # todo, ensure .tar.gz end
         svn_url = False
     else:
         return False
