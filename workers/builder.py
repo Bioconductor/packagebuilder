@@ -247,14 +247,14 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"))
 
     retcode = subprocess.call(cmd, shell=True)
-    send_message({"status": "post_processing", "result": retcode, "body": \
+    send_message({"status": "post_processing", "retcode": retcode, "body": \
       "curl to log into tracker returned status %d" % retcode})
     if (not retcode == 0):
         sys.exit("curl to get cookie failed")
 
     retcode = subprocess.call("curl -O -s --cookie cookies.txt %s" % \
         manifest['svn_url'], shell=True)
-    send_message({"status": "post_processing", "result": retcode, "body": \
+    send_message({"status": "post_processing", "retcode": retcode, "body": \
         "curl of tarball completed with status %d" % retcode})
     if (not retcode == 0):
         sys.exit("curl of tarball failed")
@@ -262,7 +262,7 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
     retcode = subprocess.call("tar -zxf %s" % tarball, shell=True)
-    send_message({"status": "post_processing", "result": retcode, "body": \
+    send_message({"status": "post_processing", "retcode": retcode, "body": \
         "untar of tarball completed with status %d" % retcode})
     if (not retcode == 0):
         sys.exit("untar of tarball failed")
