@@ -237,14 +237,17 @@ def svn_export():
 def extract_tarball():
     global package_name
     package_name = manifest['job_id'].split("_")[0]
-    extract_path = os.path.join(working_dir, package_name)
     # first, log in to the tracker and get a cookie
     retcode = subprocess.call("curl --cookie-jar cookies.txt -d "
       "'__login_name=%s&__login_password=%s"
       "&__came_from=http://tracker.fhcrc.org/roundup/bioc_submit/"
       "&@action=login'"
-      "http://tracker.fhcrc.org/roundup/bioc_submit/" % (os.getenv("TRACKER_LOGIN"),
-      os.getenv("TRACKER_PASSWORD")), shell=True)
+      "http://tracker.fhcrc.org/roundup/bioc_submit/" % \
+      (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD")), shell=True)
+    send_message({"status": "curl_cookie_result", "result": retcode, "body": \
+      "curl to log into tracker returned status %d" % retcode})
+    if (not retcode == 0):
+        sys.exit("curl to get cookie failed")
 
     retcode = subprocess.call("curl -O -s --cookie cookies.txt %s" % \
         manifest['svn_url'], shell=True)
