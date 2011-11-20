@@ -247,6 +247,7 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
 
     print("cmd = ")
     print(cmd)
+    print("login: %s, password: %s" % (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD")))
     retcode = subprocess.call(cmd, shell=True)
     send_message({"status": "curl_cookie_result", "result": retcode, "body": \
       "curl to log into tracker returned status %d" % retcode})
