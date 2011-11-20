@@ -259,10 +259,14 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     if (not retcode == 0):
         sys.exit("curl of tarball failed")
     
+    
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
     package_name = tarball.split("_")[0]
-    retcode = subprocess.call("tar -zxf %s" % tarball, shell=True)
+    
+    os.rename(tarball, "%s.orig" % tarball)
+    
+    retcode = subprocess.call("tar -zxf %s.orig" % tarball, shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": \
         "untar of tarball completed with status %d" % retcode})
     if (not retcode == 0):
@@ -579,6 +583,8 @@ def is_svn_package():
         return True
     return False
     
+def check_package():
+    
 
 
 ## Main namespace. execution starts here.
@@ -629,8 +635,11 @@ if __name__ == "__main__":
         if warnings:
             body = "Build completed with warnings."
         else:
-            body = "Build was successfull."
+            body = "Build was successful."
+        # todo - rethink completion
         send_message({"status": "complete", "result": result, "body": body, "warnings": warnings})
     else:
         send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
+    
+    check_package()
     
