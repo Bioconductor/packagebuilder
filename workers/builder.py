@@ -337,7 +337,7 @@ def check_package():
     out_fh = open(outfile)
     warnings = False
     for line in out_fh:
-        if line.lower().startswith("warning:"):
+        if line.rstrip().endswith("WARNING")
             warnings = True
             break
     out_fh.close()
@@ -673,10 +673,12 @@ if __name__ == "__main__":
         
     result = build_package()
     if (result == 0):
-        propagate_package()
+        check_result = check_package()
+        if check_result == 0:
+            propagate_package()
         if (is_build_required):
             update_packages_file()
-        if warnings:
+        if warnings: # todo separate build / check / build bin warnings
             body = "Build completed with warnings."
         else:
             body = "Build was successful."
@@ -685,5 +687,4 @@ if __name__ == "__main__":
     else:
         send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
     
-    check_package()
     
