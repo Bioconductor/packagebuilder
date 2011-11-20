@@ -24,6 +24,9 @@ function log(message) {
 	}
 }
 
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
 
 //global variables
 var gotSvnInfo = false;
@@ -73,6 +76,10 @@ jQuery(function(){
       pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
     var tmp = svn_url.replace(/\/$/, "").split("/");
     var pkg = tmp[tmp.length -1];
+    if (pkg.endsWith(".tar.gz")) {
+        tmp = pkg.split("_")
+        pkg = tmp[0]
+    }
     var job_id = pkg + "_" + timestamp;
     obj['job_id'] = job_id;
     d = new Date();

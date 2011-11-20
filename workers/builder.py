@@ -228,6 +228,25 @@ def svn_export():
     if (not retcode == 0):
         sys.exit("svn export failed")
     
+def extract_tarball():
+    global package_name
+    package_name = manifest['job_id'].split("_")[0]
+    extract_path = os.path.join(working_dir, package_name)
+    retcode = subprocess.call("curl -O -s --user %s:%s %s" % \
+        (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"), manifest['svn_url']))
+    send_message({"status": "curl_tarball_result", "result": retcode, "body": \
+        "curl of tarball completed with status %d" % retcode})
+    if (not retcode == 0):
+        sys.exit("curl of tarball failed")
+    
+    tmp = manifest['svn_url'].split("/")
+    tarball = tmp[len(tmp)-1]
+    retcode = subprocess.call("tar -zxf %s" % tarball)
+    send_message({"status": "untar_tarball_result", "result": retcode, "body": \
+        "untar of tarball completed with status %d" % retcode})
+    if (not retcode == 0):
+        sys.exit("untar of tarball failed")
+    
 
 def install_pkg_deps():
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
@@ -251,7 +270,6 @@ def install_pkg_deps():
       "status": "preprocessing", "retcode": retcode})
     return retcode
     
-    #dante
 
 def build_package():
     global stop_thread
@@ -511,15 +529,27 @@ def get_node_info():
     
 
 def is_valid_url():
-    if (not manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
+    if (manifest['svn_url'].lower().startsWith("https://hedgehog.fhcrc.org")):
+        svn_url = True
+    elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1):
+        svn_url = False
+    else:
         return False
-    description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-    description = subprocess.Popen(["curl", "-k", "-s", 
-        "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
-        description_url], stdout=subprocess.PIPE).communicate()[0]
-    if (len(description) == 0  or description.lower().find("404 not found") > -1):
-        return False
+    
+    if svn_url:
+        description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
+        description = subprocess.Popen(["curl", "-k", "-s", 
+            "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+            description_url], stdout=subprocess.PIPE).communicate()[0]
+        if (len(description) == 0  or description.lower().find("404 not found") > -1):
+            return False
+        return True
     return True
+    
+def is_svn_package():
+    if (manifest['svn_url'].lower().startsWith("https://hedgehog.fhcrc.org")):
+        return True
+    return False
     
 
 
@@ -541,17 +571,24 @@ if __name__ == "__main__":
 
 
     get_node_info()
-    svn_info()
+    if is_svn_package():
+        svn_info()
 
     
     is_build_required = is_build_required(manifest)
     if not (is_build_required):
+        pkg_type = 'svn' if (is_svn_package()) else 'tarball'
         send_message({"status": "build_not_required",
-            "body": "Build not required (versions identical in svn and repository)."})
+            "body": "Build not required (versions identical in %s and repository)."}\
+                % pkg_type)
         send_message({"status": "normal_end", "body": "Build process is ending normally."})
         sys.exit(0)
 
-    svn_export()
+    if (is_svn_package()):
+        svn_export()
+    else:
+        extract_tarball():
+        
     result = install_pkg_deps()
     if (result != 0):
         sys.exit(0)
