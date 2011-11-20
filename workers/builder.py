@@ -48,31 +48,37 @@ def send_dcf_info(dcf_file):
 
 def is_build_required(manifest):
     global package_name
-    package_name = manifest['job_id'].split("_")[0]
-    description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-    print "description_url = " + description_url
-    print "svn_user ="  + os.getenv("SVN_USER")
-    print "svn_pass = " + os.getenv("SVN_PASS")
-    try:
+    if (is_svn_package):
+        package_name = manifest['job_id'].split("_")[0]
+        description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
+        print "description_url = " + description_url
+        print "svn_user ="  + os.getenv("SVN_USER")
+        print "svn_pass = " + os.getenv("SVN_PASS")
+        try:
         
-        description = subprocess.Popen(["curl", "-k", "-s", 
-            "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
-            description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
-    except:
-        print "Unexpected error:", sys.exc_info()[0]
+            description = subprocess.Popen(["curl", "-k", "-s", 
+                "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+                description_url], stdout=subprocess.PIPE).communicate()[0] # todo - handle it if description does not exist
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
 
-    print "debug -- description ="
-    print description
-    print "description length = %d" % len(description)
+        print "debug -- description ="
+        print description
+        print "description length = %d" % len(description)
     
-    dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
-    send_dcf_info(dcf_file)
+        dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
+        send_dcf_info(dcf_file)
     
-    if ("force" in manifest.keys()):
-        if (manifest['force'] == True):
-            return(True)
+        if ("force" in manifest.keys()):
+            if (manifest['force'] == True):
+                return(True)
 
-    svn_version = dcf_file.getValue("Version")
+        svn_version = dcf_file.getValue("Version")
+    else:
+        tmp = manifest["svn_url"].split("/")
+        pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
+        svn_version = pkgname.split("_")[1]
+        
             
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
