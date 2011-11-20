@@ -48,7 +48,7 @@ def send_dcf_info(dcf_file):
 
 def is_build_required(manifest):
     global package_name
-    if (is_svn_package):
+    if (is_svn_package()):
         package_name = manifest['job_id'].split("_")[0]
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
         print "description_url = " + description_url
