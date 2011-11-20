@@ -367,7 +367,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     flags = "--keep-empty-dirs --no-resave-data"
         
         
-    #flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
+    flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
