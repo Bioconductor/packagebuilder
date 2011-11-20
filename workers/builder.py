@@ -261,11 +261,19 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
+    package_name = tarball.split("_")[0]
     retcode = subprocess.call("tar -zxf %s" % tarball, shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": \
         "untar of tarball completed with status %d" % retcode})
     if (not retcode == 0):
         sys.exit("untar of tarball failed")
+    
+    f = open("%s/DESCRIPTION" % packagename)
+    description = f.read
+    f.close()
+    dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    send_dcf_info(dcf_file)
+    
     
 
 def install_pkg_deps():
@@ -286,7 +294,7 @@ def install_pkg_deps():
       %s %s" % (os.getenv("BBS_R_CMD"), args.strip(), r_script, log)
     send_message({"body": "Installing dependencies...", "status": "preprocessing", "retcode": 0})
     retcode = subprocess.call(cmd, shell=True)
-    send_message({"body": "Result of installing dependencies",
+    send_message({"body": "Result of installing dependencies: %d" % retcode,
       "status": "post_processing", "retcode": retcode})
     return retcode
     
