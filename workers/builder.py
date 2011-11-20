@@ -587,7 +587,7 @@ if __name__ == "__main__":
     if (is_svn_package()):
         svn_export()
     else:
-        extract_tarball():
+        extract_tarball()
         
     result = install_pkg_deps()
     if (result != 0):
