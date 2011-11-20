@@ -598,8 +598,8 @@ if __name__ == "__main__":
     if not (is_build_required):
         pkg_type = 'svn' if (is_svn_package()) else 'tarball'
         send_message({"status": "build_not_required",
-            "body": "Build not required (versions identical in %s and repository)."}\
-                % pkg_type)
+            "body": "Build not required (versions identical in %s and repository)."\
+            % pkg_type})
         send_message({"status": "normal_end", "body": "Build process is ending normally."})
         sys.exit(0)
 
