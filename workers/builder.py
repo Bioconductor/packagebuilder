@@ -322,7 +322,7 @@ def check_package():
     
     pkgname = manifest['job_id'].split("_")[0]
     tarball = os.popen("ls -1 %s_*.tar.gz" % pkgname)
-    cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv['BBS_R_CMD'], \
+    cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
