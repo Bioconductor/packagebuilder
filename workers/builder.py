@@ -268,7 +268,7 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     if (not retcode == 0):
         sys.exit("untar of tarball failed")
     
-    f = open("%s/DESCRIPTION" % packagename)
+    f = open("%s/DESCRIPTION" % package_name)
     description = f.read
     f.close()
     dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
