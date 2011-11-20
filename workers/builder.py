@@ -337,7 +337,7 @@ def check_package():
     out_fh = open(outfile)
     warnings = False
     for line in out_fh:
-        if line.rstrip().endswith("WARNING")
+        if line.rstrip().endswith("WARNING"):
             warnings = True
             break
     out_fh.close()
