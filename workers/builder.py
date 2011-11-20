@@ -238,8 +238,8 @@ def extract_tarball():
     global package_name
     package_name = manifest['job_id'].split("_")[0]
     # first, log in to the tracker and get a cookie
-    cmd = """curl --cookie-jar cookies.txt -d\ 
-'__login_name=%s&__login_password=%s\
+    cmd = """curl --cookie-jar cookies.txt -d\
+ '__login_name=%s&__login_password=%s\
 &__came_from=http://tracker.fhcrc.org/roundup/bioc_submit/\
 &@action=login' \
 http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
