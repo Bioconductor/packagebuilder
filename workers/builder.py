@@ -244,7 +244,7 @@ def extract_tarball():
       "&__came_from=http://tracker.fhcrc.org/roundup/bioc_submit/"
       "&@action=login'"
       "http://tracker.fhcrc.org/roundup/bioc_submit/" % (os.getenv("TRACKER_LOGIN"),
-      os.getenv("TRACKER_PASSWORD")))
+      os.getenv("TRACKER_PASSWORD")), shell=True)
 
     retcode = subprocess.call("curl -O -s --cookie cookies.txt %s" % \
         manifest['svn_url'], shell=True)
