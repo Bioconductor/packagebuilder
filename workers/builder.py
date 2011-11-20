@@ -629,7 +629,7 @@ if __name__ == "__main__":
         if warnings:
             body = "Build completed with warnings."
         else:
-            body = "All build processes have finished successfully."
+            body = "Build was successfull."
         send_message({"status": "complete", "result": result, "body": body, "warnings": warnings})
     else:
         send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
