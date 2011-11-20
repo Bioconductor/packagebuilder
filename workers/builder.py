@@ -239,7 +239,8 @@ def extract_tarball():
     package_name = manifest['job_id'].split("_")[0]
     extract_path = os.path.join(working_dir, package_name)
     retcode = subprocess.call("curl -O -s --user %s:%s %s" % \
-        (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"), manifest['svn_url']))
+        (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"),
+        manifest['svn_url']), shell=True)
     send_message({"status": "curl_tarball_result", "result": retcode, "body": \
         "curl of tarball completed with status %d" % retcode})
     if (not retcode == 0):
@@ -247,7 +248,7 @@ def extract_tarball():
     
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
-    retcode = subprocess.call("tar -zxf %s" % tarball)
+    retcode = subprocess.call("tar -zxf %s" % tarball, shell=True)
     send_message({"status": "untar_tarball_result", "result": retcode, "body": \
         "untar of tarball completed with status %d" % retcode})
     if (not retcode == 0):
