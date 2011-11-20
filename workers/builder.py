@@ -47,6 +47,10 @@ def send_dcf_info(dcf_file):
         "maintainer": dcf_file.getValue("Maintainer"), "version": dcf_file.getValue("Version")})
 
 def is_build_required(manifest):
+    if ("force" in manifest.keys()):
+        if (manifest['force'] == True):
+            return(True)
+
     global package_name
     package_name = manifest['job_id'].split("_")[0]
     if (is_svn_package()):
@@ -69,9 +73,6 @@ def is_build_required(manifest):
         dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
         send_dcf_info(dcf_file)
     
-        if ("force" in manifest.keys()):
-            if (manifest['force'] == True):
-                return(True)
 
         svn_version = dcf_file.getValue("Version")
     else:
