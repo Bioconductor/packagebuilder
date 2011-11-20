@@ -584,7 +584,7 @@ def is_svn_package():
     return False
     
 def check_package():
-    
+    pass
 
 
 ## Main namespace. execution starts here.
