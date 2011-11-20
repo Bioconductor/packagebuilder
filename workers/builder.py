@@ -547,7 +547,7 @@ def is_valid_url():
     return True
     
 def is_svn_package():
-    if (manifest['svn_url'].lower().startsWith("https://hedgehog.fhcrc.org")):
+    if (manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
         return True
     return False
     
