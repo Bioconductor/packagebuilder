@@ -116,10 +116,15 @@ def is_build_required(manifest):
     return(svn_version != repository_version)
 
 
-def tail(filename):
+def tail(filename, checking):
     global thread_is_done
     global message_sequence
     prevsize = 0
+    if (checking):
+        status = "checking"
+    else:
+        status = "building"
+
     while 1:
         time.sleep(0.2)
         #print ".",
@@ -136,7 +141,7 @@ def tail(filename):
             f.close()
             print bytes,
             sys.stdout.flush()
-            send_message({"status": "building", "sequence": message_sequence, "body": bytes})
+            send_message({"status": status, "sequence": message_sequence, "body": bytes})
             prevsize = st.st_size
             thread_is_done = True
             print "Thread says I'm done"
@@ -151,7 +156,7 @@ def tail(filename):
             f.close()
             print bytes,
             sys.stdout.flush()
-            send_message({"status": "building", "sequence": message_sequence, "body": bytes})
+            send_message({"status": status, "sequence": message_sequence, "body": bytes})
             message_sequence += 1
             prevsize = st.st_size
 
@@ -303,7 +308,48 @@ def install_pkg_deps():
     return retcode
     
 
-def build_package():
+def check_package():
+    outfile = "Rcheck.out"
+    if (os.path.exists(outfile)):
+        os.remove(outfile)
+
+    out_fh = open(outfile, "w")
+    start_time = datetime.datetime.now()
+    thread.start_new(tail,(outfile, True,))
+    stop_thread = False
+    thread_is_done = False
+    message_sequence = 1
+    
+    pkgname = manifest['job_id'].split("_")[0]
+    tarball = os.popen("ls -1 %s_*.tar.gz" % pkgname)
+    cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv['BBS_R_CMD'],
+      tarball)
+    retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    stop_time = datetime.datetime.now()
+    elapsed_time = str(stop_time - start_time)
+    stop_thread = True # tell thread to stop
+    out_fh.close()
+    
+    while thread_is_done == False: pass # wait till thread tells us to stop
+    print "Done"
+
+    # check for warnings
+    out_fh = open(outfile)
+    warnings = False
+    for line in out_fh:
+        if line.lower().startswith("warning:"):
+            warnings = True
+            break
+    out_fh.close()
+
+    send_message({"status": "check_complete", "result_code": retcode, "warnings": warnings,
+        "body": "Check completed with status %d" % retcode, "elapsed_time": elapsed_time})
+        
+        
+    return (retcode)
+    
+
+def build_package(): # todo - refactor to allow either source or binary builds
     global stop_thread
     global message_sequence
     global thread_is_done
@@ -311,7 +357,7 @@ def build_package():
     stop_thread = False
     thread_is_done = False
     message_sequence = 1
-
+    
 
 
     outfile = "R.out"
@@ -325,7 +371,7 @@ def build_package():
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    thread.start_new(tail,(outfile,))
+    thread.start_new(tail,(outfile, False,))
     if (pkg_type == "source"):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
@@ -583,8 +629,6 @@ def is_svn_package():
         return True
     return False
     
-def check_package():
-    pass
 
 
 ## Main namespace. execution starts here.
