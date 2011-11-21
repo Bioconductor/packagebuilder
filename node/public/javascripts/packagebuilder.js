@@ -148,6 +148,9 @@ jQuery(function(){
         case 'starting_check':
             handleStartingCheck(obj);
             break;
+        case 'check_complete':
+            handleCheckComplete(obj);
+            break;
         case 'starting_buildbin':
             handleStartingBuildBin(obj);
             break;
@@ -240,7 +243,7 @@ var handleEvent = function(event, node, stage) {
         
     log("in handleEvent, node = " + node + ", event = " + event, " stage = " + stage);
     jQuery(selector).removeClass("OK ERROR WARNINGS IN_PROGRESS skipped TIMEOUT");
-    msg = "&nbsp;&nbsp;" + event.replace(/_/g, " ") + "&nbsp;&nbsp;";
+    msg = "&nbsp;&nbsp;" + event.replace(/_/g, " ") + "&nbsp;&nbsp;"; //?
     jQuery(selector).addClass(event);
     jQuery(selector).html(msg);
     
@@ -344,19 +347,35 @@ var handleInvalidUrl = function(message) {
 var handleStartingCheck = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
-    jQuery("#" + nodeName + "_check_event").html("&nbsp;IN&nbsp;PROGRESS&nbsp;");
+    handleEvent("IN PROGRESS", nodeName, "check") 
 }
 
 handleStartingBuildBin = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
-    jQuery("#" + nodeName + "_buildbin_event").html("&nbsp;IN&nbsp;PROGRESS&nbsp;");
+    handleEvent("IN PROGRESS", nodeName, "buildbin")
 }
 
 handleSkipBuildBin = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
+    handleEvent("skipped", nodeName, "buildbin");
+}
+
+handleCheckComplete = function(message) {
+    var nodeName = message['builder_id'];
+    // todo add time
     jQuery("#" + nodeName + "_buildbin_event").html("&nbsp;IN&nbsp;SKIPPED&nbsp;");
+    var status;
+    if (message['result_code'] == 0) {
+        if (message['warnings']) {
+            status = "warnings"
+        } else {
+            status = "ok"
+        }
+    } else {
+        status = "error";
+    }
     handleEvent("skipped", nodeName, "buildbin");
 }
 
