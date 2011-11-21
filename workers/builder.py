@@ -350,9 +350,9 @@ def check_package():
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     out_fh.close()
-    stop_thread = True # tell thread to stop
+    #stop_thread = True # tell thread to stop
 
-    background.join()
+    #background.join()
     
     #while thread_is_done == False:
     #    print ("waiting for thread to tell us to stop...")
