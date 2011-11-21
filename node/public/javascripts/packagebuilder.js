@@ -347,13 +347,13 @@ var handleInvalidUrl = function(message) {
 var handleStartingCheck = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
-    handleEvent("IN PROGRESS", nodeName, "check") 
+    handleEvent("IN_PROGRESS", nodeName, "check") 
 }
 
 handleStartingBuildBin = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
-    handleEvent("IN PROGRESS", nodeName, "buildbin")
+    handleEvent("IN_PROGRESS", nodeName, "buildbin")
 }
 
 handleSkipBuildBin = function(message) {
