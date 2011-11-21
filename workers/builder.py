@@ -46,7 +46,7 @@ class Tailer(threading.Thread):
                 f.close()
                 print bytes,
                 sys.stdout.flush()
-                send_message({"status": status, "sequence": message_sequence, "body": bytes})
+                send_message({"status": status, "sequence": self.message_sequence, "body": bytes})
                 prevsize = st.st_size
                 #thread_is_done = True
                 print "Thread says I'm done %s" % status
@@ -63,8 +63,8 @@ class Tailer(threading.Thread):
                 f.close()
                 print bytes,
                 sys.stdout.flush()
-                send_message({"status": status, "sequence": message_sequence, "body": bytes})
-                message_sequence += 1
+                send_message({"status": status, "sequence": self.message_sequence, "body": bytes})
+                self.message_sequence += 1
                 prevsize = st.st_size
 
 
