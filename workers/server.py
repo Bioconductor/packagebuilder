@@ -23,7 +23,8 @@ except:
 
 stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
 
-
+os.environ['TRACKER_LOGIN'] = 'pkgbuild'
+os.environ['TRACKER_PASSWORD'] = 'buildpkg'
 
 
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
