@@ -480,7 +480,6 @@ def svn_info():
 def propagate_package():
     global build_product
     global repos
-    global pkg_type
     global url
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     ext = BBScorevars.pkgType2FileExt[pkg_type]
