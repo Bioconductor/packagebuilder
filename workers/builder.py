@@ -405,7 +405,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     background = Tailer(outfile, buildmsg)
     background.start()
     
-    if (not source_build):
+    if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
         #if builder_id == "cyclonus":
