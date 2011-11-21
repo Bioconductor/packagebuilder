@@ -197,8 +197,8 @@ var gotNewNode = function(message) {
 	s += '<span id="'+nodeName+'_buildstatus"><a href="#' +nodeName+'_anchor"><SPAN class="IN_PROGRESS ' + nodeName + '_EVENT">&nbsp;IN&nbsp;PROGRESS&nbsp;</SPAN></a></span></TD>\n';
 	s += '</tr>\n';
 
-    s = jQuery("#appendMe").html()
-    jQuery("#nodeinfo_append_to_me").append(s);
+    s = jQuery("#appendMe").html().replace(/NODENAME/g, nodeName);
+    s = s.replace("NODENAME", )
     
     var summaryTemplate = jQuery("#summary_template").html();
     
