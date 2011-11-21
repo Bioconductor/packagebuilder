@@ -22,17 +22,16 @@ global stop_buildbin_thread
 stop_buildsrc_thread = stop_check_thread = stop_buildbin_thread = False
 
 class Tailer(threading.Thread):
-    def __init__(self, filename, phase):
+    def __init__(self, filename, status):
         threading.Thread.__init__(self)
         self.filename = filename
-        self.phase = phase
+        self.status = status
         self.message_sequence = 1
     def run(self):
         prevsize = 0
-        status = self.phase
         while 1:
             time.sleep(0.2)
-            print ("in tail loop (%s)" % self.phase)
+            print ("in tail loop (%s)" % self.status)
             #print ".",
             if not os.path.isfile(self.filename):
                 continue
@@ -41,12 +40,18 @@ class Tailer(threading.Thread):
                 continue
                 
             stop_flag = None
-            if (self.phase == "checking"):
+            if (self.status == "checking"):
                 stop_flag = stop_check_thread
-            elif (self.phase == "building"):
+                print "stop_check_thread: %s" % stop_check_thread
+                print "stop_flag: %s" % stop_flag
+            elif (self.status == "building"):
                 stop_flag = stop_buildsrc_thread
-            elif (self.phase == "buildbin"):
+                print "stop_buildsrc_thread = %s" % stop_buildsrc_thread
+                print "stop_flag: %s" % stop_flag
+            elif (self.status == "buildbin"):
                 stop_flag = stop_buildbin_thread
+                print "stop_buildbin_thread: %s" % stop_buildbin_thread
+                print "stop_flag: %s" % stop_flag
             
             
             if stop_flag == True:
@@ -58,10 +63,10 @@ class Tailer(threading.Thread):
                 f.close()
                 print bytes,
                 sys.stdout.flush()
-                send_message({"status": status, "sequence": self.message_sequence, "body": bytes})
+                send_message({"status": self.status, "sequence": self.message_sequence, "body": bytes})
                 prevsize = st.st_size
                 #thread_is_done = True
-                print "Thread says I'm done %s" % status
+                print "Thread says I'm done %s" % self.status
                 break # not needed here but might be needed if program was to continue doing other stuff
                 # and we wanted the thread to exit
             
@@ -75,7 +80,7 @@ class Tailer(threading.Thread):
                 f.close()
                 print bytes,
                 sys.stdout.flush()
-                send_message({"status": status, "sequence": self.message_sequence, "body": bytes})
+                send_message({"status": self.status, "sequence": self.message_sequence, "body": bytes})
                 self.message_sequence += 1
                 prevsize = st.st_size
 
@@ -352,8 +357,6 @@ def check_package():
       tarball)
     background = Tailer(outfile, "checking")
     background.start()
-    #thread_id = thread.start_new_thread(tail2,(outfile, True,))
-    #print("thread_id in check_package(): %d" % thread_id)
     pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     pid = pope.pid
     
@@ -366,10 +369,6 @@ def check_package():
 
     background.join()
     
-    #while thread_is_done == False:
-    #    print ("waiting for thread to tell us to stop...")
-    #    #pass # wait till thread tells us to stop
-    #print "Done checking"
     
     # check for warnings
     out_fh = open(outfile)
@@ -409,8 +408,6 @@ def build_package(): # todo - refactor to allow either source or binary builds
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    #thread_id = thread.start_new_thread(tail,(outfile, False,))
-    #print("thread_id in build_package(): %d" % thread_id)
     background = Tailer(outfile, "building")
     background.start()
     
@@ -432,7 +429,6 @@ def build_package(): # todo - refactor to allow either source or binary builds
     stop_buildsrc_thread = True # tell thread to stop
     out_fh.close()
     
-    #while thread_is_done == False: pass # wait till thread tells us to stop
     background.join()
     print "Done"
     
