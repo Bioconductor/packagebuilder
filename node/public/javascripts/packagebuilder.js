@@ -142,6 +142,9 @@ jQuery(function(){
         case 'build_complete':
             handleBuildComplete(obj);
             break;
+        case 'buildbin_complete':
+            handleBuildBinComplete(obj);
+            break;
         case 'invalid_url':
             handleInvalidUrl(obj);
             break;
@@ -296,7 +299,37 @@ var handleBuildComplete = function(message) {
     jQuery("#" + nodeName + "_ended_at").html(message['time']);
     jQuery("#" + nodeName + "_elapsed_time").html(message['elapsed_time']);
     jQuery("#" + nodeName + "_ret_code").html(message['result_code']);
+    var status;
+    if (message['result_code'] == 0) {
+        if (message['warnings']) {
+            status = "WARNINGS";
+        } else {
+            status = "OK";
+        }
+    } else {
+        status = "ERROR";
+    }
+    handleEvent(status, nodeName, "build")
 }
+
+var handleBuildBinComplete = function(message) {
+    var nodeName = message['builder_id'];
+    jQuery("#" + nodeName + "_ended_at").html(message['time']);
+    jQuery("#" + nodeName + "_elapsed_time").html(message['elapsed_time']);
+    jQuery("#" + nodeName + "_ret_code").html(message['result_code']);
+    var status;
+    if (message['result_code'] == 0) {
+        if (message['warnings']) {
+            status = "WARNINGS";
+        } else {
+            status = "OK";
+        }
+    } else {
+        status = "ERROR";
+    }
+    handleEvent(status, nodeName, "buildbin")
+}
+
 
 var handlePostProcessing = function(message) {
     var nodeName = message['builder_id'];

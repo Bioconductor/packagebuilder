@@ -339,6 +339,7 @@ def check_package():
             break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
+    cmd = "ls" # COMMENT THIS OUT!!!!!!
     background = Tailer(outfile, "checking")
     background.start()
     pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
@@ -447,7 +448,13 @@ def build_package(source_build): # todo - refactor to allow either source or bin
             break
     out_fh.close()
     
-    send_message({"status": "build_complete", "result_code": retcode, "warnings": warnings,
+    complete_status = None
+    if (source_build):
+        complete_status = "build_complete"
+    else:
+        complete_status = "buildbin_complete"
+    
+    send_message({"status": complete_status, "result_code": retcode, "warnings": warnings,
         "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
         
     
