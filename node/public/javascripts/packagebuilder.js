@@ -185,6 +185,7 @@ var gotNewNode = function(message) {
     
     //todo- grab this from html file instead of constructing string in js
 	//<!-- change to e.g. nodeinfo_lamb2 -->
+	/*
 	var s = "";
 	s += '<tr id="nodeinfo_' + nodeName + '">\n';
 	//<!-- class should be e.g. "node lamb2" -->
@@ -196,7 +197,8 @@ var gotNewNode = function(message) {
 	s += '&nbsp;</TD><TD class="status ' + nodeName + ' buildsrc">\n';
 	s += '<span id="'+nodeName+'_buildstatus"><a href="#' +nodeName+'_anchor"><SPAN class="IN_PROGRESS ' + nodeName + '_EVENT">&nbsp;IN&nbsp;PROGRESS&nbsp;</SPAN></a></span></TD>\n';
 	s += '</tr>\n';
-
+    */
+    
     s = jQuery("#appendMe").html().replace(/NODENAME/g, nodeName);
     s = s.replace("<tr>", "");
     s - s.replace("<tbody>", "");
@@ -205,6 +207,7 @@ var gotNewNode = function(message) {
     
     
     jQuery("#nodeinfo_append_to_me").append(s);
+    jQuery("#nodeinfo_" + nodeName).html(os + "/" + "arch");
     
     var summaryTemplate = jQuery("#summary_template").html();
     
