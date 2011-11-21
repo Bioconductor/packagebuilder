@@ -124,7 +124,7 @@ class Tailer(threading.Thread):
         self.checking = checking
     def run(self):
         prevsize = 0
-        if (checking):
+        if (self.checking):
             status = "checking"
         else:
             status = "building"
