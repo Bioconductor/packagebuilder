@@ -147,6 +147,7 @@ def tail(filename, checking):
             prevsize = st.st_size
             thread_is_done = True
             print "Thread says I'm done %s" % status
+            thread.exit()
             break # not needed here but might be needed if program was to continue doing other stuff
             # and we wanted the thread to exit
         
