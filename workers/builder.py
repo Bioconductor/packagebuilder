@@ -17,7 +17,7 @@ from stompy import Stomp
 
 
 class Tailer(threading.Thread):
-    def __init(self, filename, checking):
+    def __init__(self, filename, checking):
         threading.Thread.__init__(self)
         self.filename = filename
         self.checking = checking
