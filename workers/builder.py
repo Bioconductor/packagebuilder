@@ -29,13 +29,7 @@ class Tailer(threading.Thread):
         self.message_sequence = 1
     def run(self):
         prevsize = 0
-        status = None
-        if (self.phase == "check"):
-            status = "checking"
-        elif (self.phase == "buildsrc"):
-            status = "building source"
-        elif (self.phase == "buildbin"):
-            status = "building bin"
+        status = self.phase
         while 1:
             time.sleep(0.2)
             print ("in tail loop (%s)" % self.phase)
@@ -356,7 +350,7 @@ def check_package():
             break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
-    background = Tailer(outfile, True)
+    background = Tailer(outfile, "checking")
     background.start()
     #thread_id = thread.start_new_thread(tail2,(outfile, True,))
     #print("thread_id in check_package(): %d" % thread_id)
@@ -417,7 +411,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     start_time = datetime.datetime.now()
     #thread_id = thread.start_new_thread(tail,(outfile, False,))
     #print("thread_id in build_package(): %d" % thread_id)
-    background = Tailer(outfile, False)
+    background = Tailer(outfile, "build")
     background.start()
     
     if (pkg_type == "source"):
