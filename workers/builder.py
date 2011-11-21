@@ -146,7 +146,7 @@ def tail(filename, checking):
             send_message({"status": status, "sequence": message_sequence, "body": bytes})
             prevsize = st.st_size
             thread_is_done = True
-            print "Thread says I'm done %s" % checking
+            print "Thread says I'm done %s" % status
             break # not needed here but might be needed if program was to continue doing other stuff
             # and we wanted the thread to exit
         
@@ -332,7 +332,8 @@ def check_package():
             break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
-    thread.start_new(tail,(outfile, True,))
+    thread_id = thread.start_new_thread(tail,(outfile, True,))
+    print("thread_id in check_package(): %d" % thread_id)
     retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
@@ -380,7 +381,9 @@ def build_package(): # todo - refactor to allow either source or binary builds
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    thread.start_new(tail,(outfile, False,))
+    thread_id = thread.start_new_thread(tail,(outfile, False,))
+    print("thread_id in build_package(): %d" % thread_id)
+    
     if (pkg_type == "source"):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
