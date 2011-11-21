@@ -21,6 +21,7 @@ class Tailer(threading.Thread):
         threading.Thread.__init__(self)
         self.filename = filename
         self.checking = checking
+        self.message_sequence = 1
     def run(self):
         prevsize = 0
         if (self.checking):
@@ -47,7 +48,7 @@ class Tailer(threading.Thread):
                 sys.stdout.flush()
                 send_message({"status": status, "sequence": message_sequence, "body": bytes})
                 prevsize = st.st_size
-                thread_is_done = True
+                #thread_is_done = True
                 print "Thread says I'm done %s" % status
                 break # not needed here but might be needed if program was to continue doing other stuff
                 # and we wanted the thread to exit
