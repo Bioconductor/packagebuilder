@@ -129,6 +129,7 @@ SPAN.OK {
 }
 SPAN.skipped {
     font-weight: bold;
+    color:white;
 }
 SPAN.IN_PROGRESS {
     font-weight: bold;
@@ -156,6 +157,10 @@ TABLE.summary TD.summary.OK {
 .IN_PROGRESS,
 TABLE.summary TD.summary.IN_PROGRESS {
     background: black;
+}
+.skipped,
+TABLE.summary TD.summary.skipped {
+    background: #3399FF;
 }
 
 
