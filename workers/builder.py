@@ -150,8 +150,8 @@ def tail(filename, checking):
             break # not needed here but might be needed if program was to continue doing other stuff
             # and we wanted the thread to exit
         
-        if (st.st_size > 0)
-            print ("st.st_size = %d, prevsize = %s", % (st.st_size, prevsize))
+        if (st.st_size > 0):
+            print("st.st_size = %d, prevsize = %s" % (st.st_size, prevsize))
         if (st.st_size > 0) and (st.st_size > prevsize):
             num_bytes_to_read = st.st_size - prevsize
             f = open(filename, 'r')
