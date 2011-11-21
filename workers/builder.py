@@ -44,6 +44,8 @@ class Tailer(threading.Thread):
             st = os.stat(self.filename)
             if st.st_size == 0:
                 continue
+                
+            stop_flag = False
             if (self.phase == "check"):
                 stop_flag = stop_check_thread
             elif (self.phase == "buildsrc"):
