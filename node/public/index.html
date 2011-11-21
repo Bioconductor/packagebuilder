@@ -68,11 +68,11 @@
 		<BR> 
 		<TABLE class="mainrep"> 
 		<TR class="odd ok header">
-			<TD style="stagecmd buildsrc">Hostname</TD>
-			<TD style="stagecmd buildsrc">OS&nbsp;/&nbsp;Arch</TD>
-			<TD class="stagecmd buildsrc">BUILD</TD>
-			<TD class="stagecmd checksrc">CHECK</TD>
-			<TD class="stagecmd buildbin">BUILD BIN</TD>
+			<TD>Hostname</TD>
+			<TD>OS&nbsp;/&nbsp;Arch</TD>
+			<TD>BUILD</TD>
+			<TD>CHECK</TD>
+			<TD>BUILD BIN</TD>
 		</TR>
 		<tr id="nodeinfo_append_to_me">
 		</tr>
@@ -141,6 +141,26 @@
                         </a>
                     </span>
                 </td>
+
+                <td class="status NODENAME checksrc">
+                    <span id="NODENAME_checkstatus">
+                        <a href="#NODENAME_anchor">
+                            <span id="NODENAME_check_event" class="IN_PROGRESS NODENAME_EVENT">
+                            </span>
+                        </a>
+                    </span>
+                </td>
+
+                <td class="status NODENAME buildbin">
+                    <span id="NODENAME_buildbinstatus">
+                        <a href="#NODENAME_anchor">
+                            <span id="NODENAME_buildbin_event" class="IN_PROGRESS NODENAME_EVENT">
+                            </span>
+                        </a>
+                    </span>
+                </td>
+
+
             </table>
 	    </div>
 		
