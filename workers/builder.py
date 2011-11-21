@@ -610,9 +610,14 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
 def update_packages_file():
     global repos
     
+    
     if (manifest['repository'] == 'course'):
+        repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
+        repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor-test.org/scratch-repos/")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['r_version']
     
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
