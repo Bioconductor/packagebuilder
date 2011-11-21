@@ -615,6 +615,7 @@ def update_packages_file():
     elif (manifest['repository'] == 'scratch'):
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['r_version']
     
+    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
     command = \
