@@ -190,7 +190,7 @@ TABLE.mainrep .node {
     text-align: center;
 }
 TABLE.mainrep .stagecmd {
-    width: 120px;
+    /* width: 120px; */
 }
 
 TABLE.mainrep TR.header TD,
