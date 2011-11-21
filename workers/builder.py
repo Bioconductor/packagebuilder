@@ -337,7 +337,7 @@ def check_package():
             break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
-    background = Tailer(out_fh, True)
+    background = Tailer(outfile, True)
     background.start()
     #thread_id = thread.start_new_thread(tail2,(outfile, True,))
     #print("thread_id in check_package(): %d" % thread_id)
@@ -394,7 +394,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     start_time = datetime.datetime.now()
     #thread_id = thread.start_new_thread(tail,(outfile, False,))
     #print("thread_id in build_package(): %d" % thread_id)
-    background = Tailer(out_fh, False)
+    background = Tailer(outfile, False)
     background.start()
     
     if (pkg_type == "source"):
