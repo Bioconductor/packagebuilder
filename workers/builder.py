@@ -315,10 +315,10 @@ def check_package():
 
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    thread.start_new(tail,(outfile, True,))
     stop_thread = False
     thread_is_done = False
     message_sequence = 1
+
     
     pkgname = manifest['job_id'].split("_")[0]
     files = os.listdir(os.getcwd())
@@ -328,6 +328,7 @@ def check_package():
             break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
+    thread.start_new(tail,(outfile, True,))
     retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
