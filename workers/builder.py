@@ -379,7 +379,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
         buildmsg = "building"
     else:
         buildmsg = "buildingbin"
-
+    print("in build_package, source_build is %s and buildmsg is %s." % (source_build, buildmsg))
     
     if ((not source_build) and (pkgType == "source")):
         send_message({"status": buildmsg, "body": "skipped"})
