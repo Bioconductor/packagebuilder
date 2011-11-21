@@ -145,6 +145,15 @@ jQuery(function(){
         case 'invalid_url':
             handleInvalidUrl(obj);
             break;
+        case 'starting_check':
+            handleStartingCheck(obj);
+            break;
+        case 'starting_buildbin':
+            handleStartingBuildBin(obj);
+            break;
+        case 'skip_buildbin':
+            handleSkipBuildBin(obj);
+            break;
         default:
             break;
     }
@@ -221,10 +230,15 @@ var gotNewNode = function(message) {
 }
 
 
-var handleEvent = function(event, node) {
+var handleEvent = function(event, node, stage) {
     var msg;
-    var selector = "." + node + "_EVENT";
-    log("in handleEvent, node = " + node + ", event = " + event);
+    var selector;
+    if (stage == "build")
+        selector = "." + node + "_EVENT";
+    else
+        selector = "." + node + "_" + stage.toUpperCase() + "_EVENT";
+        
+    log("in handleEvent, node = " + node + ", event = " + event, " stage = " + stage);
     jQuery(selector).removeClass("OK ERROR WARNINGS IN_PROGRESS skipped TIMEOUT");
     msg = "&nbsp;&nbsp;" + event.replace(/_/g, " ") + "&nbsp;&nbsp;";
     jQuery(selector).addClass(event);
@@ -239,8 +253,8 @@ var handleBuildNotRequired = function(message) {
     var script = 'source("http://bioconductor.org/course-packages/courseInstall.R")\n' +
         'courseInstall("' + packageName + '")';
     selector = "#" + nodeName + "_install_command";
-    jQuery(selector).html(script); //dante
-    handleEvent("skipped", nodeName);
+    jQuery(selector).html(script); 
+    handleEvent("skipped", nodeName, "build");
 }
 
 var handleBuilding = function(message) {
@@ -266,9 +280,9 @@ var handleBuildingBin = function(message) {
 var handleComplete = function(message) {
     var nodeName = message['builder_id'];
     if (message['warnings'] == true) {
-        handleEvent("WARNINGS", nodeName)
+        handleEvent("WARNINGS", nodeName, "build");
     } else {
-        handleEvent("OK", nodeName);
+        handleEvent("OK", nodeName, "build");
     }
 }
 
@@ -282,7 +296,7 @@ var handleBuildComplete = function(message) {
 var handlePostProcessing = function(message) {
     var nodeName = message['builder_id'];
     if (message['retcode'] != 0) {
-        handleEvent("ERROR", nodeName);
+        handleEvent("ERROR", nodeName, "build");
         message['body'] = "ERROR during step: " + message['body'];
     }
     selector = "#" + nodeName + "_post_processing";
@@ -311,7 +325,7 @@ var handlePostProcessing = function(message) {
 
 var handleBuildFailed = function(message) {
     var nodeName = message['builder_id'];
-    handleEvent("ERROR", nodeName);
+    handleEvent("ERROR", nodeName, "build");
 }
 
 var handleBuildStart = function(message) {
@@ -326,6 +340,26 @@ var handleInvalidUrl = function(message) {
     jQuery("#error").html(message['body']);
     jQuery("#initially_hidden").hide();
 }
+
+var handleStartingCheck = function(message) {
+    var nodeName = message['builder_id'];
+    // todo add time
+    jQuery("#" + nodeName + "_check_event").html("&nbsp;IN&nbsp;PROGRESS&nbsp;");
+}
+
+handleStartingBuildBin = function(message) {
+    var nodeName = message['builder_id'];
+    // todo add time
+    jQuery("#" + nodeName + "_buildbin_event").html("&nbsp;IN&nbsp;PROGRESS&nbsp;");
+}
+
+handleSkipBuildBin = function(message) {
+    var nodeName = message['builder_id'];
+    // todo add time
+    jQuery("#" + nodeName + "_buildbin_event").html("&nbsp;IN&nbsp;SKIPPED&nbsp;");
+    handleEvent("skipped", nodeName, "buildbin");
+}
+
 
 var setupUI = function() {
     jQuery("#summary_template").hide();

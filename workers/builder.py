@@ -321,6 +321,7 @@ def install_pkg_deps():
 
 
 def check_package():
+    send_message({"status": "starting_check", "body": ""})
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
@@ -379,11 +380,13 @@ def build_package(source_build): # todo - refactor to allow either source or bin
         buildmsg = "building"
     else:
         buildmsg = "buildingbin"
-    print("in build_package, source_build is %s and buildmsg is %s." % (source_build, buildmsg))
     
     if ((not source_build) and (pkgType == "source")):
-        send_message({"status": buildmsg, "body": "skipped"})
+        send_message({"status": "skip_buildbin", "body": "skipped"})
         return
+        
+    if (not source_build):
+        send_message({"status": "starting_buildbin", "body": ""})
         
     global message_sequence
     global warnings
