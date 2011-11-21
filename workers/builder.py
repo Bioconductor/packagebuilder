@@ -342,7 +342,11 @@ def check_package():
     background.start()
     #thread_id = thread.start_new_thread(tail2,(outfile, True,))
     #print("thread_id in check_package(): %d" % thread_id)
-    retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    pope = Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    pid = pope.pid
+    
+    retcode = pope.wait()
+    
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     out_fh.close()
