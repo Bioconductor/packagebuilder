@@ -374,7 +374,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
 
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
 
-
+    buildmsg = None
     if (source_build):
         buildmsg = "building"
     else:
@@ -402,6 +402,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
     buildmsg = None
+    print("starting build tailer with message %s." % buildmsg)
     background = Tailer(outfile, buildmsg)
     background.start()
     
@@ -415,6 +416,8 @@ def build_package(source_build): # todo - refactor to allow either source or bin
             #os.mkdir("libdir")
         #r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
         #  libdir, package_name)
+        
+        # todo, if mac, run build_universal script
         r_cmd = "%s CMD INSTALL --build %s" % (os.getenv("BBS_R_CMD"),
           package_name)
     status = None
