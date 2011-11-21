@@ -200,10 +200,10 @@ var gotNewNode = function(message) {
     */
     
     s = jQuery("#appendMe").html().replace(/NODENAME/g, nodeName);
-    s = s.replace("<tr>", "");
-    s - s.replace("<tbody>", "");
-    s = s.replace("</tr>", "");
-    s - s.replace("</tbody>", "");
+    s = s.replace(/<tr>/gi, "");
+    s - s.replace(/<tbody>/gi, "");
+    s = s.replace(/<\/tr>/gi, "");
+    s - s.replace(/<\/tbody>/gi, "");
     
     
     jQuery("#nodeinfo_append_to_me").append(s);
