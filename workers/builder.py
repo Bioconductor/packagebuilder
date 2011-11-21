@@ -382,7 +382,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     else:
         buildmsg = "buildingbin"
     
-    if ((not source_build) and (pkgType == "source")):
+    if ((not source_build) and (pkg_type == "source")):
         send_message({"status": "skip_buildbin", "body": "skipped"})
         return
         
@@ -412,17 +412,17 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        #if builder_id == "cyclonus":
-            #libdir = "C:/Users/pkgbuild/Documents/R/win-library/2.14"
-        #else:
-            #libdir = "libdir"
-            #os.mkdir("libdir")
-        #r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
-        #  libdir, package_name)
+        if builder_id == "cyclonus":
+            libdir = "C:/Users/pkgbuild/Documents/R/win-library/2.14"
+        else:
+            libdir = "libdir"
+            os.mkdir("libdir")
+        r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
+          libdir, package_name)
         
         # todo, if mac, run build_universal script
-        r_cmd = "%s CMD INSTALL --build %s" % (os.getenv("BBS_R_CMD"),
-          package_name)
+        #r_cmd = "%s CMD INSTALL --build %s" % (os.getenv("BBS_R_CMD"),
+        #  package_name)
     status = None
     if (source_build):
         status = "r_cmd"
@@ -725,10 +725,9 @@ if __name__ == "__main__":
     result = build_package(True)
     if (result == 0):
         check_result = check_package()
-        if check_result == 0:
-            buildbin_result = build_package(False)
-            if buildbin_result == 0:
-                propagate_package()
+        buildbin_result = build_package(False)
+        if buildbin_result == 0:
+            propagate_package()
         if (is_build_required):
             update_packages_file()
         if warnings: # todo separate build / check / build bin warnings
