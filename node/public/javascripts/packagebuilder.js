@@ -124,6 +124,9 @@ jQuery(function(){
         case 'checking':
             handleChecking(obj);
             break;
+        case 'buildingbin':
+            handleBuildingBin(obj);
+            break;
         case 'complete':
             handleComplete(obj);
             break;
@@ -251,6 +254,13 @@ var handleChecking = function(message) {
     var selector = "#" + nodeName + "_check_console"
     jQuery(selector).append(message['body']);
 }
+
+var handleBuildingBin = function(message) {
+    var nodeName = message['builder_id'];
+    var selector = "#" + nodeName + "_buildbin_console"
+    jQuery(selector).append(message['body']);
+}
+
 
 
 var handleComplete = function(message) {

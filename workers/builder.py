@@ -51,7 +51,6 @@ class Tailer(threading.Thread):
                 sys.stdout.flush()
                 send_message({"status": self.status, "sequence": self.message_sequence, "body": bytes})
                 prevsize = st.st_size
-                #thread_is_done = True
                 print "Thread says I'm done %s" % self.status
                 break # not needed here but might be needed if program was to continue doing other stuff
                 # and we wanted the thread to exit
@@ -328,8 +327,6 @@ def check_package():
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    stop_thread = False
-    thread_is_done = False
     message_sequence = 1
     
     
@@ -372,13 +369,23 @@ def check_package():
     return (retcode)
 
 
-def build_package(): # todo - refactor to allow either source or binary builds
-    global stop_thread
+def build_package(source_build): # todo - refactor to allow either source or binary builds
+
+    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+
+
+    if (source_build):
+        buildmsg = "building"
+    else:
+        buildmsg = "buildingbin"
+
+    
+    if ((not source_build) and (pkgType == "source")):
+        send_message({"status": buildmsg, "body": "skipped"})
+        return
+        
     global message_sequence
-    global thread_is_done
     global warnings
-    stop_thread = False
-    thread_is_done = False
     message_sequence = 1
 
 
@@ -386,7 +393,6 @@ def build_package(): # todo - refactor to allow either source or binary builds
     outfile = "R.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
-    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     flags = "--keep-empty-dirs --no-resave-data"
         
     
@@ -394,20 +400,28 @@ def build_package(): # todo - refactor to allow either source or binary builds
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    background = Tailer(outfile, "building")
+    buildmsg = None
+    background = Tailer(outfile, buildmsg)
     background.start()
     
-    if (pkg_type == "source"):
+    if (not source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        if builder_id == "cyclonus":
-            libdir = "C:/Users/pkgbuild/Documents/R/win-library/2.14"
-        else:
-            libdir = "libdir"
-            os.mkdir("libdir")
-        r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
-          libdir, package_name)
-    send_message({"status": "r_cmd", "body": r_cmd})
+        #if builder_id == "cyclonus":
+            #libdir = "C:/Users/pkgbuild/Documents/R/win-library/2.14"
+        #else:
+            #libdir = "libdir"
+            #os.mkdir("libdir")
+        #r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
+        #  libdir, package_name)
+        r_cmd = "%s CMD INSTALL --build %s" % (os.getenv("BBS_R_CMD"),
+          package_name)
+    status = None
+    if (source_build):
+        status = "r_cmd"
+    else:
+        status = "r_buildbin_cmd"
+    send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
@@ -696,11 +710,13 @@ if __name__ == "__main__":
     if (result != 0):
         sys.exit(0)
     
-    result = build_package()
+    result = build_package(True)
     if (result == 0):
         check_result = check_package()
         if check_result == 0:
-            propagate_package()
+            buildbin_result = build_package(False)
+            if buildbin_result == 0:
+                propagate_package()
         if (is_build_required):
             update_packages_file()
         if warnings: # todo separate build / check / build bin warnings
