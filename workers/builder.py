@@ -127,6 +127,7 @@ def tail(filename, checking):
 
     while 1:
         time.sleep(0.2)
+        print ("in tail loop")
         print ".",
         if not os.path.isfile(filename):
             continue
@@ -134,6 +135,7 @@ def tail(filename, checking):
         if st.st_size == 0:
             continue
         if stop_thread == True:
+            print ("stop_thread == True")
             num_bytes_to_read = st.st_size - prevsize
             f = open(filename, 'r')
             f.seek(prevsize)
