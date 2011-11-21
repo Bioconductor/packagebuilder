@@ -321,7 +321,11 @@ def check_package():
     message_sequence = 1
     
     pkgname = manifest['job_id'].split("_")[0]
-    tarball = os.popen("ls -1 %s_*.tar.gz" % pkgname)
+    files = os.listdir(os.getcwd())
+    for file in files:
+        if pkgname in file and ".tar.gz" in file:
+            tarball = file
+            break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
     retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
