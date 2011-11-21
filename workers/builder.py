@@ -16,6 +16,58 @@ import platform
 from stompy import Stomp
 
 
+class Tailer(threading.Thread):
+    def __init(self, filename, checking):
+        threading.Thread.__init__(self)
+        self.filename = filename
+        self.checking = checking
+    def run(self):
+        prevsize = 0
+        if (self.checking):
+            status = "checking"
+        else:
+            status = "building"
+        while 1:
+            time.sleep(0.2)
+            print ("in tail loop")
+            #print ".",
+            if not os.path.isfile(self.filename):
+                continue
+            st = os.stat(filename)
+            if st.st_size == 0:
+                continue
+            if stop_thread == True:
+                print ("stop_thread == True")
+                num_bytes_to_read = st.st_size - prevsize
+                f = open(filename, 'r')
+                f.seek(prevsize)
+                bytes = f.read(num_bytes_to_read)
+                f.close()
+                print bytes,
+                sys.stdout.flush()
+                send_message({"status": status, "sequence": message_sequence, "body": bytes})
+                prevsize = st.st_size
+                thread_is_done = True
+                print "Thread says I'm done %s" % status
+                break # not needed here but might be needed if program was to continue doing other stuff
+                # and we wanted the thread to exit
+            
+            if (st.st_size > 0):
+                print("st.st_size = %d, prevsize = %s" % (st.st_size, prevsize))
+            if (st.st_size > 0) and (st.st_size > prevsize):
+                num_bytes_to_read = st.st_size - prevsize
+                f = open(self.filename, 'r')
+                f.seek(prevsize)
+                bytes = f.read(num_bytes_to_read)
+                f.close()
+                print bytes,
+                sys.stdout.flush()
+                send_message({"status": status, "sequence": message_sequence, "body": bytes})
+                message_sequence += 1
+                prevsize = st.st_size
+
+
+
 def send_message(msg, status=None):
     merged_dict = {}
     merged_dict['builder_id'] = builder_id
@@ -116,56 +168,6 @@ def is_build_required(manifest):
     return(svn_version != repository_version)
 
 
-
-class Tailer(threading.Thread):
-    def __init(self, filename, checking):
-        threading.Thread.__init__(self)
-        self.filename = filename
-        self.checking = checking
-    def run(self):
-        prevsize = 0
-        if (self.checking):
-            status = "checking"
-        else:
-            status = "building"
-        while 1:
-            time.sleep(0.2)
-            print ("in tail loop")
-            #print ".",
-            if not os.path.isfile(self.filename):
-                continue
-            st = os.stat(filename)
-            if st.st_size == 0:
-                continue
-            if stop_thread == True:
-                print ("stop_thread == True")
-                num_bytes_to_read = st.st_size - prevsize
-                f = open(filename, 'r')
-                f.seek(prevsize)
-                bytes = f.read(num_bytes_to_read)
-                f.close()
-                print bytes,
-                sys.stdout.flush()
-                send_message({"status": status, "sequence": message_sequence, "body": bytes})
-                prevsize = st.st_size
-                thread_is_done = True
-                print "Thread says I'm done %s" % status
-                break # not needed here but might be needed if program was to continue doing other stuff
-                # and we wanted the thread to exit
-            
-            if (st.st_size > 0):
-                print("st.st_size = %d, prevsize = %s" % (st.st_size, prevsize))
-            if (st.st_size > 0) and (st.st_size > prevsize):
-                num_bytes_to_read = st.st_size - prevsize
-                f = open(self.filename, 'r')
-                f.seek(prevsize)
-                bytes = f.read(num_bytes_to_read)
-                f.close()
-                print bytes,
-                sys.stdout.flush()
-                send_message({"status": status, "sequence": message_sequence, "body": bytes})
-                message_sequence += 1
-                prevsize = st.st_size
 
 
 def setup():
