@@ -117,8 +117,7 @@ def is_build_required(manifest):
 
 
 def tail(filename, checking):
-    print("in tail")
-    global thread_is_done
+\    global thread_is_done
     global message_sequence
     prevsize = 0
     if (checking):
@@ -128,7 +127,7 @@ def tail(filename, checking):
 
     while 1:
         time.sleep(0.2)
-        #print ".",
+        print ".",
         if not os.path.isfile(filename):
             continue
         st = os.stat(filename)
