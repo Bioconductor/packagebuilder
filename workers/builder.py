@@ -370,6 +370,7 @@ def check_package():
 
 
 def build_package(source_build): # todo - refactor to allow either source or binary builds
+    global pkg_type
 
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
 
@@ -597,7 +598,6 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
 
 def update_packages_file():
     global repos
-    global pkg_type
     
     if (manifest['repository'] == 'course'):
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
