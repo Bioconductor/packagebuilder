@@ -324,7 +324,7 @@ def check_package():
     tarball = os.popen("ls -1 %s_*.tar.gz" % pkgname)
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
-    retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     stop_thread = True # tell thread to stop
