@@ -198,7 +198,6 @@ var gotNewNode = function(message) {
 	s += '</tr>\n';
 
     s = jQuery("#appendMe").html().replace(/NODENAME/g, nodeName);
-    s = s.replace("NODENAME", )
     
     var summaryTemplate = jQuery("#summary_template").html();
     
