@@ -15,19 +15,26 @@ import shlex
 import platform
 from stompy import Stomp
 
+global stop_buildsrc_thread
+global stop_check_thread
+global stop_buildbin_thread
+
+stop_buildsrc_thread = stop_check_thread = stop_buildbin_thread = False
 
 class Tailer(threading.Thread):
-    def __init__(self, filename, checking):
+    def __init__(self, filename, phase):
         threading.Thread.__init__(self)
         self.filename = filename
-        self.checking = checking
+        self.phase = phase
         self.message_sequence = 1
     def run(self):
         prevsize = 0
-        if (self.checking):
+        if (self.phase == "check"):
             status = "checking"
-        else:
-            status = "building"
+        elif (self.phase == "buildsrc"):
+            status = "building source"
+        elif (self.phase == "buildbin"):
+            status = "building bin"
         while 1:
             time.sleep(0.2)
             print ("in tail loop")
@@ -37,8 +44,16 @@ class Tailer(threading.Thread):
             st = os.stat(self.filename)
             if st.st_size == 0:
                 continue
-            if stop_thread == True:
-                print ("stop_thread == True")
+            if (self.phase == "check"):
+                stop_flag = stop_check_thread
+            elif (self.phase == "buildsrc"):
+                stop_flag = stop_buildsrc_thread
+            elif (self.phase == "buildbin"):
+                stop_flag = stop_buildbin_thread
+            
+            
+            if stop_flag == True:
+                print ("stop_flag == True")
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
@@ -350,9 +365,9 @@ def check_package():
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     out_fh.close()
-    #stop_thread = True # tell thread to stop
+    stop_check_thread = True # tell thread to stop
 
-    #background.join()
+    background.join()
     
     #while thread_is_done == False:
     #    print ("waiting for thread to tell us to stop...")
@@ -417,7 +432,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
-    stop_thread = True # tell thread to stop
+    stop_buildsrc_thread = True # tell thread to stop
     out_fh.close()
     
     #while thread_is_done == False: pass # wait till thread tells us to stop
