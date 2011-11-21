@@ -367,7 +367,6 @@ handleSkipBuildBin = function(message) {
 handleCheckComplete = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
-    jQuery("#" + nodeName + "_buildbin_event").html("&nbsp;IN&nbsp;SKIPPED&nbsp;");
     var status;
     if (message['result_code'] == 0) {
         if (message['warnings']) {
@@ -378,7 +377,7 @@ handleCheckComplete = function(message) {
     } else {
         status = "ERROR";
     }
-    handleEvent("skipped", nodeName, "buildbin");
+    handleEvent(status, nodeName, "check");
 }
 
 
