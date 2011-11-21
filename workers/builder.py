@@ -411,7 +411,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     start_time = datetime.datetime.now()
     #thread_id = thread.start_new_thread(tail,(outfile, False,))
     #print("thread_id in build_package(): %d" % thread_id)
-    background = Tailer(outfile, "build")
+    background = Tailer(outfile, "building")
     background.start()
     
     if (pkg_type == "source"):
