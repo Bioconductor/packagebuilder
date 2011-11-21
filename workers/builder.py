@@ -342,7 +342,7 @@ def check_package():
     background.start()
     #thread_id = thread.start_new_thread(tail2,(outfile, True,))
     #print("thread_id in check_package(): %d" % thread_id)
-    pope = Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     pid = pope.pid
     
     retcode = pope.wait()
@@ -393,7 +393,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     flags = "--keep-empty-dirs --no-resave-data"
         
     
-    #flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
+    flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
