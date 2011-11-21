@@ -27,6 +27,11 @@ class Tailer(threading.Thread):
         self.filename = filename
         self.status = status
         self.message_sequence = 1
+        self._stop = threading.Event()
+    def stop(self):
+        self._stop.set()
+    def stopped(self):
+        return self._stop.isSet()
     def run(self):
         prevsize = 0
         while 1:
@@ -39,23 +44,9 @@ class Tailer(threading.Thread):
             if st.st_size == 0:
                 continue
                 
-            stop_flag = None
-            if (self.status == "checking"):
-                stop_flag = stop_check_thread
-                print "stop_check_thread: %s" % stop_check_thread
-                print "stop_flag: %s" % stop_flag
-            elif (self.status == "building"):
-                stop_flag = stop_buildsrc_thread
-                print "stop_buildsrc_thread = %s" % stop_buildsrc_thread
-                print "stop_flag: %s" % stop_flag
-            elif (self.status == "buildbin"):
-                stop_flag = stop_buildbin_thread
-                print "stop_buildbin_thread: %s" % stop_buildbin_thread
-                print "stop_flag: %s" % stop_flag
             
-            
-            if stop_flag == True:
-                print ("stop_flag == True (%s)" % self.phase)
+            if stopped():
+                print ("stopped() == True (%s)" % self.phase)
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
@@ -365,7 +356,8 @@ def check_package():
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     out_fh.close()
-    stop_check_thread = True # tell thread to stop
+    background.stop()
+    #stop_check_thread = True # tell thread to stop
 
     background.join()
     
@@ -426,7 +418,8 @@ def build_package(): # todo - refactor to allow either source or binary builds
     retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
-    stop_buildsrc_thread = True # tell thread to stop
+    background.stop()
+    #stop_buildsrc_thread = True # tell thread to stop
     out_fh.close()
     
     background.join()
