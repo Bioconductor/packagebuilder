@@ -128,7 +128,7 @@ def tail(filename, checking):
     while 1:
         time.sleep(0.2)
         print ("in tail loop")
-        print ".",
+        #print ".",
         if not os.path.isfile(filename):
             continue
         st = os.stat(filename)
@@ -146,10 +146,12 @@ def tail(filename, checking):
             send_message({"status": status, "sequence": message_sequence, "body": bytes})
             prevsize = st.st_size
             thread_is_done = True
-            print "Thread says I'm done"
+            print "Thread says I'm done %s" % checking
             break # not needed here but might be needed if program was to continue doing other stuff
             # and we wanted the thread to exit
-
+        
+        if (st.st_size > 0)
+            print ("st.st_size = %d, prevsize = %s", % (st.st_size, prevsize))
         if (st.st_size > 0) and (st.st_size > prevsize):
             num_bytes_to_read = st.st_size - prevsize
             f = open(filename, 'r')
@@ -338,7 +340,7 @@ def check_package():
     out_fh.close()
     
     while thread_is_done == False: pass # wait till thread tells us to stop
-    print "Done"
+    print "Done checking"
 
     # check for warnings
     out_fh = open(outfile)
