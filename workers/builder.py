@@ -117,7 +117,7 @@ def is_build_required(manifest):
 
 
 def tail(filename, checking):
-\    global thread_is_done
+    global thread_is_done
     global message_sequence
     prevsize = 0
     if (checking):
