@@ -15,11 +15,6 @@ import shlex
 import platform
 from stompy import Stomp
 
-global stop_buildsrc_thread
-global stop_check_thread
-global stop_buildbin_thread
-
-stop_buildsrc_thread = stop_check_thread = stop_buildbin_thread = False
 
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
@@ -357,7 +352,6 @@ def check_package():
     elapsed_time = str(stop_time - start_time)
     out_fh.close()
     background.stop()
-    #stop_check_thread = True # tell thread to stop
 
     background.join()
     
@@ -419,7 +413,6 @@ def build_package(): # todo - refactor to allow either source or binary builds
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     background.stop()
-    #stop_buildsrc_thread = True # tell thread to stop
     out_fh.close()
     
     background.join()
