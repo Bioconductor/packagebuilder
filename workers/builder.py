@@ -29,6 +29,7 @@ class Tailer(threading.Thread):
         self.message_sequence = 1
     def run(self):
         prevsize = 0
+        status = None
         if (self.phase == "check"):
             status = "checking"
         elif (self.phase == "buildsrc"):
@@ -45,7 +46,7 @@ class Tailer(threading.Thread):
             if st.st_size == 0:
                 continue
                 
-            stop_flag = False
+            stop_flag = None
             if (self.phase == "check"):
                 stop_flag = stop_check_thread
             elif (self.phase == "buildsrc"):
