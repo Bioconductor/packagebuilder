@@ -341,7 +341,9 @@ def check_package():
     stop_thread = True # tell thread to stop
     out_fh.close()
     
-    while thread_is_done == False: pass # wait till thread tells us to stop
+    while thread_is_done == False:
+        print ("waiting for thread to tell us to stop...")
+        #pass # wait till thread tells us to stop
     print "Done checking"
 
     # check for warnings
