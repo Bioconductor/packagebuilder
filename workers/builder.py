@@ -45,7 +45,7 @@ class Tailer(threading.Thread):
                 continue
                 
             
-            if stopped():
+            if self.stopped():
                 print ("stopped() == True (%s)" % self.phase)
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
