@@ -38,7 +38,7 @@ class Tailer(threading.Thread):
             status = "building bin"
         while 1:
             time.sleep(0.2)
-            print ("in tail loop")
+            print ("in tail loop (%s)" % self.phase)
             #print ".",
             if not os.path.isfile(self.filename):
                 continue
@@ -56,7 +56,7 @@ class Tailer(threading.Thread):
             
             
             if stop_flag == True:
-                print ("stop_flag == True")
+                print ("stop_flag == True (%s)" % self.phase)
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
@@ -272,7 +272,7 @@ def extract_tarball():
     global package_name
     package_name = manifest['job_id'].split("_")[0]
     # first, log in to the tracker and get a cookie
-    cmd = """curl --cookie-jar cookies.txt -d\
+    cmd = """curl -s --cookie-jar cookies.txt -d\
  '__login_name=%s&__login_password=%s\
 &__came_from=http://tracker.fhcrc.org/roundup/bioc_submit/\
 &@action=login' \
@@ -370,7 +370,7 @@ def check_package():
     out_fh.close()
     stop_check_thread = True # tell thread to stop
 
-    background.join()
+    #background.join()
     
     #while thread_is_done == False:
     #    print ("waiting for thread to tell us to stop...")
@@ -439,7 +439,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     out_fh.close()
     
     #while thread_is_done == False: pass # wait till thread tells us to stop
-    background.join()
+    #background.join()
     print "Done"
     
     # check for warnings
