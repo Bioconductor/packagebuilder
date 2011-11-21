@@ -401,7 +401,6 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    buildmsg = None
     print("starting build tailer with message %s." % buildmsg)
     background = Tailer(outfile, buildmsg)
     background.start()
