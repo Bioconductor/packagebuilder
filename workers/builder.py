@@ -41,9 +41,9 @@ class Tailer(threading.Thread):
                 continue
                 
             stop_flag = None
-            if (self.phase == "check"):
+            if (self.phase == "checking"):
                 stop_flag = stop_check_thread
-            elif (self.phase == "buildsrc"):
+            elif (self.phase == "building"):
                 stop_flag = stop_buildsrc_thread
             elif (self.phase == "buildbin"):
                 stop_flag = stop_buildbin_thread
@@ -364,7 +364,7 @@ def check_package():
     out_fh.close()
     stop_check_thread = True # tell thread to stop
 
-    #background.join()
+    background.join()
     
     #while thread_is_done == False:
     #    print ("waiting for thread to tell us to stop...")
@@ -433,7 +433,7 @@ def build_package(): # todo - refactor to allow either source or binary builds
     out_fh.close()
     
     #while thread_is_done == False: pass # wait till thread tells us to stop
-    #background.join()
+    background.join()
     print "Done"
     
     # check for warnings
