@@ -369,12 +369,12 @@ handleCheckComplete = function(message) {
     var status;
     if (message['result_code'] == 0) {
         if (message['warnings']) {
-            status = "warnings"
+            status = "WARNINGS"
         } else {
-            status = "ok"
+            status = "OK"
         }
     } else {
-        status = "error";
+        status = "ERROR";
     }
     handleEvent("skipped", nodeName, "buildbin");
 }
