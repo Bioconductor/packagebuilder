@@ -116,6 +116,9 @@ def is_build_required(manifest):
     return(svn_version != repository_version)
 
 
+def tail2(filename, checking):
+    tail(filename, checking)
+
 def tail(filename, checking):
     global thread_is_done
     global message_sequence
@@ -333,7 +336,7 @@ def check_package():
             break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
-    thread_id = thread.start_new_thread(tail,(outfile, True,))
+    thread_id = thread.start_new_thread(tail2,(outfile, True,))
     print("thread_id in check_package(): %d" % thread_id)
     retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     stop_time = datetime.datetime.now()
