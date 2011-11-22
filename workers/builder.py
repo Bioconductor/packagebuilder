@@ -31,8 +31,8 @@ class Tailer(threading.Thread):
         prevsize = 0
         while 1:
             time.sleep(0.2)
-            print ("in tail loop (%s)" % self.status)
-            #print ".",
+            #print ("in tail loop (%s)" % self.status)
+            print ".",
             if not os.path.isfile(self.filename):
                 continue
             st = os.stat(self.filename)
@@ -418,7 +418,7 @@ def check_package():
     return (retcode)
 
 
-def build_package(source_build): # todo - refactor to allow either source or binary builds
+def build_package(source_build):
     global pkg_type
 
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
@@ -474,7 +474,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
                 libdir = "%s.buildbin-libdir" % pkg
                 r_cmd = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build "
                   "--merge-multiarch --library=%s %s") % (libdir, libdir,
-                  os.getenv("BBS_R_CMD"), libdir, package_name)
+                  os.getenv("BBS_R_CMD"), libdir, get_source_tarball_name())
             else:
                 r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
                   (os.getenv("BBS_R_CMD"), libdir, package_name)
