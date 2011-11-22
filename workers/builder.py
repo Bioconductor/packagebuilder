@@ -350,14 +350,31 @@ def check_package():
     
     tarball = get_source_tarball_name()
     extra_flags = ""
-    if (platform.system() == "Darwin"):
-        extra_flags = "--no-multiarch"
+    prefix = ""
+    suffix = ""
     
-    cmd = "%s CMD check --no-vignettes --timings %s %s" % (\
-        os.getenv('BBS_R_CMD'), extra_flags, tarball)
+    win_multiarch = True # todo - make this a checkbox
+    if (platform.system() == "Darwin"):
+        extra_flags = " --no-multiarch "
+    elif (platform.system() == "Windows"):
+        pkg = tarball.split("_")[0]
+        libdir = "%s.buildbin-libdir" % pkg
+        if (win_multiarch):
+            prefix = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build ",
+              "--merge-multiarch --library=%s %s >%s-install.out 2>&1 && ") % (
+              libdir, libdir, os.getenv("BBS_R_CMD"), libdir, tarball, pkg)
+            
+            extra_flags = " --force-multiarch --library=%s" % libdir
+            
+            suffix = " && mv %s/* %s.Rcheck/ && rmdir %s" % (\
+              libdir, pkg, libdir)
+    
+    cmd = "%s %s CMD check --no-vignettes --timings %s %s %s" % (prefix,
+        os.getenv('BBS_R_CMD'), extra_flags, tarball, suffix)
+    cmd = cmd.strip()
+    
     #cmd = "ls" # COMMENT THIS OUT!!!!!!
     
-    # todo - do windows multiarch check
     
     send_message({"status": "check_cmd", "body": cmd})
     
@@ -430,21 +447,29 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     background = Tailer(outfile, buildmsg)
     background.start()
     
+    win_multiarch = True # todo make this a checkbox
+    
     if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        if builder_id == "cyclonus":
-            libdir = "C:/Users/pkgbuild/Documents/R/win-library/2.14"
-        else:
-            libdir = "libdir"
-            os.mkdir("libdir")
-            pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
-            if pkg_type == "mac.binary.leopard":
-                r_cmd = "../../build-universal.sh %s %s" % (\
-                  get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
+        libdir = "libdir"
+        os.mkdir("libdir")
+        pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+
+        if pkg_type == "mac.binary.leopard":
+            r_cmd = "../../build-universal.sh %s %s" % (\
+              get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
+        elif pkg_type == "win.binary":
+            if (win_multiarch):
+                pkg = package_name.split("_")[0]
+                libdir = "%s.buildbin-libdir" % pkg
+                r_cmd = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build ",
+                  "--merge-multiarch --library=%s %s") % (libdir, libdir,
+                  os.getenv("BBS_R_CMD"), libdir, package_name)
             else:
                 r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
                   (os.getenv("BBS_R_CMD"), libdir, package_name)
+            
         
     status = None
     if (source_build):
