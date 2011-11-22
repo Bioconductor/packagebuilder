@@ -211,6 +211,7 @@ def setup():
     print("argument is %s" % sys.argv[1])
     print("cwd is %s" % os.getcwd())
     print("does %s exist? %s" % (sys.argv[1], os.path.exists(sys.argv[1])))
+    time.sleep(1)
     manifest_fh = open(sys.argv[1], "r")
     manifest_json = manifest_fh.read()
     manifest_fh.close()
