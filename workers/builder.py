@@ -317,6 +317,8 @@ def install_pkg_deps():
     cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore --slave'--args %s'\
       %s %s" % (os.getenv("BBS_R_CMD"), args.strip(), r_script, log)
     send_message({"body": "Installing dependencies...", "status": "preprocessing", "retcode": 0})
+    print("command to install dependencies:")
+    print(cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({"body": "Result of installing dependencies: %d" % retcode,
       "status": "post_processing", "retcode": retcode})
