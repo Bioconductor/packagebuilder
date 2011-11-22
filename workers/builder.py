@@ -352,8 +352,8 @@ def check_package():
     if (platform.system() == "Darwin"):
         extra_flags = "--no-multiarch"
     
-    cmd = "CMD check --no-vignettes --timings %s %s %s" % (extra_flags,
-      os.getenv('BBS_R_CMD'), tarball)
+    cmd = "%s CMD check --no-vignettes --timings %s %s" % (\
+        os.getenv('BBS_R_CMD'), extra_flags, tarball)
     #cmd = "ls" # COMMENT THIS OUT!!!!!!
     
     # todo - do windows multiarch check
