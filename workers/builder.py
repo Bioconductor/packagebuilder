@@ -346,7 +346,7 @@ def check_package():
       tarball)
     cmd = "ls" # COMMENT THIS OUT!!!!!!
     
-    send_message({"status": "check_cmd", "body": r_cmd})
+    send_message({"status": "check_cmd", "body": cmd})
     
     background = Tailer(outfile, "checking")
     background.start()
