@@ -139,6 +139,9 @@ jQuery(function(){
         case 'r_cmd':
             handleBuildStart(obj);
             break;
+        case 'r_buildbin_cmd':
+            handleRBuildBinCmd(obj);
+            break;
         case 'build_complete':
             handleBuildComplete(obj);
             break;
@@ -148,8 +151,8 @@ jQuery(function(){
         case 'invalid_url':
             handleInvalidUrl(obj);
             break;
-        case 'starting_check':
-            handleStartingCheck(obj);
+        case 'check_cmd':
+            handleCheckCmd(obj);
             break;
         case 'check_complete':
             handleCheckComplete(obj);
@@ -294,6 +297,11 @@ var handleComplete = function(message) {
     }
 }
 
+var handleRBuildBinCmd = function(message) {
+    var nodeName = message['builder_id'];
+    jQuery("#" + nodeName + "_buildbin_command").html(message['body']);
+}
+
 var handleBuildComplete = function(message) {
     var nodeName = message['builder_id'];
     jQuery("#" + nodeName + "_ended_at").html(message['time']);
@@ -379,9 +387,10 @@ var handleInvalidUrl = function(message) {
     jQuery("#initially_hidden").hide();
 }
 
-var handleStartingCheck = function(message) {
+var handleCheckCmd = function(message) {
     var nodeName = message['builder_id'];
     // todo add time
+    jQuery("#" + nodeName + "_check_command").html(message['body']);
     handleEvent("IN_PROGRESS", nodeName, "check") 
 }
 

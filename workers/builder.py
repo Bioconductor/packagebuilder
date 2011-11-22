@@ -320,6 +320,16 @@ def install_pkg_deps():
     return retcode
 
 
+def get_source_tarball_name():
+    pkgname = manifest['job_id'].split("_")[0]
+    files = os.listdir(os.getcwd())
+    tarball = None
+    for file in files:
+        if pkgname in file and ".tar.gz" in file:
+            tarball = file
+            break
+    return(tarball)
+
 def check_package():
     send_message({"status": "starting_check", "body": ""})
     outfile = "Rcheck.out"
@@ -330,16 +340,14 @@ def check_package():
     start_time = datetime.datetime.now()
     message_sequence = 1
     
+    tarball = get_source_tarball_name()
     
-    pkgname = manifest['job_id'].split("_")[0]
-    files = os.listdir(os.getcwd())
-    for file in files:
-        if pkgname in file and ".tar.gz" in file:
-            tarball = file
-            break
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
     cmd = "ls" # COMMENT THIS OUT!!!!!!
+    
+    send_message({"status": "check_cmd", "body": r_cmd})
+    
     background = Tailer(outfile, "checking")
     background.start()
     pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
@@ -417,12 +425,14 @@ def build_package(source_build): # todo - refactor to allow either source or bin
         else:
             libdir = "libdir"
             os.mkdir("libdir")
-        r_cmd = "%s CMD INSTALL --build --library=%s %s" % (os.getenv("BBS_R_CMD"),
-          libdir, package_name)
+            pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+            if pkg_type == "mac.binary.leopard":
+                r_cmd = "%s/utils/build-universal.sh %s" % (\
+                  os.getenv("BBS_HOME"), get_source_tarball_name())
+            else:
+                r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
+                  (os.getenv("BBS_R_CMD"), libdir, package_name)
         
-        # todo, if mac, run build_universal script
-        #r_cmd = "%s CMD INSTALL --build %s" % (os.getenv("BBS_R_CMD"),
-        #  package_name)
     status = None
     if (source_build):
         status = "r_cmd"
