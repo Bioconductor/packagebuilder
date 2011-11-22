@@ -282,8 +282,11 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     package_name = tarball.split("_")[0]
     
     os.rename(tarball, "%s.orig" % tarball)
-    
-    retcode = subprocess.call("tar -zxf %s.orig" % tarball, shell=True)
+    extra_flags = ""
+    if platform.system() == "Windows":
+        extra_flags = " --no-same-owner "
+    retcode = subprocess.call("tar %s -zxf %s.orig" % (extra_flags,
+      tarball), shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": \
         "untar of tarball completed with status %d" % retcode})
     if (not retcode == 0):
