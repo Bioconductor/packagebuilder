@@ -44,17 +44,19 @@ FILENAME_PARSER="^(.*)_([^_]+)\.tar\.gz$"
 pkgname=`echo "$srcpkg_filename" | sed -E "s/$FILENAME_PARSER/\1/"`
 #pkgversion=`echo "$srcpkg_filename" | sed -E "s/$FILENAME_PARSER/\2/"`
 
+R_CMD="R"
+
 if [ "x$2" != "x" ]; then
-    R_CMD="$2"
-else
-    R_CMD="R"
+    R_LIBS="$2"
+#else
+#    R_CMD="R"
 fi
 
-if [ "x$3" != "x" ]; then
-    R_LIBS="$3"
+#if [ "x$3" != "x" ]; then
+#    R_LIBS="$3"
 #else
 #    R_LIBS="`$R_CMD CMD sh -c 'echo "$R_HOME"'`/library"
-fi
+#fi
 
 
 
