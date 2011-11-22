@@ -351,7 +351,7 @@ def check_package():
     
     cmd = "%s CMD check --no-vignettes --timings %s" % (os.getenv('BBS_R_CMD'),
       tarball)
-    cmd = "ls" # COMMENT THIS OUT!!!!!!
+    #cmd = "ls" # COMMENT THIS OUT!!!!!!
     
     send_message({"status": "check_cmd", "body": cmd})
     
@@ -416,7 +416,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     flags = "--keep-empty-dirs --no-resave-data"
         
     
-    flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
+    #flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
     
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
