@@ -455,7 +455,8 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     for line in out_fh:
         if line.lower().startswith("warning:"):
             warnings = True
-            break
+        if line.lower().startswith("error:"):
+            retcode = 1
     out_fh.close()
     
     complete_status = None
