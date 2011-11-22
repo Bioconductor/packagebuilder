@@ -656,7 +656,7 @@ def update_packages_file():
     print "retcode for update packages: %d" % retcode
     send_message({"status": "post_processing", "retcode": retcode, "body": "Updated packages list"})
     if retcode != 0:
-        send_message({"status": "post_processing", "retcode": retcode, "body": "Updating packages failed.",
+        send_message({"status": "post_processing_complete", "retcode": retcode, "body": "Updating packages failed.",
             "build_product": build_product, "url": url})
         sys.exit("Updating packages failed")
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
@@ -668,10 +668,10 @@ def update_packages_file():
         send_message({"status": "post_processing", "retcode": retcode, "body": "Synced repository to website",
             "build_product": build_product, "url": url})
         if retcode != 0:
-            send_message({"status": "post_processing", "retcode": retcode, "body": "Syncing repository failed",
+            send_message({"status": "post_processing_complete", "retcode": retcode, "body": "Syncing repository failed",
                 "build_product": build_product, "url": url})
             sys.exit("Sync to website failed")
-        send_message({"status": "post_processing", "retcode": retcode, "body": "Post-processing complete.",
+        send_message({"status": "post_processing_complete", "retcode": retcode, "body": "Post-processing complete.",
             "build_product": build_product, "url": url})
         
 

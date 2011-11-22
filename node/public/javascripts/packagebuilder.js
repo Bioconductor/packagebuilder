@@ -134,6 +134,9 @@ jQuery(function(){
         case 'post_processing':
             handlePostProcessing(obj);
             break;
+        case 'post_processing_complete':
+            handlePostProcessingComplete(obj);
+            break;
         case 'build_failed':
             handleBuildFailed(obj);
             break;
@@ -371,6 +374,15 @@ var handlePostProcessing = function(message) {
     }
 }
 
+var handlePostProcessingComplete = function(message) {
+    var nodeName = message['builder_id'];
+    if (message['retcode'] != 0) {
+        handleEvent("ERROR", nodeName, "postprocessing"); 
+    } else {
+        handleEvent("OK", nodeName, "postprocessing");
+    }
+    
+}
 
 var handleBuildFailed = function(message) {
     var nodeName = message['builder_id'];
