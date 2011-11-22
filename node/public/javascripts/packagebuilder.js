@@ -260,6 +260,11 @@ var handleEvent = function(event, node, stage) {
     msg = "&nbsp;&nbsp;" + event.replace(/_/g, "&nbsp;") + "&nbsp;&nbsp;"; 
     jQuery(selector).addClass(event);
     jQuery(selector).html(msg);
+    if (event == "ERROR" && stage == "build") {
+        handleEvent("skipped", nodeName, "check");
+        handleEvent("skipped", nodeName, "buildbin");
+        handleEvent("skipped", nodeName, "postprocessing");
+    }
     
 }
 
