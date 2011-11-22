@@ -1,8 +1,11 @@
 
 # run me like this:
-# /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave '--args Depends="R (>= 2.10), utils"; Imports="methods"; Suggests="tools, tkWidgets, ALL";' /working_dir/../installPkgDeps.R /working_dir/installDeps.log
+# /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave "--args Depends=@@R (>= 2.10), utils@@; Imports=@@methods@@; Suggests=@@tools, tkWidgets, ALL@@;" /working_dir/../installPkgDeps.R /working_dir/installDeps.log
 
 args <- (commandArgs(TRUE))
+
+args <- gsub("@@", "\"", args, fixed=TRUE)
+
 if (length(args) == 0) {
     print("No arguments supplied.")
     q("no")

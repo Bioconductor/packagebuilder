@@ -309,7 +309,7 @@ def install_pkg_deps():
     args = ""
     for field in fields:
         try:
-            args += '%s="%s" ' % (field, desc.getValue(field))
+            args += '%s=@@%s@@ ' % (field, desc.getValue(field))
         except KeyError:
             pass
     r_script = "%s/../../installPkgDeps.R" % working_dir
