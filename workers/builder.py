@@ -610,6 +610,13 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
 def update_packages_file():
     global repos
     
+    if (platform.system() == "Darwin"):
+        os_seg = "bin/macosx/leopard/contrib/%s" % manifest['r_version']
+    elif (platform.system() == "Linux"):
+        os_seg = "src/contrib"
+    else:
+        os_seg = "bin/windows/contrib/%s" % manifest['r_version']
+    
     
     if (manifest['repository'] == 'course'):
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
