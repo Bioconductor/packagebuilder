@@ -740,8 +740,8 @@ if __name__ == "__main__":
         buildbin_result = build_package(False)
         if buildbin_result == 0:
             propagate_package()
-        if (is_build_required):
-            update_packages_file()
+            if (is_build_required):
+                update_packages_file()
         if warnings: # todo separate build / check / build bin warnings
             body = "Build completed with warnings."
         else:
