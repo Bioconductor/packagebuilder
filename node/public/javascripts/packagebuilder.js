@@ -265,6 +265,12 @@ var handleEvent = function(event, node, stage) {
         handleEvent("skipped", node, "buildbin");
         handleEvent("skipped", node, "postprocessing");
     }
+    if (event == "ERROR" && stage == "check") {
+        handleEvent("skipped", node, "postprocessing");
+    }
+    if (event == "ERROR" && stage == "buildbin") {
+        handleEvent("skipped", node, "postprocessing");
+    }
     
 }
 
