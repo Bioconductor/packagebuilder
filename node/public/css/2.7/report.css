@@ -372,6 +372,17 @@ TABLE.mainrep .even .pelham {
     background: #B9C;
 }
 
+/* petty */
+DIV.petty,
+TR.petty TD,
+TABLE.mainrep .petty,
+TABLE.mainrep .odd .petty {
+    background: #DAE;
+}
+TABLE.mainrep .even .petty {
+    background: #B8C;
+}
+
 
 /* montagu */
 DIV.montagu,
