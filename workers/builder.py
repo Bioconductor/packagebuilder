@@ -384,7 +384,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
     
     if ((not source_build) and (pkg_type == "source")):
         send_message({"status": "skip_buildbin", "body": "skipped"})
-        return
+        return(0)
         
     if (not source_build):
         send_message({"status": "starting_buildbin", "body": ""})
