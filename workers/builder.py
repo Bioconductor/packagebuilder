@@ -546,16 +546,16 @@ def propagate_package():
     
     
     # now install the package
-    r_cmd = "%s CMD INSTALL %s" % (os.getenv("BBS_R_CMD"), build_product)
+    #r_cmd = "%s CMD INSTALL %s" % (os.getenv("BBS_R_CMD"), build_product)
     
-    send_message({"body": "Installing package", "status": "post_processing", "retcode": 0})
+    #send_message({"body": "Installing package", "status": "post_processing", "retcode": 0})
     
-    retcode = subprocess.call(r_cmd, shell=True)
+    #retcode = subprocess.call(r_cmd, shell=True)
     
-    send_message({"body": "Installed package", "status": "post_processing", "retcode": retcode})
+    #send_message({"body": "Installed package", "status": "post_processing", "retcode": retcode})
     
-    if retcode != 0:
-        sys.exit("package install failed")
+    #if retcode != 0:
+    #    sys.exit("package install failed")
     
     
     if (platform.system() == "Darwin"):
@@ -631,7 +631,7 @@ def _call(command_str, shell):
         command_str = str(command_str)
         print("size = %d" % len(command_str))
         print(command_str)
-        retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
+        retcode = subprocess.call(command_str, shell=True, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
         stderr_fh.close()
         return(retcode)
