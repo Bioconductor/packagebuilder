@@ -17,7 +17,7 @@ export SVN_PASS="buildpkg"
 
 export BBS_PYTHON_CMD="/Users/pkgbuild/python/bin/python"
 
-export SPB_R_LIBS="/Users/pkgbuild/Library/R/2.15/library"
+export SPB_R_LIBS="/Users/pkgbuild/packagebuilder/R-libs"
 
 $BBS_PYTHON_CMD builder.py $1
  
