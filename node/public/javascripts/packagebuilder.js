@@ -287,10 +287,10 @@ var handleBuildingBin = function(message) {
 
 var handleComplete = function(message) {
     var nodeName = message['builder_id'];
-    if (message['warnings'] == true) {
-        handleEvent("WARNINGS", nodeName, "build");
+    if (message['result'] == 0) {
+        handleEvent("OK", nodeName, "postprocessing");
     } else {
-        handleEvent("OK", nodeName, "build");
+        handleEvent("ERROR", nodeName, "postprocessing");
     }
 }
 
