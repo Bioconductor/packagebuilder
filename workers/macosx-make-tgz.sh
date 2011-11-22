@@ -8,17 +8,17 @@
 
 set -e  # Exit immediately if a simple command exits with a non-zero status
 
-CHOWNROOTADMIN=`dirname "$0"`/chown-rootadmin
+#CHOWNROOTADMIN=`dirname "$0"`/chown-rootadmin
 
-if [ ! -f "$CHOWNROOTADMIN" ]; then
-	echo "Installation problem: before you can use the $0 script, you must"
-	echo "install chown-rootadmin in the same directory as $0 like this:"
-	echo "  cd" `dirname "$0"`
-	echo "  gcc chown-rootadmin.c -o chown-rootadmin"
-	echo "  sudo chown root:admin chown-rootadmin"
-	echo "  sudo chmod 4750 chown-rootadmin"
-	exit 1
-fi
+#if [ ! -f "$CHOWNROOTADMIN" ]; then
+#	echo "Installation problem: before you can use the $0 script, you must"
+#	echo "install chown-rootadmin in the same directory as $0 like this:"
+#	echo "  cd" `dirname "$0"`
+#	echo "  gcc chown-rootadmin.c -o chown-rootadmin"
+#	echo "  sudo chown root:admin chown-rootadmin"
+#	echo "  sudo chmod 4750 chown-rootadmin"
+#	exit 1
+#fi
 
 print_usage()
 {
@@ -47,7 +47,7 @@ tgz_file="${pkgname}_${pkgversion}.tgz"
 
 chmod -R ug+w "$pkg_dirpath" # Just because Simon does it
 
-$CHOWNROOTADMIN "$pkg_dirpath" # Change the ownerchip to root:admin
+#$CHOWNROOTADMIN "$pkg_dirpath" # Change the ownerchip to root:admin
 
 tar zcf "$tgz_file" -C "$pkg_dirpath/.." "$pkgname"
 
