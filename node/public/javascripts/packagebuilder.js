@@ -261,9 +261,9 @@ var handleEvent = function(event, node, stage) {
     jQuery(selector).addClass(event);
     jQuery(selector).html(msg);
     if (event == "ERROR" && stage == "build") {
-        handleEvent("skipped", nodeName, "check");
-        handleEvent("skipped", nodeName, "buildbin");
-        handleEvent("skipped", nodeName, "postprocessing");
+        handleEvent("skipped", node, "check");
+        handleEvent("skipped", node, "buildbin");
+        handleEvent("skipped", node, "postprocessing");
     }
     
 }
