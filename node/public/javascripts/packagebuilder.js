@@ -225,9 +225,9 @@ var gotNewNode = function(message) {
     */
     
     s = jQuery("#appendMe").html().replace(/NODENAME/g, nodeName);
-    s = s.replace(/<tr>/gi, "");
+    //s = s.replace(/<tr>/gi, "");
     s - s.replace(/<tbody>/gi, "");
-    s = s.replace(/<\/tr>/gi, "");
+    //s = s.replace(/<\/tr>/gi, "");
     s - s.replace(/<\/tbody>/gi, "");
     
     
