@@ -405,3 +405,15 @@ TABLE.mainrep .odd .lamb1 {
 TABLE.mainrep .even .lamb1 {
     background: #9AA;
 }
+
+/* moscato2 */
+DIV.moscato2,
+TR.moscato2 TD,
+TABLE.mainrep .moscato2,
+TABLE.mainrep .odd .moscato2 {
+    background: #EBA;
+}
+TABLE.mainrep .even .moscato2 {
+    background: #C98;
+}
+
