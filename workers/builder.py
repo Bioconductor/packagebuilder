@@ -763,7 +763,7 @@ if __name__ == "__main__":
         else:
             body = "Build was successful."
         # todo - rethink completion
-        send_message({"status": "complete", "result": result, "body": body, "warnings": warnings})
+        #send_message({"status": "complete", "result": result, "body": body, "warnings": warnings})
     else:
         send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
     
