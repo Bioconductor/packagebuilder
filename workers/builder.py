@@ -428,8 +428,7 @@ def build_package(source_build): # todo - refactor to allow either source or bin
             pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
             if pkg_type == "mac.binary.leopard":
                 r_cmd = "../../build-universal.sh %s %s" % (\
-                  os.getenv("BBS_HOME"), get_source_tarball_name(),
-                  os.getenv("SPB_R_LIBS"))
+                  get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
             else:
                 r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
                   (os.getenv("BBS_R_CMD"), libdir, package_name)
