@@ -212,6 +212,15 @@ def setup():
     print("cwd is %s" % os.getcwd())
     print("does %s exist? %s" % (sys.argv[1], os.path.exists(sys.argv[1])))
     print("size of %s: %d" % (sys.argv[1], os.stat(sys.argv[1]).st_size))
+    timeout = 10
+    i = 0
+    while (os.stat(sys.argv[1]).st_size == 0):
+        print("manifest file is empty, waiting...")
+        time.sleep(1)
+        i += 1
+        if i == timeout:
+            # todo - send a message and do something with it
+            break
     time.sleep(1)
     manifest_fh = open(sys.argv[1], "r")
     manifest_json = manifest_fh.read()
