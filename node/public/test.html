@@ -1,0 +1,523 @@
+<html><head>
+		<title>Bioconductor Package Builder.</title>
+		<link rel="stylesheet" href="/css/2.7/report.css" type="text/css"> 
+		<script type="text/javascript" src="/javascripts/jquery-1.4.4.min.js"></script>
+		<script type="text/javascript" src="/javascripts/json2.js"></script>
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<script type="text/javascript" src="/javascripts/servername.js"></script>
+		
+		<script type="text/javascript" src="/javascripts/packagebuilder.js"></script>
+	</head>
+	<body>
+		<h1>Bioconductor Package Builder</h1>
+		
+		
+		<div id="build_start"><p><a href="/">New Build</a></p><p>
+</p></div>
+		
+		<div id="error"></div>
+
+		<div id="initially_hidden" style="display: block; ">
+    		<table class="svn_info">
+    			<tbody><tr>
+    				<td class="svn_info">Snapshot&nbsp;Date:&nbsp;
+    					<span class="svn_info" id="svn_info_snapshot_date"></span>
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="svn_info">URL:&nbsp;
+    					<span class="svn_info" id="svn_info_svn_url"></span>
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="svn_info">Last&nbsp;Changed&nbsp;Rev:&nbsp;
+    					<span class="svn_info" id="svn_last_changed_rev"></span>
+    					 / Revision:&nbsp;
+    					<span class="svn_info" id="svn_revision"></span>
+    				</td>
+    			</tr>
+    			<tr>
+    				<td class="svn_info">Last&nbsp;Changed&nbsp;Date:&nbsp;
+    					<span class="svn_info" id="svn_last_changed_date"></span>
+    				</td>
+    			</tr>
+    		</tbody></table>
+
+
+		<br> 
+		<table border="1"> 
+		<tbody><tr id="status_header">
+		    <th colspan="1">Hostname</th>
+			<th>OS /Arch</th>
+			<th>BUILD</th>
+			<th>CHECK</th>
+			<th>BUILD BIN</th>
+			<th>POST-PROCESSING</th>
+		</tr>
+		<tr id="nodeinfo_append_to_me">
+		
+                <tbody><tr><td align="left" class="node petty">
+                	<i>petty</i>&nbsp;
+                </td>
+                <td align="left" class="node petty">
+                    <span style="font-size: smaller;" id="nodeinfo_petty">Mac OS X Snow Leopard (10.6.7)/arch</span>
+                        &nbsp;
+                </td>
+                <td align="left" class="status petty buildsrc">
+                    <span id="petty_buildstatus">
+                        <a href="#petty_anchor">
+                            <span class="petty_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status petty checksrc">
+                    <span id="petty_checkstatus">
+                        <a href="#petty_anchor">
+                            <span id="petty_check_event" class="petty_CHECK_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status petty buildbin">
+                    <span id="petty_buildbinstatus">
+                        <a href="#petty_anchor">
+                            <span id="petty_buildbin_event" class="petty_BUILDBIN_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status petty postprocessing">
+                    <span id="petty_postprocessingstatus">
+                        <a href="#petty_anchor">
+                            <span id="petty_postprocessing_event" class="petty_POSTPROCESSING_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+
+            </tr></tbody>
+                <tbody><tr><td align="left" class="node lamb2">
+                	<i>lamb2</i>&nbsp;
+                </td>
+                <td align="left" class="node lamb2">
+                    <span style="font-size: smaller;" id="nodeinfo_lamb2">Linux (openSUSE 11.4)/arch</span>
+                        &nbsp;
+                </td>
+                <td align="left" class="status lamb2 buildsrc">
+                    <span id="lamb2_buildstatus">
+                        <a href="#lamb2_anchor">
+                            <span class="lamb2_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status lamb2 checksrc">
+                    <span id="lamb2_checkstatus">
+                        <a href="#lamb2_anchor">
+                            <span id="lamb2_check_event" class="lamb2_CHECK_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status lamb2 buildbin">
+                    <span id="lamb2_buildbinstatus">
+                        <a href="#lamb2_anchor">
+                            <span id="lamb2_buildbin_event" class="lamb2_BUILDBIN_EVENT skipped">&nbsp;&nbsp;skipped&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status lamb2 postprocessing">
+                    <span id="lamb2_postprocessingstatus">
+                        <a href="#lamb2_anchor">
+                            <span id="lamb2_postprocessing_event" class="lamb2_POSTPROCESSING_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span>
+                        </a>
+                    </span>
+                </td>
+
+
+            </tr></tbody></tr>
+		
+		</tbody></table>
+
+		</div>
+			
+		<div id="summaries">
+		
+			<hr>
+			<a name="petty_anchor"></a>
+			<h2>petty Summary</h2> 
+			<div class="petty" style="margin-left: 12px;"> 
+				<table> 
+					<tbody><tr><td><b>Package</b>: <span id="petty_package_name">ternarynet</span></td></tr> 
+					<tr><td><b>Version</b>: <span id="petty_version">0.1.6</span></td></tr> 
+					<tr><td><b>RVersion</b>: <span id="petty_r_version">R Under development (unstable) (2011-10-27 r57452)</span></td></tr> 
+					<tr><td><b>BuildCommand</b>: <span id="petty_command">/Library/Frameworks/R.framework/Versions/2.15/Resources/bin/R CMD build --keep-empty-dirs --no-resave-data --no-vignettes ternarynet</span></td></tr> 
+					<tr><td><b>CheckCommand</b>: <span id="petty_check_command">ls</span></td></tr> 
+					<tr><td><b>BuildBinCommand</b>: <span id="petty_buildbin_command">../../build-universal.sh ternarynet_0.1.6.tar.gz /Users/pkgbuild/packagebuilder/R-libs</span></td></tr> 
+					<tr><td><b>StartedAt</b>: <span id="petty_started_at">2011-11-22 10:07:10.586663</span></td></tr> 
+					<tr><td><b>EndedAt</b>: <span id="petty_ended_at">2011-11-22 10:07:20.001201</span></td></tr> 
+					<tr><td><b>ElapsedTime</b>: <span id="petty_elapsed_time">0:00:08.214265</span></td></tr> 
+					<tr><td><b>RetCode</b>: <span id="petty_ret_code">0</span></td></tr> 
+					<tr><td><b>Status</b>: <span id="petty_status" class="petty_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span></td></tr> 
+					<tr><td><b>PackageFile</b>: <span id="petty_build_product"><a href="http://bioconductor-test.org/scratch-repos/2.15/bin/macosx/leopard/contrib/2.15">ternarynet_0.1.6.tgz</a></span></td></tr> 
+					<tr><td><b>PackageFileSize</b>: <span id="petty_file_size"></span> <a href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</a></td></tr> 
+					<tr><td><b>BuildID:</b>: <span id="petty_build_id">ternarynet_20111122100709</span></td></tr> 
+					<tr><td><b>Pre/PostProcessing</b>: <span id="petty_post_processing">curl to log into tracker returned status 0...curl of tarball completed with status 0...Result of installing dependencies: 0...Installing package...Installed package...Pruning older packages from repository...Set read permissions on build product...Updated packages list...Synced repository to website...DONE.</span></td></tr> 
+					<tr><td><b>InstallCommand</b>: <br><pre id="petty_install_command">source("http://bioconductor.org/scratch-repos/pkgInstall.R")
+pkgInstall("ternarynet")</pre></td></tr>
+				</tbody></table> 
+			</div> 
+			<hr> 
+				<h3>petty BUILD SRC output</h3> 
+				<div class="petty" style="margin-left: 12px;"> 
+					<pre id="petty_console" style="font-size: smaller; padding: 2px;">* checking for file 'ternarynet/DESCRIPTION' ... OK
+* preparing 'ternarynet':
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* checking for LF line-endings in source and make files
+* checking for empty or unneeded directories
+* building 'ternarynet_0.1.6.tar.gz'
+
+</pre>
+				</div> 
+
+			<hr> 
+				<h3>petty CHECK output</h3> 
+				<div class="petty" style="margin-left: 12px;"> 
+					<pre id="petty_check_console" style="font-size: smaller; padding: 2px;">R.out
+Rcheck.out
+builder.log
+cookies.txt
+installDeps.log
+manifest.json
+ternarynet
+ternarynet_0.1.6.tar.gz
+ternarynet_0.1.6.tar.gz.orig
+</pre>
+				</div> 
+
+            <hr> 
+				<h3>petty BUILD BIN output</h3> 
+				<div class="petty" style="margin-left: 12px;"> 
+					<pre id="petty_buildbin_console" style="font-size: smaller; padding: 2px;">&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; INSTALLATION WITH 'R CMD INSTALL --preclean --library=/Users/pkgbuild/packagebuilder/R-libs ternarynet_0.1.6.tar.gz'
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+
+* installing *source* package 'ternarynet' ...
+** libs
+*** arch - i386
+g++-4.2 -arch i386 -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/i386 -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetfit.cc -o tnetfit.o
+tnetfit.cc: In function 'SEXPREC* tnetfit(SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*)':
+tnetfit.cc:96: warning: unused variable 'tempi'
+tnetfit.cc:121: warning: 'muci_old' may be used uninitialized in this function
+tnetfit.cc:121: warning: 'sigmaci' may be used uninitialized in this function
+tnetfit.cc:121: warning: 'sigma0' may be used uninitialized in this function
+tnetfit.cc:100: warning: 'newScore' may be used uninitialized in this function
+g++-4.2 -arch i386 -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/i386 -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetfuncs.cc -o tnetfuncs.o
+tnetfuncs.cc: In function 'double AttractorDistanceForced(int, int, int, int, double, int*, int*, int*, double*, int*)':
+tnetfuncs.cc:421: warning: unused variable 'tableWidth'
+tnetfuncs.cc:429: warning: unused variable 'ipause'
+tnetfuncs.cc: In function 'double initialTemp(double, int, int, int, int, int, double, double, double, int, double*, int*, int*, int*, double*, int*)':
+tnetfuncs.cc:511: warning: unused variable 'ipause'
+tnetfuncs.cc:515: warning: unused variable 'i'
+g++-4.2 -arch i386 -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/i386 -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetpost.cc -o tnetpost.o
+tnetpost.cc: In function 'SEXPREC* tnetpost(SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*)':
+tnetpost.cc:25: warning: unused variable 'ipause'
+tnetpost.cc:27: warning: unused variable 'm0fit'
+tnetpost.cc:28: warning: unused variable 'finalScore'
+tnetpost.cc:30: warning: unused variable 'l0'
+tnetpost.cc:30: warning: unused variable 'stage_count'
+tnetpost.cc:30: warning: unused variable 'tempi'
+tnetpost.cc:30: warning: unused variable 'jtrans'
+tnetpost.cc:30: warning: unused variable 'nTransition'
+tnetpost.cc:85: warning: unused variable 'degreeObjMin'
+tnetpost.cc:86: warning: unused variable 'graphObjMin'
+tnetpost.cc:87: warning: unused variable 'tableObjMin'
+g++-4.2 -arch i386 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/usr/local/lib -o ternarynet.so tnetfit.o tnetfuncs.o tnetpost.o -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/i386
+*** arch - ppc
+g++-4.2 -arch ppc -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/ppc -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetfit.cc -o tnetfit.o
+tnetfit.cc: In function 'SEXPREC* tnetfit(SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*)':
+tnetfit.cc:96: warning: unused variable 'tempi'
+tnetfit.cc:121: warning: 'muci_old' may be used uninitialized in this function
+tnetfit.cc:121: warning: 'sigmaci' may be used uninitialized in this function
+tnetfit.cc:121: warning: 'sigma0' may be used uninitialized in this function
+tnetfit.cc:100: warning: 'newScore' may be used uninitialized in this function
+g++-4.2 -arch ppc -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/ppc -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetfuncs.cc -o tnetfuncs.o
+tnetfuncs.cc: In function 'double AttractorDistanceForced(int, int, int, int, double, int*, int*, int*, double*, int*)':
+tnetfuncs.cc:421: warning: unused variable 'tableWidth'
+tnetfuncs.cc:429: warning: unused variable 'ipause'
+tnetfuncs.cc: In function 'double initialTemp(double, int, int, int, int, int, double, double, double, int, double*, int*, int*, int*, double*, int*)':
+tnetfuncs.cc:511: warning: unused variable 'ipause'
+tnetfuncs.cc:515: warning: unused variable 'i'
+g++-4.2 -arch ppc -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/ppc -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetpost.cc -o tnetpost.o
+tnetpost.cc: In function 'SEXPREC* tnetpost(SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*)':
+tnetpost.cc:25: warning: unused variable 'ipause'
+tnetpost.cc:27: warning: unused variable 'm0fit'
+tnetpost.cc:28: warning: unused variable 'finalScore'
+tnetpost.cc:30: warning: unused variable 'l0'
+tnetpost.cc:30: warning: unused variable 'stage_count'
+tnetpost.cc:30: warning: unused variable 'tempi'
+tnetpost.cc:30: warning: unused variable 'jtrans'
+tnetpost.cc:30: warning: unused variable 'nTransition'
+tnetpost.cc:85: warning: unused variable 'degreeObjMin'
+tnetpost.cc:86: warning: unused variable 'graphObjMin'
+tnetpost.cc:87: warning: unused variable 'tableObjMin'
+g++-4.2 -arch ppc -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/usr/local/lib -o ternarynet.so tnetfit.o tnetfuncs.o tnetpost.o -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/ppc
+*** arch - x86_64
+g++-4.2 -arch x86_64 -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/x86_64 -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetfit.cc -o tnetfit.o
+tnetfit.cc: In function 'SEXPREC* tnetfit(SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*)':
+tnetfit.cc:96: warning: unused variable 'tempi'
+tnetfit.cc:121: warning: 'muci_old' may be used uninitialized in this function
+tnetfit.cc:121: warning: 'sigmaci' may be used uninitialized in this function
+tnetfit.cc:121: warning: 'sigma0' may be used uninitialized in this function
+tnetfit.cc:100: warning: 'newScore' may be used uninitialized in this function
+g++-4.2 -arch x86_64 -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/x86_64 -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetfuncs.cc -o tnetfuncs.o
+tnetfuncs.cc: In function 'double AttractorDistanceForced(int, int, int, int, double, int*, int*, int*, double*, int*)':
+tnetfuncs.cc:421: warning: unused variable 'tableWidth'
+tnetfuncs.cc:429: warning: unused variable 'ipause'
+tnetfuncs.cc: In function 'double initialTemp(double, int, int, int, int, int, double, double, double, int, double*, int*, int*, int*, double*, int*)':
+tnetfuncs.cc:511: warning: unused variable 'ipause'
+tnetfuncs.cc:515: warning: unused variable 'i'
+g++-4.2 -arch x86_64 -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include -I/Library/Frameworks/R.framework/Versions/2.15/Resources/include/x86_64 -DNDEBUG  -I/usr/local/include    -fPIC  -g -O2 -Wall -fasm-blocks -c tnetpost.cc -o tnetpost.o
+tnetpost.cc: In function 'SEXPREC* tnetpost(SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*, SEXPREC*)':
+tnetpost.cc:25: warning: unused variable 'ipause'
+tnetpost.cc:27: warning: unused variable 'm0fit'
+tnetpost.cc:28: warning: unused variable 'finalScore'
+tnetpost.cc:30: warning: unused variable 'l0'
+tnetpost.cc:30: warning: unused variable 'stage_count'
+tnetpost.cc:30: warning: unused variable 'tempi'
+tnetpost.cc:30: warning: unused variable 'jtrans'
+tnetpost.cc:30: warning: unused variable 'nTransition'
+tnetpost.cc:85: warning: unused variable 'degreeObjMin'
+tnetpost.cc:86: warning: unused variable 'graphObjMin'
+tnetpost.cc:87: warning: unused variable 'tableObjMin'
+g++-4.2 -arch x86_64 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/usr/local/lib -o ternarynet.so tnetfit.o tnetfuncs.o tnetpost.o -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+installing to /Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/x86_64
+** R
+** inst
+** preparing package for lazy loading
+** help
+*** installing help indices
+** building package indices ...
+*** tangling vignette sources ...
+   'ternarynet.Rnw' 
+** testing if installed package can be loaded
+
+* DONE (ternarynet)
+
+
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; FIXING LINKS FOR /Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/i386/ternarynet.so
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+
+install_name_tool -change "/usr/local/lib/libgcc_s.1.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libgcc_s.1.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/i386/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libgfortran.2.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libgfortran.2.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/i386/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libreadline.5.2.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libreadline.5.2.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/i386/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libreadline.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libreadline.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/i386/ternarynet.so"
+
+
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; FIXING LINKS FOR /Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/ppc/ternarynet.so
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+
+install_name_tool -change "/usr/local/lib/libgcc_s.1.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libgcc_s.1.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/ppc/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libgfortran.2.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libgfortran.2.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/ppc/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libreadline.5.2.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libreadline.5.2.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/ppc/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libreadline.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libreadline.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/ppc/ternarynet.so"
+
+
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; FIXING LINKS FOR /Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/x86_64/ternarynet.so
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; 
+
+install_name_tool -change "/usr/local/lib/libgcc_s.1.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libgcc_s.1.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/x86_64/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libgfortran.2.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libgfortran.2.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/x86_64/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libreadline.5.2.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libreadline.5.2.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/x86_64/ternarynet.so"
+install_name_tool -change "/usr/local/lib/libreadline.dylib" "/Library/Frameworks/R.framework/Versions/2.15/Resources/lib/libreadline.dylib" "/Users/pkgbuild/packagebuilder/R-libs/ternarynet/libs/x86_64/ternarynet.so"
+
+
+</pre>
+				</div> 
+			
+
+		
+		
+			<hr>
+			<a name="lamb2_anchor"></a>
+			<h2>lamb2 Summary</h2> 
+			<div class="lamb2" style="margin-left: 12px;"> 
+				<table> 
+					<tbody><tr><td><b>Package</b>: <span id="lamb2_package_name">ternarynet</span></td></tr> 
+					<tr><td><b>Version</b>: <span id="lamb2_version">0.1.6</span></td></tr> 
+					<tr><td><b>RVersion</b>: <span id="lamb2_r_version">R Under development (unstable) (2011-10-25 r57433)</span></td></tr> 
+					<tr><td><b>BuildCommand</b>: <span id="lamb2_command">/home/biocbuild/bbs-2.10-bioc/R/bin/R CMD build --keep-empty-dirs --no-resave-data --no-vignettes ternarynet</span></td></tr> 
+					<tr><td><b>CheckCommand</b>: <span id="lamb2_check_command">ls</span></td></tr> 
+					<tr><td><b>BuildBinCommand</b>: <span id="lamb2_buildbin_command"></span></td></tr> 
+					<tr><td><b>StartedAt</b>: <span id="lamb2_started_at">2011-11-22 10:07:10.867410</span></td></tr> 
+					<tr><td><b>EndedAt</b>: <span id="lamb2_ended_at">2011-11-22 10:07:11.509899</span></td></tr> 
+					<tr><td><b>ElapsedTime</b>: <span id="lamb2_elapsed_time">0:00:00.444050</span></td></tr> 
+					<tr><td><b>RetCode</b>: <span id="lamb2_ret_code">0</span></td></tr> 
+					<tr><td><b>Status</b>: <span id="lamb2_status" class="lamb2_EVENT OK">&nbsp;&nbsp;OK&nbsp;&nbsp;</span></td></tr> 
+					<tr><td><b>PackageFile</b>: <span id="lamb2_build_product"><a href="http://bioconductor-test.org/scratch-repos/2.15/src/contrib">ternarynet_0.1.6.tar.gz</a></span></td></tr> 
+					<tr><td><b>PackageFileSize</b>: <span id="lamb2_file_size">22.45</span> <a href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</a></td></tr> 
+					<tr><td><b>BuildID:</b>: <span id="lamb2_build_id">ternarynet_20111122100709</span></td></tr> 
+					<tr><td><b>Pre/PostProcessing</b>: <span id="lamb2_post_processing">curl to log into tracker returned status 0...curl of tarball completed with status 0...untar of tarball completed with status 0...Result of installing dependencies: 0...Installing package...Installed package...Pruning older packages from repository...Set read permissions on build product...Copied build file to repository...Updated packages list...Synced repository to website...DONE.</span></td></tr> 
+					<tr><td><b>InstallCommand</b>: <br><pre id="lamb2_install_command">source("http://bioconductor.org/scratch-repos/pkgInstall.R")
+pkgInstall("ternarynet")</pre></td></tr>
+				</tbody></table> 
+			</div> 
+			<hr> 
+				<h3>lamb2 BUILD SRC output</h3> 
+				<div class="lamb2" style="margin-left: 12px;"> 
+					<pre id="lamb2_console" style="font-size: smaller; padding: 2px;">* checking for file ‘ternarynet/DESCRIPTION’ ... OK
+* preparing ‘ternarynet’:
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* checking for LF line-endings in source and make files
+* checking for empty or unneeded directories
+* building ‘ternarynet_0.1.6.tar.gz’
+
+</pre>
+				</div> 
+
+			<hr> 
+				<h3>lamb2 CHECK output</h3> 
+				<div class="lamb2" style="margin-left: 12px;"> 
+					<pre id="lamb2_check_console" style="font-size: smaller; padding: 2px;">builder.log
+cookies.txt
+installDeps.log
+manifest.json
+Rcheck.out
+R.out
+ternarynet
+ternarynet_0.1.6.tar.gz
+ternarynet_0.1.6.tar.gz.orig
+</pre>
+				</div> 
+
+            <hr> 
+				<h3>lamb2 BUILD BIN output</h3> 
+				<div class="lamb2" style="margin-left: 12px;"> 
+					<pre id="lamb2_buildbin_console" style="font-size: smaller; padding: 2px;"></pre>
+				</div> 
+			
+
+		
+		</div>
+			
+		<div id="summary_template" style="display: none; ">
+			<hr>
+			<a name="NODENAME_anchor"></a>
+			<h2>NODENAME Summary</h2> 
+			<div class="NODENAME" style="margin-left: 12px;"> 
+				<table> 
+					<tbody><tr><td><b>Package</b>: <span id="NODENAME_package_name"></span></td></tr> 
+					<tr><td><b>Version</b>: <span id="NODENAME_version"></span></td></tr> 
+					<tr><td><b>RVersion</b>: <span id="NODENAME_r_version"></span></td></tr> 
+					<tr><td><b>BuildCommand</b>: <span id="NODENAME_command"></span></td></tr> 
+					<tr><td><b>CheckCommand</b>: <span id="NODENAME_check_command"></span></td></tr> 
+					<tr><td><b>BuildBinCommand</b>: <span id="NODENAME_buildbin_command"></span></td></tr> 
+					<tr><td><b>StartedAt</b>: <span id="NODENAME_started_at"></span></td></tr> 
+					<tr><td><b>EndedAt</b>: <span id="NODENAME_ended_at"></span></td></tr> 
+					<tr><td><b>ElapsedTime</b>: <span id="NODENAME_elapsed_time"></span></td></tr> 
+					<tr><td><b>RetCode</b>: <span id="NODENAME_ret_code"></span></td></tr> 
+					<tr><td><b>Status</b>: <span id="NODENAME_status" class="IN_PROGRESS NODENAME_EVENT">&nbsp;IN&nbsp;PROGRESS&nbsp;</span></td></tr> 
+					<tr><td><b>PackageFile</b>: <span id="NODENAME_build_product"></span></td></tr> 
+					<tr><td><b>PackageFileSize</b>: <span id="NODENAME_file_size"></span> <a href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</a></td></tr> 
+					<tr><td><b>BuildID:</b>: <span id="NODENAME_build_id"></span></td></tr> 
+					<tr><td><b>Pre/PostProcessing</b>: <span id="NODENAME_post_processing"></span></td></tr> 
+					<tr><td><b>InstallCommand</b>: <br><pre id="NODENAME_install_command"></pre></td></tr>
+				</tbody></table> 
+			</div> 
+			<hr> 
+				<h3>NODENAME BUILD SRC output</h3> 
+				<div class="NODENAME" style="margin-left: 12px;"> 
+					<pre id="NODENAME_console" style="font-size: smaller; padding: 2px;"></pre>
+				</div> 
+
+			<hr> 
+				<h3>NODENAME CHECK output</h3> 
+				<div class="NODENAME" style="margin-left: 12px;"> 
+					<pre id="NODENAME_check_console" style="font-size: smaller; padding: 2px;"></pre>
+				</div> 
+
+            <hr> 
+				<h3>NODENAME BUILD BIN output</h3> 
+				<div class="NODENAME" style="margin-left: 12px;"> 
+					<pre id="NODENAME_buildbin_console" style="font-size: smaller; padding: 2px;"></pre>
+				</div> 
+			
+
+		
+		</div>
+	
+	
+	    <div class="hideMe" style="display: none; ">
+	        <table id="appendMe">
+                <tbody><tr><td align="left" class="node NODENAME">
+                	<i>NODENAME</i>&nbsp;
+                </td>
+                <td align="left" class="node NODENAME">
+                    <span style="font-size: smaller;" id="nodeinfo_NODENAME"></span>
+                        &nbsp;
+                </td>
+                <td align="left" class="status NODENAME buildsrc">
+                    <span id="NODENAME_buildstatus">
+                        <a href="#NODENAME_anchor">
+                            <span class="IN_PROGRESS NODENAME_EVENT">
+                                &nbsp;IN&nbsp;PROGRESS&nbsp;
+                            </span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status NODENAME checksrc">
+                    <span id="NODENAME_checkstatus">
+                        <a href="#NODENAME_anchor">
+                            <span id="NODENAME_check_event" class="IN_PROGRESS NODENAME_CHECK_EVENT">
+                            </span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status NODENAME buildbin">
+                    <span id="NODENAME_buildbinstatus">
+                        <a href="#NODENAME_anchor">
+                            <span id="NODENAME_buildbin_event" class="IN_PROGRESS NODENAME_BUILDBIN_EVENT">
+                            </span>
+                        </a>
+                    </span>
+                </td>
+
+                <td align="left" class="status NODENAME postprocessing">
+                    <span id="NODENAME_postprocessingstatus">
+                        <a href="#NODENAME_anchor">
+                            <span id="NODENAME_postprocessing_event" class="IN_PROGRESS NODENAME_POSTPROCESSING_EVENT">
+                            </span>
+                        </a>
+                    </span>
+                </td>
+
+
+            </tr></tbody></table>
+            
+            
+            <table>
+                <tbody><tr id="get_header_here">
+                    <th>Hostname</th>
+        			<th>OS /Arch</th>
+        			<th>BUILD</th>
+        			<th>CHECK</th>
+        			<th>BUILD BIN</th>
+        			<th>POST-PROCESSING</th>
+                </tr>
+            </tbody></table>
+	    </div>
+		
+			
+	
+</body></html>
