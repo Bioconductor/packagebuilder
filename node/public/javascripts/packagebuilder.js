@@ -34,6 +34,7 @@ var gotDcfInfo = false;
 var nodes = [];
 var handledInvalidUrl = false;
 var packageName;
+var gotFirstNode = false;
 
 jQuery(function(){
   
@@ -236,8 +237,9 @@ var gotNewNode = function(message) {
     jQuery("#" + nodeName + "_r_version").html(message['r_version']);
     jQuery("#" + nodeName + "_build_id").html(message['job_id']);
     
-    //jQuery("#status_header").append(jQuery("#get_header_here").html());
-    
+    if (!gotFirstNode)
+        jQuery("#status_header").append(jQuery("#get_header_here").html());
+    gotFirstNode = true;
 }
 
 
