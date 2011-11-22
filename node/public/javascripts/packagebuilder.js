@@ -232,7 +232,7 @@ var gotNewNode = function(message) {
     
     
     jQuery("#nodeinfo_append_to_me").append(s);
-    jQuery("#nodeinfo_" + nodeName).html(os + "/" + "arch");
+    jQuery("#nodeinfo_" + nodeName).html(os + "/" + arch);
     
     var summaryTemplate = jQuery("#summary_template").html();
     
