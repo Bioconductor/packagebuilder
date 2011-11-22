@@ -370,8 +370,8 @@ def check_package():
         libdir = "%s.buildbin-libdir" % pkg
         if (win_multiarch):
             prefix = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build ",
-              "--merge-multiarch --library=%s %s >%s-install.out 2>&1 && ") % (\
-              libdir, libdir, os.getenv("BBS_R_CMD"), libdir, tarball, pkg)
+              "--merge-multiarch --library=%s %s >%s-install.out 2>&1 && ") % \
+              (libdir, libdir, os.getenv("BBS_R_CMD"), libdir, tarball, pkg)
             
             extra_flags = " --force-multiarch --library=%s" % libdir
             
