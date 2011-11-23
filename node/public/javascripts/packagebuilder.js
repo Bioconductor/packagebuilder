@@ -359,7 +359,7 @@ var handleBuildBinComplete = function(message) {
 var handlePostProcessing = function(message) {
     var nodeName = message['builder_id'];
     if (message['retcode'] != 0) {
-        handleEvent("ERROR", nodeName, "build");
+        handleEvent("ERROR", nodeName, "postprocessing"); 
         message['body'] = "ERROR during step: " + message['body'];
     }
     selector = "#" + nodeName + "_post_processing";
