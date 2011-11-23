@@ -421,6 +421,8 @@ def win_multiarch_buildbin(message_stream):
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
         retcode = _call("rm -rf %s" % libdir, False)
+    if not (os.path.exists(libdir)):
+        os.mkdir(libdir)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
       (os.getenv("BBS_R_CMD"), libdir, tarball)
     return do_build(cmd, "buildbin", False)
@@ -471,12 +473,6 @@ def do_build(cmd, message_stream, source):
     print("starting build tailer with message %s." % message_stream)
     background = Tailer(outfile, message_stream)
     background.start()
-    if (not source):
-        tarball = get_source_tarball_name()
-        pkg = tarball.split("_")[0]
-        libdir = "%s.buildbin-libdir" % pkg
-        if (os.path.exists(libdir)):
-            retcode = _call("rm -rf %s" % libdir, False)
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
     pid = pope.pid
@@ -529,7 +525,10 @@ def build_package(source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
         libdir = "libdir"
-        os.mkdir("libdir")
+        if os.path.exists(libdir):
+            _call("rm -rf %s" % libdir, False)
+        if (not (os.path.exists(libdir))):
+            os.mkdir("libdir")
         pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
 
         if pkg_type == "mac.binary.leopard":
