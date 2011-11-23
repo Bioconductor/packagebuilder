@@ -411,8 +411,10 @@ def win_multiarch_check():
         send_message({"status": "clear_check_console"})
         # send a message to clear the output of the check console
         retcode = do_check(cmd)
-
-    # indicate whether check succeeds
+    else:
+        send_message({"status": "check_complete", "result_code": retcode, "warnings": False,
+            "body": "Pre-check installation failed with status %d" % retcode,
+            "elapsed_time": 999})
     return (retcode)
         
     
