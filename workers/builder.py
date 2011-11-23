@@ -584,7 +584,7 @@ def propagate_package():
     
     if (platform.system() == "Windows"):
         retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'rm -f %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"], 
-        repos, package_name))
+          repos, package_name))
     else:
         retcode = ssh("rm -f %s" % files_to_delete)
     
@@ -598,10 +598,12 @@ def propagate_package():
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
         send_message("chmod_retcode=%d" % chmod_retcode)
-        command = "c:/cygwin/bin/scp.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2.fhcrc.org:%s/" % (build_product, repos)
+        command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2.fhcrc.org:%s/" % (os.environ["PACKAGEBUILDER_HOME"],
+          build_product, repos)
         print("command = %s" % command)
         retcode = subprocess.call(command)
-        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'chmod a+r %s/%s_*.zip'" % (repos, package_name))
+        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'chmod a+r %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"],
+          repos, package_name))
         print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
         print("chmod code not run, because platform.system() == %s" % platform.system())
