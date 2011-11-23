@@ -399,8 +399,8 @@ def win_multiarch_check():
     suffix = ""
     pkg = tarball.split("_")[0]
     libdir = "%s.buildbin-libdir" % pkg
-    retcode = _call("rm -rf %s" % libdir)
-    retcode = _call("mkdir %s" % libdir)
+    retcode = _call("rm -rf %s" % libdir, False)
+    retcode = _call("mkdir %s" % libdir, False)
     
     retcode = win_multiarch_buildbin("checking")
     if (retcode == 0):
@@ -498,7 +498,7 @@ def do_build(cmd, message_stream, source):
         tarball = get_source_tarball_name()
         pkg = tarball.split("_")[0]
         libdir = "%s.buildbin-libdir" % pkg
-        retcode = _call("rm -rf %s" % libdir)
+        retcode = _call("rm -rf %s" % libdir, False)
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
     pid = pope.pid
@@ -561,7 +561,7 @@ def build_package(source_build):
             if (win_multiarch):
                 pkg = package_name.split("_")[0]
                 libdir = "%s.buildbin-libdir" % pkg
-                retcode = _call("rm -rf %s" % libdir)
+                retcode = _call("rm -rf %s" % libdir, False)
                 r_cmd = ("%s CMD INSTALL --build "
                   "--merge-multiarch --library=%s %s") % (\
                   os.getenv("BBS_R_CMD"), libdir, get_source_tarball_name())
