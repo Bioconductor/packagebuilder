@@ -514,6 +514,7 @@ def do_build(cmd, message_stream, source):
     background.join()
     print("after joining background thread...")
     print "Done"
+    return(retcode)
     
     
 def build_package(source_build):
