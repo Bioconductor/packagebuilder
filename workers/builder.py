@@ -428,7 +428,7 @@ def win_multiarch_buildbin(message_stream):
         os.mkdir(libdir)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
       (os.getenv("BBS_R_CMD"), libdir, tarball)
-    return do_build(cmd, "buildbin", False)
+    return do_build(cmd, message_stream, False)
 
 def check_package():
     send_message({"status": "starting_check", "body": ""}) # apparently ignored
