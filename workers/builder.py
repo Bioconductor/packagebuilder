@@ -827,10 +827,21 @@ def is_valid_url():
         return False
     
     if svn_url:
+            
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-        description = subprocess.Popen(["curl", "-k", "-s",
-            "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
-            description_url], stdout=subprocess.PIPE).communicate()[0]
+
+        timeout = 10
+        i  = 0
+        description = None
+        while i < timeout:
+            i += 1
+            description = subprocess.Popen(["curl", "-k", "-s",
+                "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+                description_url], stdout=subprocess.PIPE).communicate()[0]
+            time.sleep(0.5)
+            if (len(description) > 0):
+                break
+
         if (len(description) == 0  or description.lower().find("404 not found") > -1):
             return False
         return True
