@@ -571,7 +571,7 @@ def build_package(source_build):
     print("before build, working dir is %s" % working_dir)
     
     if ((not source_build) and win_multiarch):
-        retcode = win_multiarch_buildbin("buildmsg")
+        retcode = win_multiarch_buildbin(buildmsg)
     else:
         retcode = do_build(r_cmd, buildmsg, source_build)
     
