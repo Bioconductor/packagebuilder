@@ -570,7 +570,7 @@ def build_package(source_build):
     send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     
-    if ((not source_build) and win_multiarch):
+    if ((not source_build) and win_multiarch and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
     else:
         retcode = do_build(r_cmd, buildmsg, source_build)
@@ -838,6 +838,7 @@ def is_valid_url():
             description = subprocess.Popen(["curl", "-k", "-s",
                 "--user", "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
                 description_url], stdout=subprocess.PIPE).communicate()[0]
+            print ("possibly bogus svn output, trying again...")
             time.sleep(0.5)
             if (len(description) > 0):
                 break
