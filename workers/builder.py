@@ -523,6 +523,7 @@ def svn_info():
     print "svn_url is %s" % manifest['svn_url']
     svn_info = subprocess.Popen(["svn", "info", manifest['svn_url']], \
         stdout=subprocess.PIPE).communicate()[0]
+    print("svn info is:\n%s" % svn_info)
     dcf_records = dcf.DcfRecordParser(svn_info.rstrip().split("\n"))
     keys = ['Path', 'URL', 'Repository Root', 'Repository UUID', 'Revision', 'Node Kind',
         'Last Changed Author', 'Last Changed Rev', 'Last Changed Date']
