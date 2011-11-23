@@ -355,7 +355,14 @@ def get_source_tarball_name():
             break
     return(tarball)
     
-def do_check(outfile, out_fh, cmd, start_time):
+def do_check(cmd):
+    outfile = "Rcheck.out"
+    if (os.path.exists(outfile)):
+        os.remove(outfile)
+    
+    out_fh = open(outfile, "w")
+    start_time = datetime.datetime.now()
+    
     background = Tailer(outfile, "checking")
     background.start()
     pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
@@ -384,10 +391,71 @@ def do_check(outfile, out_fh, cmd, start_time):
     
     return (retcode)
     
+
+def win_multiarch_check():
+    tarball = get_source_tarball_name()
+    extra_flags = ""
+    prefix = ""
+    suffix = ""
+    pkg = tarball.split("_")[0]
+    libdir = "%s.buildbin-libdir" % pkg
+    retcode = _call("rm -rf %s" % libdir)
+    retcode = _call("mkdir %s" % libdir)
     
+    retcode = win_multiarch_buildbin("checking")
+    if (retcode == 0):
+        # send a message to clear the output of the check console
+        cmd = "%s CMD check --no-vignettes --timings --force-multiarch"
+        " --library=%s --install=\"check:%s-install.out\" %s", (os.getenv("BBS_R_CMD"),
+          libdir, pkg, tarball)
+        check_retcode = do_check(cmd)
+        # indicate that check has succeeded
+    else:
+        # indicate that check has failed
+        pass
+    
+    prefix = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build "
+      "--merge-multiarch --library=%s %s >%s-install.out 2>&1 && ") % \
+      (libdir, libdir, os.getenv("BBS_R_CMD"), libdir, tarball, pkg)
+    
+    extra_flags = " --force-multiarch --library=%s" % libdir
+    
+    suffix = " && mv %s/* %s.Rcheck/ && rmdir %s" % (\
+      libdir, pkg, libdir)
+
+    segs = cmd.split("&&")
+    for seg in segs:
+        seg = seg.strip()
+        if (seg.startswith(os.getenv("BBS_R_CMD"))):
+            retcode = do_check(outfile, out_fh, seg, start_time)
+        else:
+            pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+            pid = pope.pid
+            retcode = pope.wait()
+            out_fh.close()
+            if retcode != 0:
+                msg = "A pre- or post-check step failed.\n"
+                if (os.stat(outfile).st_size > 0):
+                    f = open(outfile)
+                    msg += f.read()
+                    f.close()
+                elapsed_time = str(stop_time - start_time)
+                send_message({"status": "check_complete", "result_code": retcode,
+                  "warnings": False, "elapsed_time": elapsed_time, "body": msg})
+                return(retcode)
+        
+    
+def win_multiarch_buildbin(message_stream):
+    pass
 
 def check_package():
     send_message({"status": "starting_check", "body": ""})
+
+    win_multiarch = True # todo - make this a checkbox
+    if (platform.system() == "Windows" and win_muliarch):
+        return(win_multiarch_check())
+    
+
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
@@ -398,63 +466,48 @@ def check_package():
     
     tarball = get_source_tarball_name()
     extra_flags = ""
-    prefix = ""
-    suffix = ""
     
-    win_multiarch = True # todo - make this a checkbox
+    
     if (platform.system() == "Darwin"):
         extra_flags = " --no-multiarch "
-    elif (platform.system() == "Windows" and win_multiarch):
-        pkg = tarball.split("_")[0]
-        libdir = "%s.buildbin-libdir" % pkg
-        if (win_multiarch):
-            prefix = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build "
-              "--merge-multiarch --library=%s %s >%s-install.out 2>&1 && ") % \
-              (libdir, libdir, os.getenv("BBS_R_CMD"), libdir, tarball, pkg)
-            
-            extra_flags = " --force-multiarch --library=%s" % libdir
-            
-            suffix = " && mv %s/* %s.Rcheck/ && rmdir %s" % (\
-              libdir, pkg, libdir)
     
-    cmd = "%s %s CMD check --no-vignettes --timings %s %s %s" % (prefix,
-        os.getenv('BBS_R_CMD'), extra_flags, tarball, suffix)
-    cmd = cmd.strip()
-    
-    
-    #cmd = "ls" # COMMENT THIS OUT!!!!!!
-    
+    cmd = "%s CMD check --no-vignettes --timings %s %s" % (\
+        os.getenv('BBS_R_CMD'), extra_flags, tarball)
     
     send_message({"status": "check_cmd", "body": cmd})
     
-    
-    if (platform.system() == "Windows" and win_multiarch):
-        segs = cmd.split("&&")
-        for seg in segs:
-            seg = seg.strip()
-            if (seg.startswith(os.getenv("BBS_R_CMD"))):
-                retcode = do_check(outfile, out_fh, seg, start_time)
-            else:
-                pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
-                pid = pope.pid
-                retcode = pope.wait()
-                out_fh.close()
-                if retcode != 0:
-                    msg = "A pre- or post-check step failed.\n"
-                    if (os.stat(outfile).st_size > 0):
-                        f = open(outfile)
-                        msg += f.read()
-                        f.close()
-                    elapsed_time = str(stop_time - start_time)
-                    send_message({"status": "check_complete", "result_code": retcode,
-                      "warnings": False, "elapsed_time": elapsed_time, "body": msg})
-                    return(retcode)
-    else:
-        retcode = do_check(outfile, out_fh, cmd, start_time)
+    retcode = do_check(outfile, out_fh, cmd, start_time)
     
     return (retcode)
 
 
+
+def do_buildbin(message_stream):
+    outfile = "Rbuildbin.out"
+    if (os.path.exists(outfile)):
+        os.remove(outfile)
+    out_fh = open(outfile, "w")
+    start_time = datetime.datetime.now()
+    print("starting build tailer with message %s." % message_stream)
+    background = Tailer(outfile, message_stream)
+    background.start()
+    pope  = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    
+    pid = pope.pid
+    
+    retcode = pope.wait()
+
+    stop_time = datetime.datetime.now()
+    elapsed_time = str(stop_time - start_time)
+    background.stop()
+    out_fh.close()
+    
+    print("before joining background thread...")
+    background.join()
+    print("after joining background thread...")
+    print "Done"
+    
+    
 def build_package(source_build):
     global pkg_type
 
@@ -477,21 +530,11 @@ def build_package(source_build):
     global warnings
     message_sequence = 1
 
-
-    
-    outfile = "R.out"
-    if (os.path.exists(outfile)):
-        os.remove(outfile)
     flags = "--keep-empty-dirs --no-resave-data"
         
     
     #flags += " --no-vignettes"  ## be sure to comment this line!!!!!!! (used for testing, to speed up builds)
     
-    out_fh = open(outfile, "w")
-    start_time = datetime.datetime.now()
-    print("starting build tailer with message %s." % buildmsg)
-    background = Tailer(outfile, buildmsg)
-    background.start()
     
     win_multiarch = True # todo make this a checkbox
     
@@ -520,25 +563,15 @@ def build_package(source_build):
     status = None
     if (source_build):
         status = "r_cmd"
+        outfile = "R.out"
     else:
         status = "r_buildbin_cmd"
+        outfile = "Rbuildbin.out"
     send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
-    pope  = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
-    pid = pope.pid
     
-    retcode = pope.wait()
-
-    stop_time = datetime.datetime.now()
-    elapsed_time = str(stop_time - start_time)
-    background.stop()
-    out_fh.close()
-    
-    print("before joining background thread...")
-    background.join()
-    print("after joining background thread...")
-    print "Done"
+    retcode = do_buildbin(buildmsg)
     
     # check for warnings
     out_fh = open(outfile)
