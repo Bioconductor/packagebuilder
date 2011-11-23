@@ -50,12 +50,19 @@ class Tailer(threading.Thread):
                 if (num_bytes_to_read == 0):
                     print("0 bytes remaining to read, exiting tailer...")
                     return()
+                
                 f = open(self.filename, 'r')
+                print("hi1")
                 f.seek(prevsize)
+                print("hi2")
                 bytes = f.read(num_bytes_to_read)
+                print("hi3")
                 f.close()
+                print("hi4")
                 print bytes,
+                print("hi5")
                 sys.stdout.flush()
+                print("hi6")
                 send_message({"status": self.status, "sequence": self.message_sequence, "body": bytes})
                 prevsize = st.st_size
                 print "Thread says I'm done %s" % self.status
