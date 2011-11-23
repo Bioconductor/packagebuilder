@@ -494,8 +494,11 @@ def do_build(cmd, message_stream, source):
     print("starting build tailer with message %s." % message_stream)
     background = Tailer(outfile, message_stream)
     background.start()
-    libdir = dante
-    retcode = _call("rm -rf %s" % libdir)
+    if (not source):
+        tarball = get_source_tarball_name()
+        pkg = tarball.split("_")[0]
+        libdir = "%s.buildbin-libdir" % pkg
+        retcode = _call("rm -rf %s" % libdir)
     pope  = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
     pid = pope.pid
