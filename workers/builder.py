@@ -482,8 +482,11 @@ def check_package():
 
 
 
-def do_buildbin(message_stream):
-    outfile = "Rbuildbin.out"
+def do_build(cmd, message_stream, source):
+    if source:
+        outfile = "R.out"
+    else:
+        outfile = "Rbuildbin.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
     out_fh = open(outfile, "w")
@@ -491,6 +494,8 @@ def do_buildbin(message_stream):
     print("starting build tailer with message %s." % message_stream)
     background = Tailer(outfile, message_stream)
     background.start()
+    libdir = dante
+    retcode = _call("rm -rf %s" % libdir)
     pope  = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
     pid = pope.pid
@@ -552,8 +557,9 @@ def build_package(source_build):
             if (win_multiarch):
                 pkg = package_name.split("_")[0]
                 libdir = "%s.buildbin-libdir" % pkg
-                r_cmd = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build "
-                  "--merge-multiarch --library=%s %s") % (libdir, libdir,
+                retcode = _call("rm -rf %s" % libdir)
+                r_cmd = ("%s CMD INSTALL --build "
+                  "--merge-multiarch --library=%s %s") % (\
                   os.getenv("BBS_R_CMD"), libdir, get_source_tarball_name())
             else:
                 r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
@@ -571,7 +577,7 @@ def build_package(source_build):
     print("before build, working dir is %s" % working_dir)
     
     
-    retcode = do_buildbin(buildmsg)
+    retcode = do_build(r_cmd, buildmsg, source_build)
     
     # check for warnings
     out_fh = open(outfile)
