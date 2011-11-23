@@ -430,6 +430,7 @@ def win_multiarch_buildbin(message_stream):
     if not (os.path.exists(libdir)):
         os.mkdir(libdir)
     print("after mkdir: does %s exist? %s" % (libdir, os.path.exists(libdir)))
+    time.sleep(1)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
       (os.getenv("BBS_R_CMD"), libdir, tarball)
     return do_build(cmd, message_stream, False)
