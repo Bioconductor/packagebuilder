@@ -52,17 +52,11 @@ class Tailer(threading.Thread):
                     return()
                 
                 f = open(self.filename, 'r')
-                print("hi1")
                 f.seek(prevsize)
-                print("hi2")
                 bytes = f.read(num_bytes_to_read)
-                print("hi3")
                 f.close()
-                print("hi4")
                 print bytes,
-                print("hi5")
                 sys.stdout.flush()
-                print("hi6")
                 send_message({"status": self.status, "sequence": self.message_sequence, "body": bytes})
                 prevsize = st.st_size
                 print "Thread says I'm done %s" % self.status
@@ -360,6 +354,37 @@ def get_source_tarball_name():
             tarball = file
             break
     return(tarball)
+    
+def do_check(outfile, out_fh, cmd, start_time):
+    background = Tailer(outfile, "checking")
+    background.start()
+    pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    pid = pope.pid
+    
+    retcode = pope.wait()
+    
+    stop_time = datetime.datetime.now()
+    elapsed_time = str(stop_time - start_time)
+    out_fh.close()
+    background.stop()
+
+    background.join()
+    # check for warnings
+    out_fh = open(outfile)
+    warnings = False
+    for line in out_fh:
+        if line.rstrip().endswith("WARNING"):
+            warnings = True
+            break
+    out_fh.close()
+    
+    send_message({"status": "check_complete", "result_code": retcode, "warnings": warnings,
+        "body": "Check completed with status %d" % retcode, "elapsed_time": elapsed_time})
+        
+    
+    return (retcode)
+    
+    
 
 def check_package():
     send_message({"status": "starting_check", "body": ""})
@@ -379,7 +404,7 @@ def check_package():
     win_multiarch = True # todo - make this a checkbox
     if (platform.system() == "Darwin"):
         extra_flags = " --no-multiarch "
-    elif (platform.system() == "Windows"):
+    elif (platform.system() == "Windows" and win_multiarch):
         pkg = tarball.split("_")[0]
         libdir = "%s.buildbin-libdir" % pkg
         if (win_multiarch):
@@ -396,38 +421,36 @@ def check_package():
         os.getenv('BBS_R_CMD'), extra_flags, tarball, suffix)
     cmd = cmd.strip()
     
+    
     #cmd = "ls" # COMMENT THIS OUT!!!!!!
     
     
     send_message({"status": "check_cmd", "body": cmd})
     
-    background = Tailer(outfile, "checking")
-    background.start()
-    pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
-    pid = pope.pid
     
-    retcode = pope.wait()
-    
-    stop_time = datetime.datetime.now()
-    elapsed_time = str(stop_time - start_time)
-    out_fh.close()
-    background.stop()
-
-    background.join()
-    
-    
-    # check for warnings
-    out_fh = open(outfile)
-    warnings = False
-    for line in out_fh:
-        if line.rstrip().endswith("WARNING"):
-            warnings = True
-            break
-    out_fh.close()
-    
-    send_message({"status": "check_complete", "result_code": retcode, "warnings": warnings,
-        "body": "Check completed with status %d" % retcode, "elapsed_time": elapsed_time})
-        
+    if (platform.system() == "Windows" and win_multiarch):
+        segs = cmd.split("&&")
+        for seg in segs:
+            seg = seg.strip()
+            if (seg.startswith(os.getenv("BBS_R_CMD"))):
+                retcode = do_check(outfile, out_fh, seg, start_time)
+            else:
+                pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+                pid = pope.pid
+                retcode = pope.wait()
+                out_fh.close()
+                if retcode != 0:
+                    msg = "A pre- or post-check step failed.\n"
+                    if (os.stat(outfile).st_size > 0):
+                        f = open(outfile)
+                        msg += f.read()
+                        f.close()
+                    elapsed_time = str(stop_time - start_time)
+                    send_message({"status": "check_complete", "result_code": retcode,
+                      "warnings": False, "elapsed_time": elapsed_time, "body": msg})
+                    return(retcode)
+    else:
+        retcode = do_check(outfile, out_fh, cmd, start_time)
     
     return (retcode)
 
