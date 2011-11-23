@@ -110,9 +110,6 @@ def send_dcf_info(dcf_file):
         "maintainer": dcf_file.getValue("Maintainer"), "version": dcf_file.getValue("Version")})
 
 def is_build_required(manifest):
-    if ("force" in manifest.keys()):
-        if (manifest['force'] == True):
-            return(True)
     
     global package_name
     package_name = manifest['job_id'].split("_")[0]
@@ -138,6 +135,11 @@ def is_build_required(manifest):
 
         
         svn_version = dcf_file.getValue("Version")
+
+        if ("force" in manifest.keys()):
+            if (manifest['force'] == True):
+                return(True)
+
     else:
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
