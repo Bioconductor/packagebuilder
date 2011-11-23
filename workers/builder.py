@@ -42,6 +42,9 @@ class Tailer(threading.Thread):
             
             if self.stopped():
                 print ("stopped() == True (%s)" % self.status)
+                if (st.st_size == 0):
+                    print("0 bytes in output file, exiting...")
+                    return()
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
