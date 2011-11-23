@@ -406,6 +406,8 @@ def win_multiarch_check():
       libdir, pkg, tarball)
     send_message({"status": "check_cmd", "body": cmd})
     
+    send_message({"status": "checking", "sequence": 0, "body":\
+      "Installing package prior to check...\n\n"})
     retcode = win_multiarch_buildbin("checking")
     if (retcode == 0):
         send_message({"status": "clear_check_console"})
@@ -424,6 +426,7 @@ def win_multiarch_buildbin(message_stream):
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
         retcode = _call("rm -rf %s" % libdir, False)
+    print("does %s exist? %s" % (libdir, os.path.exists(libdir)))
     if not (os.path.exists(libdir)):
         os.mkdir(libdir)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
@@ -807,6 +810,7 @@ def get_node_info():
 
 
 def is_valid_url():
+    # todo bulletproof this; sometimes fails bogusly on windows
     if (manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
         svn_url = True
     elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1): # todo, ensure .tar.gz end
