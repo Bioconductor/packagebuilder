@@ -394,22 +394,21 @@ def do_check(cmd):
 
 def win_multiarch_check():
     tarball = get_source_tarball_name()
-    extra_flags = ""
-    prefix = ""
-    suffix = ""
     pkg = tarball.split("_")[0]
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
         retcode = _call("rm -rf %s" % libdir, False)
     if (not os.path.exists(libdir)):
-        retcode = _call("mkdir %s" % libdir, False)
+        os.mkdir(libdir)
     
     retcode = win_multiarch_buildbin("checking")
     if (retcode == 0):
+        send_message({"status": "clear_check_console"})
         # send a message to clear the output of the check console
         cmd = "%s CMD check --no-vignettes --timings --force-multiarch"
         " --library=%s --install=\"check:%s-install.out\" %s", (os.getenv("BBS_R_CMD"),
           libdir, pkg, tarball)
+        send_message({"status": "check_cmd", "body": cmd})
         retcode = do_check(cmd)
 
     # indicate whether check succeededs
@@ -417,7 +416,14 @@ def win_multiarch_check():
         
     
 def win_multiarch_buildbin(message_stream):
-    pass
+    tarball = get_source_tarball_name()
+    pkg = tarball.split("_")[0]
+    libdir = "%s.buildbin-libdir" % pkg
+    if (os.path.exists(libdir)):
+        retcode = _call("rm -rf %s" % libdir, False)
+    cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
+      (os.getenv("BBS_R_CMD"), libdir, tarball)
+    return do_build(cmd, "buildbin", False)
 
 def check_package():
     send_message({"status": "starting_check", "body": ""})

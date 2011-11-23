@@ -125,6 +125,9 @@ jQuery(function(){
         case 'checking':
             handleChecking(obj);
             break;
+        case 'clear_check_console':
+            handleClearCheckConsole(obj);
+            break;
         case 'buildingbin':
             handleBuildingBin(obj);
             break;
@@ -184,6 +187,11 @@ var handleSvnInfo = function(message) {
     jQuery("#svn_last_changed_rev").html(message['Last Changed Rev']);
     jQuery("#svn_revision").html(message['Revision']);
     jQuery("#svn_last_changed_date").html(message['Last Changed Date']);
+}
+
+var handleClearCheckConsole = function(message) {
+    var nodeName = message['builder_id'];
+    jQuery("#" + nodeName + "_check_console").html("");
 }
 
 var handleDcfInfo = function(message) {
