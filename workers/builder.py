@@ -144,6 +144,11 @@ def is_build_required(manifest):
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
         svn_version = pkgname.split("_")[1]
+        
+        if ("force" in manifest.keys()):
+            if (manifest['force'] == True):
+                return(True)
+        
             
     
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
@@ -604,6 +609,8 @@ def build_package(source_build):
 
 def svn_info():
     #global manifest
+    
+    # todo - make more bulletproof 
     print "svn_url is %s" % manifest['svn_url']
     svn_info = subprocess.Popen(["svn", "info", manifest['svn_url']], \
         stdout=subprocess.PIPE).communicate()[0]
