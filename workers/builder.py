@@ -493,7 +493,9 @@ def build_package(source_build):
     background.stop()
     out_fh.close()
     
+    print("before joining background thread...")
     background.join()
+    print("after joining background thread...")
     print "Done"
     
     # check for warnings
