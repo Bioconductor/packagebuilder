@@ -433,6 +433,8 @@ def win_multiarch_buildbin(message_stream):
     time.sleep(1)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
       (os.getenv("BBS_R_CMD"), libdir, tarball)
+    send_message({"status": "r_buildbin_cmd", "body": cmd})
+      
     return do_build(cmd, message_stream, False)
 
 def check_package():
@@ -532,8 +534,6 @@ def build_package(source_build):
     if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
-
         if pkg_type == "mac.binary.leopard":
             libdir = "libdir"
             if os.path.exists(libdir):
@@ -567,12 +567,12 @@ def build_package(source_build):
     else:
         status = "r_buildbin_cmd"
         outfile = "Rbuildbin.out"
-    send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     
     if ((not source_build) and win_multiarch and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
     else:
+        send_message({"status": status, "body": r_cmd})
         retcode = do_build(r_cmd, buildmsg, source_build)
     
     # check for warnings
