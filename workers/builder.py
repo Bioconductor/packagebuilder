@@ -427,7 +427,7 @@ def win_multiarch_check():
     for seg in segs:
         seg = seg.strip()
         if (seg.startswith(os.getenv("BBS_R_CMD"))):
-            retcode = do_check(outfile, out_fh, seg, start_time)
+            retcode = do_check(seg)
         else:
             pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
             pid = pope.pid
@@ -476,7 +476,7 @@ def check_package():
     
     send_message({"status": "check_cmd", "body": cmd})
     
-    retcode = do_check(outfile, out_fh, cmd, start_time)
+    retcode = do_check(cmd)
     
     return (retcode)
 
