@@ -494,7 +494,12 @@ def build_package(source_build):
         status = "r_buildbin_cmd"
     send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
-    retcode = subprocess.call(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    pope  = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    
+    pid = pope.pid
+    
+    retcode = pope.wait()
+
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     background.stop()
