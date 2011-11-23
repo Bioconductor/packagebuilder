@@ -499,7 +499,7 @@ def do_build(cmd, message_stream, source):
         pkg = tarball.split("_")[0]
         libdir = "%s.buildbin-libdir" % pkg
         retcode = _call("rm -rf %s" % libdir)
-    pope  = subprocess.Popen(r_cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
+    pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
     pid = pope.pid
     
