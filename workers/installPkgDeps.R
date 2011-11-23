@@ -31,11 +31,13 @@ installPkg <- function(pkg)
 {
     if (pkg == "multicore" && .Platform$OS.type == "windows")
         return()
+    lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
     if (!getOption("pkgType") == "source")
-        tryCatch(biocLite(pkg, suppressUpdates=TRUE),
-            error=biocLite(pkg, type="source", suppressUpdates=TRUE))
+        tryCatch(biocLite(pkg, suppressUpdates=TRUE, lib=lib),
+            error=biocLite(pkg, type="source", suppressUpdates=TRUE,
+            lib=lib))
     else
-        biocLite(pkg, suppressUpdates=TRUE)
+        biocLite(pkg, suppressUpdates=TRUE, lib=lib)
 }
 
 installDeps <- function(depStr)
