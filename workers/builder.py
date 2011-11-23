@@ -600,7 +600,7 @@ def build_package(source_build):
         complete_status = "buildbin_complete"
     
     send_message({"status": complete_status, "result_code": retcode, "warnings": warnings,
-        "body": "Build completed with status %d" % retcode, "elapsed_time": elapsed_time})
+        "body": "Build completed with status %d" % retcode, "elapsed_time": 666})
         
     
     return (retcode)
