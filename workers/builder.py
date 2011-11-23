@@ -544,6 +544,7 @@ def build_package(source_build):
               get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
         elif pkg_type == "win.binary":
             if (win_multiarch):
+                pass
                 #pkg = package_name.split("_")[0]
                 #libdir = "%s.buildbin-libdir" % pkg
                 #if (os.path.exists(libdir)):
@@ -569,7 +570,7 @@ def build_package(source_build):
     send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     
-    if ((not source_build) && win_multiarch):
+    if ((not source_build) and win_multiarch):
         retcode = win_multiarch_buildbin("buildmsg")
     else:
         retcode = do_build(r_cmd, buildmsg, source_build)
