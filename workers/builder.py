@@ -401,9 +401,9 @@ def win_multiarch_check():
     if (not os.path.exists(libdir)):
         os.mkdir(libdir)
 
-    cmd = "%s CMD check --no-vignettes --timings --force-multiarch"
-    " --library=%s --install=\"check:%s-install.out\" %s", (os.getenv("BBS_R_CMD"),
-      libdir, pkg, tarball)
+    cmd = ("%s CMD check --no-vignettes --timings --force-multiarch"
+    " --library=%s --install=\"check:%s-install.out\" %s") % \
+      (os.getenv("BBS_R_CMD"), libdir, pkg, tarball)
     send_message({"status": "check_cmd", "body": cmd})
     
     send_message({"status": "checking", "sequence": 0, "body":\
