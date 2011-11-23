@@ -399,8 +399,10 @@ def win_multiarch_check():
     suffix = ""
     pkg = tarball.split("_")[0]
     libdir = "%s.buildbin-libdir" % pkg
-    retcode = _call("rm -rf %s" % libdir, False)
-    retcode = _call("mkdir %s" % libdir, False)
+    if (os.path.exists(libdir)):
+        retcode = _call("rm -rf %s" % libdir, False)
+    if (not os.path.exists(libdir)):
+        retcode = _call("mkdir %s" % libdir, False)
     
     retcode = win_multiarch_buildbin("checking")
     if (retcode == 0):
@@ -408,41 +410,10 @@ def win_multiarch_check():
         cmd = "%s CMD check --no-vignettes --timings --force-multiarch"
         " --library=%s --install=\"check:%s-install.out\" %s", (os.getenv("BBS_R_CMD"),
           libdir, pkg, tarball)
-        check_retcode = do_check(cmd)
-        # indicate that check has succeeded
-    else:
-        # indicate that check has failed
-        pass
-    
-    prefix = ("rm -rf %s && mkdir %s && %s CMD INSTALL --build "
-      "--merge-multiarch --library=%s %s >%s-install.out 2>&1 && ") % \
-      (libdir, libdir, os.getenv("BBS_R_CMD"), libdir, tarball, pkg)
-    
-    extra_flags = " --force-multiarch --library=%s" % libdir
-    
-    suffix = " && mv %s/* %s.Rcheck/ && rmdir %s" % (\
-      libdir, pkg, libdir)
+        retcode = do_check(cmd)
 
-    segs = cmd.split("&&")
-    for seg in segs:
-        seg = seg.strip()
-        if (seg.startswith(os.getenv("BBS_R_CMD"))):
-            retcode = do_check(seg)
-        else:
-            pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
-            pid = pope.pid
-            retcode = pope.wait()
-            out_fh.close()
-            if retcode != 0:
-                msg = "A pre- or post-check step failed.\n"
-                if (os.stat(outfile).st_size > 0):
-                    f = open(outfile)
-                    msg += f.read()
-                    f.close()
-                elapsed_time = str(stop_time - start_time)
-                send_message({"status": "check_complete", "result_code": retcode,
-                  "warnings": False, "elapsed_time": elapsed_time, "body": msg})
-                return(retcode)
+    # indicate whether check succeededs
+    return (retcode)
         
     
 def win_multiarch_buildbin(message_stream):
@@ -452,7 +423,7 @@ def check_package():
     send_message({"status": "starting_check", "body": ""})
 
     win_multiarch = True # todo - make this a checkbox
-    if (platform.system() == "Windows" and win_muliarch):
+    if (platform.system() == "Windows" and win_multiarch):
         return(win_multiarch_check())
     
 
@@ -498,7 +469,8 @@ def do_build(cmd, message_stream, source):
         tarball = get_source_tarball_name()
         pkg = tarball.split("_")[0]
         libdir = "%s.buildbin-libdir" % pkg
-        retcode = _call("rm -rf %s" % libdir, False)
+        if (os.path.exists(libdir)):
+            retcode = _call("rm -rf %s" % libdir, False)
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
     
     pid = pope.pid
@@ -561,7 +533,8 @@ def build_package(source_build):
             if (win_multiarch):
                 pkg = package_name.split("_")[0]
                 libdir = "%s.buildbin-libdir" % pkg
-                retcode = _call("rm -rf %s" % libdir, False)
+                if (os.path.exists(libdir)):
+                    retcode = _call("rm -rf %s" % libdir, False)
                 r_cmd = ("%s CMD INSTALL --build "
                   "--merge-multiarch --library=%s %s") % (\
                   os.getenv("BBS_R_CMD"), libdir, get_source_tarball_name())
