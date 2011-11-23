@@ -544,13 +544,16 @@ def build_package(source_build):
               get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
         elif pkg_type == "win.binary":
             if (win_multiarch):
-                pkg = package_name.split("_")[0]
-                libdir = "%s.buildbin-libdir" % pkg
-                if (os.path.exists(libdir)):
-                    retcode = _call("rm -rf %s" % libdir, False)
-                r_cmd = ("%s CMD INSTALL --build "
-                  "--merge-multiarch --library=%s %s") % (\
-                  os.getenv("BBS_R_CMD"), libdir, get_source_tarball_name())
+                #pkg = package_name.split("_")[0]
+                #libdir = "%s.buildbin-libdir" % pkg
+                #if (os.path.exists(libdir)):
+                #    retcode = _call("rm -rf %s" % libdir, False)
+                #if (not os.path.exists(libdir)):
+                #    os.mkdir(libdir)
+                    # TODO - use win_multiarch_buildbin here
+                #r_cmd = ("%s CMD INSTALL --build "
+                #  "--merge-multiarch --library=%s %s") % (\
+                #  os.getenv("BBS_R_CMD"), libdir, get_source_tarball_name())
             else:
                 r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
                   (os.getenv("BBS_R_CMD"), libdir, package_name)
@@ -566,8 +569,10 @@ def build_package(source_build):
     send_message({"status": status, "body": r_cmd})
     print("before build, working dir is %s" % working_dir)
     
-    
-    retcode = do_build(r_cmd, buildmsg, source_build)
+    if ((not source_build) && win_multiarch):
+        retcode = win_multiarch_buildbin("buildmsg")
+    else:
+        retcode = do_build(r_cmd, buildmsg, source_build)
     
     # check for warnings
     out_fh = open(outfile)
