@@ -582,10 +582,11 @@ def propagate_package():
     
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
-    #if (platform.system() == "Windows"):
-    #    retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi c:/packagebuilder/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'rm -f %s/%s_*.zip'" % (repos, package_name))
-    #else:
-    retcode = ssh("rm -f %s" % files_to_delete)
+    if (platform.system() == "Windows"):
+        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'rm -f %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"], 
+        repos, package_name))
+    else:
+        retcode = ssh("rm -f %s" % files_to_delete)
     
     print("result of deleting files: %d" % retcode)
     send_message({"body": "Pruning older packages from repository", "status": "post_processing", "retcode": retcode})
@@ -631,7 +632,7 @@ def _call(command_str, shell):
         command_str = str(command_str)
         print("size = %d" % len(command_str))
         print(command_str)
-        retcode = subprocess.call(command_str, shell=True, stdout=stdout_fh, stderr=stderr_fh)
+        retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh, stderr=stderr_fh)
         stdout_fh.close()
         stderr_fh.close()
         return(retcode)
