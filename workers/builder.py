@@ -532,14 +532,14 @@ def build_package(source_build):
     if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        libdir = "libdir"
-        if os.path.exists(libdir):
-            _call("rm -rf %s" % libdir, False)
-        if (not (os.path.exists(libdir))):
-            os.mkdir("libdir")
         pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
 
         if pkg_type == "mac.binary.leopard":
+            libdir = "libdir"
+            if os.path.exists(libdir):
+                _call("rm -rf %s" % libdir, False)
+            if (not (os.path.exists(libdir))):
+                os.mkdir(libdir)
             r_cmd = "../../build-universal.sh %s %s" % (\
               get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
         elif pkg_type == "win.binary":
