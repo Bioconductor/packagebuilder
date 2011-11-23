@@ -255,7 +255,7 @@ var handleEvent = function(event, node, stage) {
     else
         selector = "." + node + "_" + stage.toUpperCase() + "_EVENT";
         
-    log("in handleEvent, node = " + node + ", event = " + event, + " stage = " + stage);
+    log("in handleEvent, node = " + node + ", event = " + event + ", stage = " + stage);
     jQuery(selector).removeClass("OK ERROR WARNINGS IN_PROGRESS skipped TIMEOUT");
     msg = "&nbsp;&nbsp;" + event.replace(/_/g, "&nbsp;") + "&nbsp;&nbsp;"; 
     jQuery(selector).addClass(event);
