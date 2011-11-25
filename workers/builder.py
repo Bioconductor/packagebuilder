@@ -357,7 +357,7 @@ def get_source_tarball_name():
     files = os.listdir(os.getcwd())
     tarball = None
     for file in files:
-        if pkgname in file and ".tar.gz" in file:
+        if pkgname in file and ".tar.gz" in file and (not ".orig" in file):
             tarball = file
             break
     return(tarball)
