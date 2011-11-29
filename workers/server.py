@@ -87,7 +87,7 @@ def callback(body):
         msg_obj['job_id'] = job_id
         msg_obj['client_id'] = received_obj['client_id']
         json_str = json.dumps(msg_obj)
-        this_frame = stomp.send({'destination': "/queue/builderevents",
+        this_frame = stomp.send({'destination': "/topic/builderevents",
           'body': json_str,
           'persistent': 'true'})
         print("Receipt: %s" % this_frame.headers.get('receipt-id'))

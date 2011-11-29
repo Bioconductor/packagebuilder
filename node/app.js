@@ -86,7 +86,7 @@ io.sockets.on('connection', function (socket) {
 var client = new stomp.Client("merlot2.fhcrc.org", 61613);
 
 sys.puts("before subscribing to queue");
-client.subscribe("/queue/builderevents", function(data){
+client.subscribe("/topic/builderevents", function(data){
     sys.puts("got message: " + data.body);
     var obj;
     try {

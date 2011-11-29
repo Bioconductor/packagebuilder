@@ -99,7 +99,7 @@ def send_message(msg, status=None):
     print "sending message:"
     print json_str
     print
-    this_frame = stomp.send({'destination': "/queue/builderevents",
+    this_frame = stomp.send({'destination': "/topic/builderevents",
       'body': json_str,
       'persistent': 'true'})
     print("Receipt: %s" % this_frame.headers.get('receipt-id'))
