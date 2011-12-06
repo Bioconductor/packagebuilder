@@ -14,4 +14,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^$', 'viewhistory.views.index'),
+    url(r'^jobs/(?P<package_id>\d+)/$', 'viewhistory.views.jobs')
 )

@@ -1,0 +1,15 @@
+<html>
+    <head>
+        <title>Single Package Builder - Build History</title>
+    </head>
+    <body>
+        {% if jobs %}
+            <h2>Builds of package '{{package}}'</h2>
+                <ul>
+                    {% for job in jobs %}
+                        <li><a href="">{{job.time_started}}</a></li>
+                    {% endfor %}
+                </ul>
+        {% endif %}
+    </body>
+</html>
