@@ -22,7 +22,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'spb_history.settings'
 from spb_history.viewhistory.models import Job
 from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
-
+from spb_history.viewhistory.models import Message
 try:
     stomp = Stomp("merlot2.fhcrc.org", 61613)
     # optional connect keyword args "username" and "password" like so:
@@ -74,22 +74,75 @@ def handle_first_message(obj, parent_job):
       checkinstall_result='unknown',
       checksrc_result='unknown',
       buildbin_result='unknown',
-      postprocessing_result='unknown')
+      postprocessing_result='unknown',
+      svn_cmd='unknown',
+      check_cmd='unknown',
+      r_buildbin_cmd='unknown',
+      os='unknown',
+      arch='unknown',
+      r_version='unknown',
+      platform='unknown',
+      invalid_url=False,
+      build_not_required=False)
     build.save()
     return(build)
 
-def handle_check_complete(obj, build_obj):
-    if obj['warnings'] == True:
-        result = "WARNINGS"
+def handle_phase_message(obj):
+    if obj.has_key('sequence'):
+        sequence = obj['sequence']
     else:
-        result = "OK"
-    build_obj.checksrc_result = result
-    build_obj.save()
+        sequence = -1
+    
+    if obj.has_key('retcode'):
+        retcode = obj['retcode']
+    else:
+        retcode = -1
+    
+    msg = Message(build = get_build_obj(obj),
+      build_phase = obj['status'],
+      sequence=sequence,
+      retcode=retcode,
+      body=obj['body'])
+    msg.save()
 
 def get_build_obj(obj):
     return(Build.objects.get(jid=obj['job_id'], builder_id=obj['builder_id']))
 
+
+def handle_complete(obj, build_obj):
+    if obj.has_key("result_code"):
+        obj['retcode'] = obj['result_code']
+    if obj['retcode'] == 0:
+        if obj.has_key("warnings") and obj['warnings'] == True:
+            result = "WARNINGS"
+        else:
+            result = "OK"
+    else:
+        result = "ERROR"
+    if (obj['status'] == 'build_complete'):
+        build_obj.buildsrc_result = result
+        if result == "ERROR":
+            build_obj.checksrc_result = "skipped"
+            build_obj.buildbin_result = "skipped"
+            build_obj.postprocessing_result = "skipped"
+    elif (obj['status'] == 'check_complete'):
+        if result == "ERROR":
+            build_obj.buildbin_result = "skipped"
+            build_obj.postprocessing_result = "skipped"
+        build_obj.checksrc_result = result
+        
+    elif (obj['status'] == 'buildbin_complete'):
+        if result == "ERROR":
+            build_obj.postprocessing_result = "skipped"
+        build_obj.buildbin_result = result
+    elif (obj['status'] == 'post_processing_complete'):
+        build_obj.postprocessing_result = result
+    build_obj.save()
+    
+
 def handle_builder_event(obj):
+    phases = ["building", "checking", "buildingbin", "preprocessing",
+      "post_processing"]
     parent_job = None
     job_id = None
     if (obj.has_key('job_id')):
@@ -108,14 +161,54 @@ def handle_builder_event(obj):
         build_obj = handle_first_message(obj, parent_job)
     if (obj.has_key('status')):
         status = obj['status']
+        build_obj = get_build_obj(obj)
         if (status == 'dcf_info'):
             print("handling dcf info")
-            handle_dcf_info(obj, get_build_obj(obj))
-        elif (status == 'check_complete'):
-            print("handle check_complete")
-            handle_check_complete(obj, get_build_obj(obj))
+            handle_dcf_info(obj, build_obj)
+        elif (status in phases):
+            handle_phase_message(obj)
+        elif (status == 'svn_cmd'):
+            build_obj.svn_cmd = obj['body']
+            build_obj.save()
+        elif (status == 'check_cmd'):
+            build_obj.check_cmd = obj['body']
+            build_obj.save()
+        elif (status=='r_buildbin_cmd'):
+            build_obj.r_buildbin_cmd = obj['body']
+            build_obj.save()
+        elif (status=='skip_buildbin'):
+            build_obj.buildbin_result = 'skipped'
+            build_obj.save()
+        elif (status in ['build_complete', 'check_complete',
+          'buildbin_complete', 'post_processing_complete']):
+            handle_complete(obj, build_obj)
+        elif (status == 'node_info'):
+            build_obj.r_version = obj['r_version']
+            build_obj.os = obj['os']
+            build_obj.arch = obj['arch']
+            build_obj.platform = obj['platform']
+            build_obj.save()
+        elif (status == 'invalid_url'):
+            build_obj.invalid_url = True
+            build_obj.save()
+        elif (status == 'build_not_required'):
+            build_obj.build_not_required = True
+            build_obj.save()
+        elif (status == 'build_failed'):
+            build_obj.buildsrc_result = 'ERROR'
+            build_obj.checksrc_result = 'skipped'
+            build_obj.buildbin_result = 'skipped'
+            build_obj.postprocessing_result = 'skipped'
+            build_obj.save()
         else:
             print("ignoring message:%s" % obj)
+    else:
+        print("invalid message, no 'status' key: %s" % obj)
+        # svn_result,
+        # clear_check_console, starting_check,
+        # starting_buildbin, svn_info,
+        # chmod_retcode*,
+        # normal_end
 
 def callback(body, destination):
     print " [x] Received %r" % (body,)

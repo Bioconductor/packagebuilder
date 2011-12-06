@@ -40,6 +40,15 @@ class Build(models.Model):
     checksrc_result = models.CharField(max_length=20, choices=RESULT_CHOICES)
     buildbin_result = models.CharField(max_length=20, choices=RESULT_CHOICES)
     postprocessing_result = models.CharField(max_length=20, choices=RESULT_CHOICES)
+    svn_cmd = models.TextField()
+    check_cmd = models.TextField()
+    r_buildbin_cmd = models.TextField()
+    os = models.CharField(max_length=50)
+    arch = models.CharField(max_length=50)
+    r_version = models.CharField(max_length=255)
+    platform = models.CharField(max_length=255)
+    invalid_url = models.BooleanField()
+    build_not_required = models.BooleanField()
     
 class NodeInfo(models.Model):
     builder_id = models.ForeignKey(Build)
@@ -53,3 +62,4 @@ class Message(models.Model):
     build_phase = models.CharField(max_length=20)
     sequence = models.IntegerField()
     retcode = models.IntegerField()
+    body = models.TextField()

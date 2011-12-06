@@ -690,7 +690,8 @@ def propagate_package():
         print("platform.system() == 'Windows', running chmod commands...")
         chmod_retcode = subprocess.call("chmod a+r %s" % os.path.join(working_dir, package_name))
         print("chmod_retcode = %d" % chmod_retcode)
-        send_message("chmod_retcode=%d" % chmod_retcode)
+        send_message({"status": "chmod_retcode", "body": \
+          "chmod_retcode=%d" % chmod_retcode, "retcode": chmod_retcode})
         command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2.fhcrc.org:%s/" % (os.environ["PACKAGEBUILDER_HOME"],
           build_product, repos)
         print("command = %s" % command)
@@ -749,7 +750,8 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
         if chmod_retcode != 0:
             sys.exit("chmod failed")
         print("chmod retcode: %s" % chmod_retcode)
-        send_message("chmod_retcode = %d" % chmod_retcode)
+        send_message({"status": "chmod_retcode", "body": \
+          "chmod_retcode=%d" % chmod_retcode, "retcode": chmod_retcode})
         command = "%s %s %s@%s:%s" % (packagebuilder_scp_cmd, src, user, host, dest)
     else:
         command = "%s %s@%s:%s %s" % (packagebuilder_scp_cmd, user, host, src, dest)
