@@ -110,6 +110,7 @@ def get_build_obj(obj):
 
 
 def handle_complete(obj, build_obj):
+    
     if obj.has_key("result_code"):
         obj['retcode'] = obj['result_code']
     if obj['retcode'] == 0:
@@ -119,6 +120,7 @@ def handle_complete(obj, build_obj):
             result = "OK"
     else:
         result = "ERROR"
+    print("in handle_complete(), status is %s and result is %s." % (obj['status'], result))
     if (obj['status'] == 'build_complete'):
         build_obj.buildsrc_result = result
         if result == "ERROR":
@@ -127,10 +129,11 @@ def handle_complete(obj, build_obj):
             build_obj.postprocessing_result = "skipped"
     elif (obj['status'] == 'check_complete'):
         if result == "ERROR":
-            build_obj.buildbin_result = "skipped"
+            #build_obj.buildbin_result = "skipped"
             build_obj.postprocessing_result = "skipped"
         build_obj.checksrc_result = result
-        
+        if "Linux" in build.os:
+            build_obj.buildbin_result = "skipped"
     elif (obj['status'] == 'buildbin_complete'):
         if result == "ERROR":
             build_obj.postprocessing_result = "skipped"
