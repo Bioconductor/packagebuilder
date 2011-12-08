@@ -42,6 +42,7 @@ class Build(models.Model):
     postprocessing_result = models.CharField(max_length=20, choices=RESULT_CHOICES)
     svn_cmd = models.TextField()
     check_cmd = models.TextField()
+    r_cmd = models.TextField()
     r_buildbin_cmd = models.TextField()
     os = models.CharField(max_length=50)
     arch = models.CharField(max_length=50)
@@ -49,7 +50,9 @@ class Build(models.Model):
     platform = models.CharField(max_length=255)
     invalid_url = models.BooleanField()
     build_not_required = models.BooleanField()
-    
+    build_product = models.CharField(max_length=255)
+    filesize = models.DecimalField(max_digits=10, decimal_places=2)
+
 class NodeInfo(models.Model):
     builder_id = models.ForeignKey(Build)
     arch = models.CharField(max_length=20)

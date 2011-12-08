@@ -77,13 +77,16 @@ def handle_first_message(obj, parent_job):
       postprocessing_result='unknown',
       svn_cmd='unknown',
       check_cmd='unknown',
+      r_cmd='unknown',
       r_buildbin_cmd='unknown',
       os='unknown',
       arch='unknown',
       r_version='unknown',
       platform='unknown',
       invalid_url=False,
-      build_not_required=False)
+      build_not_required=False,
+      build_product='unknown',
+      filesize=-1)
     build.save()
     return(build)
 
@@ -132,7 +135,7 @@ def handle_complete(obj, build_obj):
             #build_obj.buildbin_result = "skipped"
             build_obj.postprocessing_result = "skipped"
         build_obj.checksrc_result = result
-        if "Linux" in build.os:
+        if "Linux" in build_obj.os:
             build_obj.buildbin_result = "skipped"
     elif (obj['status'] == 'buildbin_complete'):
         if result == "ERROR":
@@ -169,12 +172,22 @@ def handle_builder_event(obj):
             print("handling dcf info")
             handle_dcf_info(obj, build_obj)
         elif (status in phases):
+            if obj['status'] == 'post_processing':
+                if obj.has_key('build_product'):
+                    build_obj.build_product = obj['build_product']
+                if obj.has_key('filesize'):
+                    build_obj.filesize = obj['filesize']
+                    build_obj.save()
+                    return()
             handle_phase_message(obj)
         elif (status == 'svn_cmd'):
             build_obj.svn_cmd = obj['body']
             build_obj.save()
         elif (status == 'check_cmd'):
             build_obj.check_cmd = obj['body']
+            build_obj.save()
+        elif (status=='r_cmd'):
+            build_obj.r_cmd = obj['body']
             build_obj.save()
         elif (status=='r_buildbin_cmd'):
             build_obj.r_buildbin_cmd = obj['body']
