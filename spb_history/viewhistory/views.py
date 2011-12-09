@@ -12,13 +12,14 @@ from viewhistory import helper
 def index(request):
     packages = Package.objects.all().order_by('name')
     return render_to_response('index.html',
-      {'packages': packages})
+      {'packages': packages}, context_instance=RequestContext(request))
 
 def jobs(request, package_id):
     p = Package.objects.get(pk=package_id)
     jobs = Job.objects.filter(package=p)#.order_by('id')
     return render_to_response('jobs.html', {'jobs': jobs,
-      "package": jobs[0].package.name})
+      "package": jobs[0].package.name},
+      context_instance=RequestContext(request))
       
 def job(request, job_id):
     job = Job.objects.get(pk=job_id)

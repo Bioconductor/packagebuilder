@@ -1,9 +1,6 @@
-<html><head>
-		<title>[History]Bioconductor Single Package Builder</title>
-		<link rel="stylesheet" href="{{ STATIC_URL }}css/2.7/report.css" type="text/css"> 
-		
-		<script type="text/javascript" src="/javascripts/packagebuilder.js"></script>
-	</head>
+{% extends "base.html" %}
+{% block title %}[History]Bioconductor Single Package Builder{% endblock %}
+{% block content %}
 	<body>
 	    <a name="top"></a>
 		<h1>Bioconductor Single Package Builder - Build History</h1>
@@ -151,4 +148,4 @@
                 
 		    {% endfor %}
 
-</body></html>
+{% endblock %}
