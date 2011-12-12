@@ -67,25 +67,25 @@ def handle_first_message(obj, parent_job):
     build = Build(job=parent_job,
       builder_id=obj['builder_id'],
       jid=obj['job_id'],
-      maintainer='unknown',
+      maintainer='',
       version='0.0.0',
-      preprocessing_result='unknown',
-      buildsrc_result='unknown',
-      checkinstall_result='unknown',
-      checksrc_result='unknown',
-      buildbin_result='unknown',
-      postprocessing_result='unknown',
-      svn_cmd='unknown',
-      check_cmd='unknown',
-      r_cmd='unknown',
-      r_buildbin_cmd='unknown',
-      os='unknown',
-      arch='unknown',
-      r_version='unknown',
-      platform='unknown',
+      preprocessing_result='',
+      buildsrc_result='',
+      checkinstall_result='',
+      checksrc_result='',
+      buildbin_result='',
+      postprocessing_result='',
+      svn_cmd='',
+      check_cmd='',
+      r_cmd='',
+      r_buildbin_cmd='',
+      os='',
+      arch='',
+      r_version='',
+      platform='',
       invalid_url=False,
       build_not_required=False,
-      build_product='unknown',
+      build_product='',
       filesize=-1)
     build.save()
     return(build)
@@ -207,8 +207,16 @@ def handle_builder_event(obj):
         elif (status == 'invalid_url'):
             build_obj.invalid_url = True
             build_obj.save()
+            job = build_obj.job
+            pkg = job.package
+            pkg.delete()
+            job.delete()
+            build_obj.delete()
+            return(1)
         elif (status == 'build_not_required'):
             build_obj.build_not_required = True
+            build_obj.buildsrc_result = 'skipped'
+            build_obj.preprocessing_message = "Build not required, versions identical in source and repository, and force not specified."
             build_obj.save()
         elif (status == 'build_failed'):
             build_obj.buildsrc_result = 'ERROR'
