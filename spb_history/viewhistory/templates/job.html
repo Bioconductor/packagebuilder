@@ -109,7 +109,7 @@
                 					<tr><td><b>CheckCommand</b>: <span id="{{build.builder_id}}_check_command">{{build.check_cmd}}</span></td></tr> 
                 					<tr><td><b>BuildBinCommand</b>: <span id="{{build.builder_id}}_buildbin_command">{{build.r_buildbin_cmd}}</span></td></tr> 
                 					<tr><td><b>Status</b>: <span id="{{build.builder_id}}_status" class="{{build.builder_id}}_EVENT OK">{{build.postprocessing_result}}</span></td></tr> 
-                					<tr><td><b>PackageFile</b>: <span id="{{build.builder_id}}_build_product"><a href="http://bioconductor.org/scratch-repos/2.15/{{pkg_type(job.os)}}/2.15/{{build.build_product}}"> {{build.build_product}}</a></span></td></tr> 
+                					<tr><td><b>PackageFile</b>: <span id="{{build.builder_id}}_build_product"><a href="http://bioconductor.org/scratch-repos/2.15/{{job.pkg_type}}/2.15/{{build.build_product}}"> {{build.build_product}}</a></span></td></tr> 
                 					<tr><td><b>PackageFileSize</b>: <span id="{{build.builder_id}}_file_size">{{build.filesize}}</span> <a href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</a></td></tr> 
                 					<tr><td><b>BuildID:</b>: <span id="{{build.builder_id}}_build_id">{{job.job_id}}</span></td></tr> 
                 					<tr><td><b>PreProcessing</b>: <span id="{{build.builder_id}}_pre_processing">{{build.preprocessing_message}}</span></td></tr> 

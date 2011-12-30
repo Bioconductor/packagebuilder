@@ -19,6 +19,17 @@ class Job(models.Model):
     force = models.BooleanField()
     client_id = models.CharField(max_length=30)
     
+    def pkg_type(self):
+        word = self.os.split(" ")[0]
+        if word == "Linux":
+            return "src/contrib"
+        elif word == "Mac":
+            return "bin/macosx/leopard/contrib"
+        elif word == "Windows":
+            return "bin/windows/contrib"
+        return None
+    
+    
 class Build(models.Model):
     RESULT_CHOICES = (
         ('unknown', 'unknown'),

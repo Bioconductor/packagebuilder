@@ -9,15 +9,6 @@ def sort_helper(b1, b2):
 def re_sort(builds):
     return(sorted(builds, cmp=sort_helper))
 
-def pkg_type(os):
-    word = os.split(" ")[0]
-    if word == "Linux":
-        return "src/contrib"
-    elif word == "Mac":
-        return "bin/macosx/leopard/contrib"
-    elif word == "Windows":
-        return "bin/windows/contrib"
-    return None
 
 def get_message(build, build_phase):
     messages = build.message_set.filter(build_phase=build_phase)
