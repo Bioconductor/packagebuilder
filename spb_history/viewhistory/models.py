@@ -19,15 +19,6 @@ class Job(models.Model):
     force = models.BooleanField()
     client_id = models.CharField(max_length=30)
     
-    def pkg_type(self):
-        word = self.os.split(" ")[0]
-        if word == "Linux":
-            return "src/contrib"
-        elif word == "Mac":
-            return "bin/macosx/leopard/contrib"
-        elif word == "Windows":
-            return "bin/windows/contrib"
-        return None
     
     
 class Build(models.Model):
@@ -63,6 +54,17 @@ class Build(models.Model):
     build_not_required = models.BooleanField()
     build_product = models.CharField(max_length=255)
     filesize = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def pkg_type(self):
+        word = self.os.split(" ")[0]
+        if word == "Linux":
+            return "src/contrib"
+        elif word == "Mac":
+            return "bin/macosx/leopard/contrib"
+        elif word == "Windows":
+            return "bin/windows/contrib"
+        return None
+    
 
 class NodeInfo(models.Model):
     builder_id = models.ForeignKey(Build)
