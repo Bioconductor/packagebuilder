@@ -60,9 +60,9 @@ class Build(models.Model):
         if word == "Linux":
             return "src/contrib"
         elif word == "Mac":
-            return "bin/macosx/leopard/contrib"
+            return "bin/macosx/leopard/contrib/2.15"
         elif word == "Windows":
-            return "bin/windows/contrib"
+            return "bin/windows/contrib/2.15"
         return None
     
 
