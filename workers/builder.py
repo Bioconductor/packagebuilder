@@ -147,7 +147,6 @@ def is_build_required(manifest):
     else:
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
-        print("debug: pkgname == %s" % pkgname)
         if (pkgname.find("_") == -1): # package name doesn't have version in it
             return(True) # TODO - download tarball and examine DESCRIPTION file
         svn_version = pkgname.split("_")[1]
@@ -310,6 +309,8 @@ http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
     package_name = tarball.split("_")[0]
+    # what if package name does not have version in it? do this:
+    package_name = package_name.replace(".tar.gz", "")
     
     os.rename(tarball, "%s.orig" % tarball)
     extra_flags = ""
