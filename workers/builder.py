@@ -143,6 +143,8 @@ def is_build_required(manifest):
     else:
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
+        if (not pkgname.find("_")): # package name doesnt have version in it
+            return(True) # TODO - download tarball and examine DESCRIPTION file
         svn_version = pkgname.split("_")[1]
         
         if ("force" in manifest.keys()):
