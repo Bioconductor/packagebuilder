@@ -113,6 +113,13 @@ def is_build_required(manifest):
     
     global package_name
     package_name = manifest['job_id'].split("_")[0]
+    
+    
+    if ("force" in manifest.keys()):
+        if (manifest['force'] == True):
+            return(True)
+    
+    
     if (is_svn_package()):
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
         print "description_url = " + description_url
@@ -136,22 +143,16 @@ def is_build_required(manifest):
         
         svn_version = dcf_file.getValue("Version")
 
-        if ("force" in manifest.keys()):
-            if (manifest['force'] == True):
-                return(True)
 
     else:
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
+        print("debug: pkgname == %s" % pkgname)
         if (pkgname.find("_") == -1): # package name doesn't have version in it
             return(True) # TODO - download tarball and examine DESCRIPTION file
         svn_version = pkgname.split("_")[1]
         
-        if ("force" in manifest.keys()):
-            if (manifest['force'] == True):
-                return(True)
         
-            
     
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
