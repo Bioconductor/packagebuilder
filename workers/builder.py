@@ -358,6 +358,8 @@ def install_pkg_deps():
 
 def get_source_tarball_name():
     pkgname = manifest['job_id'].split("_")[0]
+    # if tarball name does not have version:
+    pkgname = pkgname.replace("tar.gz", "")
     files = os.listdir(os.getcwd())
     tarball = None
     for file in files:
