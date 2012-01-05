@@ -4,6 +4,7 @@
 
 args <- (commandArgs(TRUE))
 
+
 args <- gsub("@@", "\"", args, fixed=TRUE)
 
 if (length(args) == 0) {
@@ -12,12 +13,17 @@ if (length(args) == 0) {
 }
 
 s <- paste(args, collapse=" ")
+
+
 segs <- strsplit(s, ";", fixed=TRUE)
 
-r <- paste(segs[[1]][1:length(segs[[1]])-1])
+l <- length(segs[[1]])
+n = length(segs[[1]]) -1
+if (l == 1) n <- 1
 
+r <- paste(segs[[1]][1:n])
 
-for (i in 1:length(r)) {
+for (i in 1:length(r)) { 
     eval(parse(text=r[i]))
 }
 
@@ -31,13 +37,15 @@ installPkg <- function(pkg)
 {
     if (pkg == "multicore" && .Platform$OS.type == "windows")
         return()
-    lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
+    #lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
     if (!getOption("pkgType") == "source")
-        tryCatch(biocLite(pkg, suppressUpdates=TRUE, lib=lib),
-            error=biocLite(pkg, type="source", suppressUpdates=TRUE,
-            lib=lib))
-    else
-        biocLite(pkg, suppressUpdates=TRUE, lib=lib)
+    {
+        biocLite(pkg, suppressUpdates=TRUE)
+        if (!pkg %in% installed.packages())
+		biocLite(pkg, suppressUpdates=TRUE, type="source")
+    } else {
+        biocLite(pkg, suppressUpdates=TRUE)
+    }
 }
 
 installDeps <- function(depStr)
