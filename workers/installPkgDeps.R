@@ -82,7 +82,7 @@ installDeps <- function(depStr)
             }
         } else {
             if (builtIn(pkg)) next
-            if (!pkg %in% rownames(installed.packages())
+            if (!pkg %in% rownames(installed.packages()))
                 installPkg(pkg)
         }
     }
