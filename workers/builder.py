@@ -881,8 +881,26 @@ if __name__ == "__main__":
     if (len(sys.argv) < 2):
         sys.exit("builder.py started without manifest file and R version arguments, exiting...")
     
+    
+    
+    
     print "Builder has been started"
+    
+    
+    
+    
     setup()
+
+
+    r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10"} # need a better way to determine bioc version
+    wanted_bioc_version = r_bioc_map[manifest['r_version']]
+    bioc_version = os.getenv["BBS_BIOC_VERSION"]
+    
+    if (wanted_bioc_version != bioc_version):
+        print("Can't build this package, we don't have R-%s." % \
+            manifest['r_version'])
+        sys.exit(1)
+
     setup_stomp()
     
     send_message("Builder has been started")
