@@ -417,3 +417,35 @@ TABLE.mainrep .even .moscato2 {
     background: #C98;
 }
 
+/* wilson2 */
+DIV.wilson2,
+TR.wilson2 TD,
+TABLE.mainrep .wilson2,
+TABLE.mainrep .odd .wilson2 {
+    background: #BDD;
+}
+TABLE.mainrep .even .wilson2 {
+    background: #9BB;
+}
+
+/* moscato1 */
+DIV.moscato1,
+TR.moscato1 TD,
+TABLE.mainrep .moscato1,
+TABLE.mainrep .odd .moscato1 {
+    background: #EBA;
+}
+TABLE.mainrep .even .moscato1 {
+    background: #C98;
+}
+
+/* pitt */
+DIV.pitt,
+TR.pitt TD,
+TABLE.mainrep .pitt,
+TABLE.mainrep .odd .pitt {
+    background: #DBE;
+}
+TABLE.mainrep .even .pitt {
+    background: #B9C;
+}
