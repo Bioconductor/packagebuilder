@@ -14,17 +14,17 @@ if (length(args) == 0) {
 
 s <- paste(args, collapse=" ")
 
-
+library(stringr)
 segs <- strsplit(s, ";", fixed=TRUE)
 
 l <- length(segs[[1]])
-n = length(segs[[1]]) -1
+n = length(segs[[1]]) #-1
 if (l == 1) n <- 1
 
 r <- paste(segs[[1]][1:n])
 
 for (i in 1:length(r)) { 
-    eval(parse(text=r[i]))
+    eval(parse(text=str_trim(r[i])))
 }
 
 if (!require(BiocInstaller)) 
