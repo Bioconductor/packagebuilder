@@ -70,7 +70,7 @@ installDeps <- function(depStr)
             pkgName <- trim(segs[[1]][1])
             if (builtIn(pkgName)) next
             ip <- installed.packages()
-            if (pkgName %in% ip) {
+            if (pkgName %in% rownames(ip)) {
                 installedVersion <- ip[pkgName, "Version"]
                 if (!version >= installedVersion) {
                     message(paste(pkgName, "version", installedVersion,
