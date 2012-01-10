@@ -1,6 +1,6 @@
-set packagebuilderhome=e:\packagebuilder
+set packagebuilderhome=d:\packagebuilder
 
-set PACKAGEBUILDER_RSAKEY=e:/packagebuilder/.packagebuilder.private_key.rsa
+set PACKAGEBUILDER_RSAKEY=d:/packagebuilder/.packagebuilder.private_key.rsa
 
 
 E:
