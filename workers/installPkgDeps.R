@@ -14,7 +14,6 @@ if (length(args) == 0) {
 
 s <- paste(args, collapse=" ")
 
-library(stringr)
 segs <- strsplit(s, ";", fixed=TRUE)
 
 l <- length(segs[[1]])
@@ -23,15 +22,18 @@ if (l == 1) n <- 1
 
 r <- paste(segs[[1]][1:n])
 
+
+trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+
+
 for (i in 1:length(r)) { 
-    eval(parse(text=str_trim(r[i])))
+    eval(parse(text=trim(r[i])))
 }
 
 if (!require(BiocInstaller)) 
     source("http://bioconductor.org/biocLite.R")
 
 
-trim <- function (x) gsub("^\\s+|\\s+$", "", x)
 
 installPkg <- function(pkg)
 {
@@ -59,7 +61,7 @@ installDeps <- function(depStr)
     pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
     for (pkg in pkgs) {
         pkg <- trim(pkg)
-        if (length(grep("(", pkg, fixed=TRUE))) {
+        if (length(grep("(", pkg, fixed=TRUE))) { ## is there a version spec?
             versionSpec <- gsub(".*\\((.*?)\\).*","\\1", pkg)
             segs <- strsplit(versionSpec, " ", fixed=TRUE)
             operator <- segs[[1]][1]
@@ -75,6 +77,8 @@ installDeps <- function(depStr)
                       "is too old, updating..."))
                     installPkg(pkgName)
                 }
+            } else {
+                installPkg(pkgName)
             }
         } else {
             if (builtIn(pkg)) next
