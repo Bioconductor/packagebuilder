@@ -43,7 +43,7 @@ installPkg <- function(pkg)
     if (!getOption("pkgType") == "source")
     {
         biocLite(pkg, suppressUpdates=TRUE)
-        if (!pkg %in% installed.packages())
+        if (!pkg %in% rownames(installed.packages()))
 		biocLite(pkg, suppressUpdates=TRUE, type="source")
     } else {
         biocLite(pkg, suppressUpdates=TRUE)
@@ -82,7 +82,7 @@ installDeps <- function(depStr)
             }
         } else {
             if (builtIn(pkg)) next
-            if (!pkg %in% installed.packages())
+            if (!pkg %in% rownames(installed.packages())
                 installPkg(pkg)
         }
     }
