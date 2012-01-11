@@ -10,6 +10,7 @@ pushd /Users/biocbuild/BBS/$2/bioc/pitt
 
 popd
 
+export BBS_HOME="/Users/biocbuild/BBS"
 
 export BBS_USER="pkgbuild"
 export SVN_USER="pkgbuild"
