@@ -55,7 +55,8 @@ def handle_job_start(obj):
       time_started=parse_time(obj['time']),
       pkg_url=obj['svn_url'],
       force=obj['force'],
-      client_id=obj['client_id'])
+      client_id=obj['client_id'],
+      r_version=obj['r_version'])
     j.save()
 
 def handle_dcf_info(obj, build):
