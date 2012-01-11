@@ -24,7 +24,7 @@ def jobs(request, package_id):
 def job(request, job_id):
     job = Job.objects.get(pk=job_id)
     builds = job.build_set.all()
-    builds = helper.re_sort(builds)
+    #builds = helper.re_sort(builds)
     helper.get_messages(builds)
     return render_to_response('job.html', {"job": job, "builds": builds},
       context_instance=RequestContext(request))
