@@ -29,3 +29,18 @@ def get_messages(builds):
             message = get_message(build, phase)
             setattr(build, attr_name, message)
             #print("[%s]build.%s is \n%s" % (build.builder_id, attr_name, getattr(build, attr_name)))
+
+def filter_out_wrong_versions(builds, job):
+    r_ver = job.r_version
+    if r_ver == "2.14":
+        nodes = ['wilson2', 'pitt', 'moscato1']
+    elif r_ver == "2.15":
+        nodes = ['lamb2', 'petty', 'moscato2']
+    else:
+        raise "Don't know the build nodes for R-%s" % r_ver
+    
+    ret = []
+    for build in builds:
+        if build.builder_id in nodes:
+            ret.append(build)
+    return (ret)
