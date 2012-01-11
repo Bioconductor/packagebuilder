@@ -37,7 +37,7 @@ def filter_out_wrong_versions(builds, job):
     elif r_ver == "2.15":
         nodes = ['lamb2', 'petty', 'moscato2']
     else:
-        raise "Don't know the build nodes for R-%s" % r_ver
+        raise Exception("Don't know the build nodes for R-%s" % r_ver)
     
     ret = []
     for build in builds:
