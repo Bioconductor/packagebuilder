@@ -33,6 +33,9 @@ for (i in 1:length(r)) {
 if (!require(BiocInstaller)) 
     source("http://bioconductor.org/biocLite.R")
 
+r_ver <- paste(R.Version()$major, as.integer(R.Version()$minor), sep=".")
+repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
+    r_ver, sep="/"))
 
 
 installPkg <- function(pkg)
@@ -42,11 +45,11 @@ installPkg <- function(pkg)
     #lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
     if (!getOption("pkgType") == "source")
     {
-        biocLite(pkg, suppressUpdates=TRUE)
+        install.packages(pkg, repos=repos)
         if (!pkg %in% rownames(installed.packages()))
-		biocLite(pkg, suppressUpdates=TRUE, type="source")
+		install.packages(pkg, type="source", repos=repos)
     } else {
-        biocLite(pkg, suppressUpdates=TRUE)
+        install.packages(pkg, repos=repos)
     }
 }
 
