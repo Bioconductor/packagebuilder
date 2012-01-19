@@ -115,9 +115,6 @@ def is_build_required(manifest):
     package_name = manifest['job_id'].split("_")[0]
     
     
-    if ("force" in manifest.keys()):
-        if (manifest['force'] == True):
-            return(True)
     
     
     if (is_svn_package()):
@@ -139,6 +136,10 @@ def is_build_required(manifest):
         
         dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
         send_dcf_info(dcf_file)
+
+        if ("force" in manifest.keys()):
+            if (manifest['force'] == True):
+                return(True)
 
         
         svn_version = dcf_file.getValue("Version")
@@ -244,6 +245,7 @@ def setup():
     manifest_fh.close()
     print("manifest_json is %s" % manifest_json)
     manifest = json.loads(manifest_json)
+    manifest['svn_url'] = manifest['svn_url'].strip()
     working_dir = os.path.split(sys.argv[1])[0]
     os.chdir(working_dir)
     print("working dir is %s" % working_dir)
