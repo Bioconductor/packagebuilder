@@ -68,14 +68,15 @@ installDeps <- function(depStr)
             versionSpec <- gsub(".*\\((.*?)\\).*","\\1", pkg)
             segs <- strsplit(versionSpec, " ", fixed=TRUE)
             operator <- segs[[1]][1]
-            version <- segs[[1]][2]
+            requiredVersion <- segs[[1]][2]
             segs <- strsplit(pkg, "(", fixed=TRUE)
             pkgName <- trim(segs[[1]][1])
             if (builtIn(pkgName)) next
             ip <- installed.packages()
             if (pkgName %in% rownames(ip)) {
                 installedVersion <- ip[pkgName, "Version"]
-                if (!version >= installedVersion) {
+                if (numeric_version(requiredVersion) > 
+                  numeric_version(installedVersion)) {
                     message(paste(pkgName, "version", installedVersion,
                       "is too old, updating..."))
                     installPkg(pkgName)
