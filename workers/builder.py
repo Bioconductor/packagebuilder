@@ -136,11 +136,6 @@ def is_build_required(manifest):
         
         dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
         send_dcf_info(dcf_file)
-
-        if ("force" in manifest.keys()):
-            if (manifest['force'] == True):
-                return(True)
-
         
         svn_version = dcf_file.getValue("Version")
 
@@ -152,6 +147,9 @@ def is_build_required(manifest):
             return(True) # TODO - download tarball and examine DESCRIPTION file
         svn_version = pkgname.split("_")[1]
         
+    if ("force" in manifest.keys()):
+        if (manifest['force'] == True):
+            return(True)
         
     
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
