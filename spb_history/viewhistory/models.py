@@ -14,6 +14,7 @@ class Job(models.Model):
     job_id = models.CharField(max_length=50) # unique for each job
     repository = models.CharField(max_length=20)
     r_version = models.CharField(max_length=10)
+    bioc_version = models.CharField(max_length=10)
     time_started = models.DateTimeField()
     pkg_url = models.CharField(max_length=200)
     force = models.BooleanField()

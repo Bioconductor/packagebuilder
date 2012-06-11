@@ -4,6 +4,10 @@
 
 args <- (commandArgs(TRUE))
 
+if (!require(BiocInstaller))
+{
+    source("http://bioconductor.org/biocLite.R")
+}
 
 args <- gsub("@@", "\"", args, fixed=TRUE)
 
@@ -34,8 +38,34 @@ if (!require(BiocInstaller))
     source("http://bioconductor.org/biocLite.R")
 
 r_ver <- paste(R.Version()$major, as.integer(R.Version()$minor), sep=".")
+
+
+bioc_version <- character(0)
+if (r_ver == "2.12")
+{
+    bioc_version <- "2.7"
+} else if (r_ver == "2.13") 
+{
+    bioc_version <- "2.8"
+} else if (r_ver == "2.14") 
+{
+    bioc_version <- "2.9"
+} else if (r_ver <- "2.15")
+{
+    if (BiocInstaller:::.isDevel())
+    {
+        bioc_version <- "2.11"
+        } else {
+        bioc_version <- "2.10"
+    }
+} else {
+	stop("I don't know what version of Bioconductor you're running.")
+}
+
+
+
 repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
-    r_ver, sep="/"))
+    bioc_ver, sep="/"))
 
 
 installPkg <- function(pkg)

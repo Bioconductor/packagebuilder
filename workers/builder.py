@@ -151,9 +151,9 @@ def is_build_required(manifest):
         if (manifest['force'] == True):
             return(True)
         
-    
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
-    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
+    r_version = manifest['r_version']
+    #r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     
     cran_repo_map = { \
@@ -166,7 +166,7 @@ def is_build_required(manifest):
     if (manifest['repository'] == 'course'):
         base_repo_url = "http://bioconductor.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
-        base_repo_url = "http://bioconductor.org/scratch-repos/%s" % manifest['r_version']
+        base_repo_url = "http://bioconductor.org/scratch-repos/%s" % manifest['bioc_version']
     
     repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
     # What if there is no file at this url?
@@ -668,7 +668,7 @@ def propagate_package():
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
     elif (manifest['repository'] == 'scratch'):
-        repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
+        repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['bioc_version'], os_seg)
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor-test.org/scratch-repos/")
     
     
@@ -785,9 +785,9 @@ def update_packages_file():
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
-        repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['r_version'], os_seg)
+        repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['bioc_version'], os_seg)
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor-test.org/scratch-repos/")
-        script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['r_version']
+        script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['bioc_version']
     
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     if pkg_type == "mac.binary.leopard":
@@ -892,13 +892,12 @@ if __name__ == "__main__":
     setup()
 
 
-    r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10"} # need a better way to determine bioc version
-    wanted_bioc_version = r_bioc_map[manifest['r_version']]
+    wanted_bioc_version = manifest['bioc_version']#r_bioc_map[manifest['r_version']]
     bioc_version = os.getenv("BBS_BIOC_VERSION")
     
     if (wanted_bioc_version != bioc_version):
-        print("Can't build this package, we don't have R-%s." % \
-            manifest['r_version'])
+        print("Can't build this package, we don't build BioC-%s." % \
+            manifest['bioc_version'])
         sys.exit(1)
 
     setup_stomp()

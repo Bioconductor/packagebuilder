@@ -47,6 +47,8 @@ else:
 
 r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10"} # need a better way to determine bioc version
 
+bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16", "2.13": "2.16"}
+
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 sys.stdout.flush()
@@ -60,8 +62,8 @@ def callback(body):
     received_obj = json.loads(body)
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
-        r_version = received_obj['r_version']
-        bioc_version = r_bioc_map[r_version]
+        bioc_version = received_obj['bioc_version']
+        r_version = bioc_r_map[bioc_version]
         jobs_dir = os.path.join(packagebuilder_home, "jobs")
         if not os.path.exists(jobs_dir):
             os.mkdir(jobs_dir)

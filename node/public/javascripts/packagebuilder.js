@@ -59,7 +59,9 @@ jQuery(function(){
   
   jQuery('#start_build_button').click(function(){
     obj = {};
-    obj['r_version'] = jQuery("#r_version").val();
+    var bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16", "2.13": "2.16"};
+    obj['bioc_version'] = jQuery("#bioc_version").val();
+    obj['r_version'] = bioc_r_map[obj['bioc_version']];
     obj['repository'] = jQuery("#repository").val();
 
     /*

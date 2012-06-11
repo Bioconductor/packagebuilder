@@ -56,7 +56,8 @@ def handle_job_start(obj):
       pkg_url=obj['svn_url'],
       force=obj['force'],
       client_id=obj['client_id'],
-      r_version=obj['r_version'])
+      r_version=obj['r_version'],
+      bioc_version=obj['bioc_version'])
     j.save()
 
 def handle_dcf_info(obj, build):
