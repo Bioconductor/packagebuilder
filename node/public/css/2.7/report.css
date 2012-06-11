@@ -361,6 +361,18 @@ TABLE.mainrep .even .pitt {
     background: #BAC;
 }
 
+/* pitt */
+DIV.perceval,
+TR.perceval TD,
+TABLE.mainrep .perceval,
+TABLE.mainrep .odd .perceval {
+    background: #DCE;
+}
+TABLE.mainrep .even .perceval {
+    background: #BAC;
+}
+
+
 /* pelham */
 DIV.pelham,
 TR.pelham TD,
