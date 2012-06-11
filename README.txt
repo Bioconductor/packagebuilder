@@ -9,8 +9,8 @@ Consists of three main components in three top-level directories:
 node - a web application written in node.js (server-side Javascript based on V8).
   Accessible at http://merlot2.fhcrc.org:8000
 spb_history - a Django/Python web application that tracks build history
-workers - python scripts that run on each build machine
   Accessible at http://merlot2.fhcrc.org:4000
+workers - python scripts that run on each build machine
 
 Overview
 ========
