@@ -30,6 +30,13 @@ Where possible, the code uses existing code from the Bioconductor Build
 System (BBS). In particular, it uses BBS scripts to set environment variables
 for the build, though these are overridden in a couple of cases.
 
+On the build machines, the listener that is always running is called
+server.py. When it receives a build request, it kicks off a script
+particular to that build machine (called e.g. petty.sh or moscato2.bat)
+which sets environment variables, then runs builder.py to do the
+actual building.
+
+
 Deployment
 ==========
 
