@@ -379,7 +379,7 @@ var handlePostProcessing = function(message) {
     }
     if (message['build_product'] && message['url']) {
         var fullUrl = message['url'] + "/" + message['build_product'];
-        var url = "<a href='"+ message['fullUrl']  + "'>" + message['build_product'] + "</a>"
+        var url = "<a href='"+ fullUrl  + "'>" + message['build_product'] + "</a>"
         jQuery("#" + nodeName + "_build_product").html(url);
         var script;
         if (message['url'].match(/scratch/)) {
