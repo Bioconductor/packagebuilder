@@ -50,7 +50,7 @@ if (r_ver == "2.12")
 } else if (r_ver == "2.14") 
 {
     bioc_version <- "2.9"
-} else if (r_ver <- "2.15")
+} else if (r_ver == "2.15")
 {
     if (BiocInstaller:::.isDevel())
     {
