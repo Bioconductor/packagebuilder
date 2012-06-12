@@ -30,12 +30,18 @@ def get_messages(builds):
             setattr(build, attr_name, message)
             #print("[%s]build.%s is \n%s" % (build.builder_id, attr_name, getattr(build, attr_name)))
 
+
+## FIXME there must be a less hardcodey way to do this
 def filter_out_wrong_versions(builds, job):
     r_ver = job.r_version
+    bioc_version = job.bioc_version
     if r_ver == "2.14":
         nodes = ['wilson2', 'pitt', 'moscato1']
     elif r_ver == "2.15":
-        nodes = ['lamb2', 'petty', 'moscato2']
+        if bioc_version == "2.10":
+            nodes = ['lamb2', 'petty', 'moscato2']
+        elif bioc_version == "2.11":
+            nodes = ['lamb1', 'perceval', 'moscato1']
     else:
         raise Exception("Don't know the build nodes for R-%s" % r_ver)
     
