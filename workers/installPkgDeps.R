@@ -65,7 +65,7 @@ if (r_ver == "2.12")
 
 
 repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
-    bioc_ver, sep="/"))
+    bioc_version, sep="/"))
 
 
 installPkg <- function(pkg)
