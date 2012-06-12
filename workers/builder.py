@@ -669,7 +669,7 @@ def propagate_package():
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/","http://bioconductor.org/")
     elif (manifest['repository'] == 'scratch'):
         repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['bioc_version'], os_seg)
-        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor-test.org/scratch-repos/")
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor.org/scratch-repos/")
     
     
     
@@ -786,7 +786,7 @@ def update_packages_file():
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
         repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (manifest['bioc_version'], os_seg)
-        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor-test.org/scratch-repos/")
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/scratch-repos/","http://bioconductor.org/scratch-repos/")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['bioc_version']
     
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
