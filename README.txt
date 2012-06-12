@@ -58,14 +58,15 @@ Control Panel:Services.
 
 Build Machines
 ==============
-As of 6/11/2012, the single package builder builds on the following machines:
+As of 6/12/2012, the single package builder builds on the following machines:
+BioC 2.10:
 - lamb2 (linux)
 - petty (Mac)
 - moscato2 (windows)
-
-The single package builder only builds packages for BioC 2.10 at the present
-time. Further modification will be required in order for it to build BioC 2.11
-packages as well.
+BioC 2.11:
+- lamb1 (linux)
+- perceval (Mac)
+- moscato1 (windows)
 
 Known Issues
 ============
@@ -74,7 +75,7 @@ The code does not always seem to properly install dependencies required
 by packages that it builds.
 
 The following minor issues are also listed in the bug tracker:
-https://bioc-internal.atlassian.net/browse/BUILD-4
 https://bioc-internal.atlassian.net/browse/BUILD-1
-
+https://bioc-internal.atlassian.net/browse/BUILD-4
+https://bioc-internal.atlassian.net/browse/BUILD-6
 
