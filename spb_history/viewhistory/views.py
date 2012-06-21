@@ -10,7 +10,8 @@ from viewhistory.models import Message
 from viewhistory import helper
 
 def index(request):
-    packages = Package.objects.all().order_by('name')
+    ##packages = Package.objects.all().order_by('name')
+    packages = Package.objects.all().extra(select={'lower_name': 'lower(name)'}).order_by('lower_name')
     return render_to_response('index.html',
       {'packages': packages}, context_instance=RequestContext(request))
 
