@@ -44,6 +44,7 @@ def parse_time(time_str):
 
 def handle_job_start(obj):
     pkg = obj['job_id'].split("_")[0]
+    pkg = pkg.strip()
     try:
         existing_pkg = Package.objects.get(name=pkg)
     except Package.DoesNotExist:
