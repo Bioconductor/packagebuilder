@@ -15,7 +15,7 @@ set -e  # Exit immediately if a simple command exits with a non-zero status
 # Extra .so for the following archs will be installed (in addition to the
 # native .so):
 #TARGET_ARCHS="ppc x86_64 ppc64"
-TARGET_ARCHS="i386 ppc x86_64"
+TARGET_ARCHS="i386 x86_64"
 
 # Change dynamic shared library path for
 LOCAL_DYLIB_DIR="/usr/local/lib"
