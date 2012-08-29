@@ -8,6 +8,9 @@ import platform
 from datetime import datetime, date, time
 from stompy import Stomp
 
+## this may need to change:
+num_builders = 3
+
 # set up django environment
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 segs = path.split("/")
@@ -147,7 +150,19 @@ def handle_complete(obj, build_obj):
     elif (obj['status'] == 'post_processing_complete'):
         build_obj.postprocessing_result = result
     build_obj.save()
-    
+    ##  did all builders finish this job?
+    ## if so, send a message about it
+    buildlist = Build.objects.filter(job=build_obj.job.id)
+    ok = 0
+    for item in buildlist:
+      if (item.buildbin_result != ""):
+        ok += 1
+    if ok == num_builders:
+        json_str = json.dumps(obj)
+        this_frame = stomp.send({'destination': "/topic/buildcomplete",
+          'body': json_str,
+          'persistent': 'true'})
+        print("Receipt: %s" % this_frame.headers.get('receipt-id'))
 
 def handle_builder_event(obj):
     phases = ["building", "checking", "buildingbin", "preprocessing",
