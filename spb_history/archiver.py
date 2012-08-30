@@ -152,12 +152,15 @@ def handle_complete(obj, build_obj):
     build_obj.save()
     ##  did all builders finish this job?
     ## if so, send a message about it
+    print("build appears complete")
     buildlist = Build.objects.filter(job=build_obj.job.id)
     ok = 0
     for item in buildlist:
       if (item.buildbin_result != ""):
         ok += 1
     if ok == num_builders:
+        job_id = build_obj.job.id
+        obj['job_id'] = job_id
         json_str = json.dumps(obj)
         this_frame = stomp.send({'destination': "/topic/buildcomplete",
           'body': json_str,
