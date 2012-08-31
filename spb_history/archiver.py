@@ -152,20 +152,23 @@ def handle_complete(obj, build_obj):
     build_obj.save()
     ##  did all builders finish this job?
     ## if so, send a message about it
-    print("build appears complete")
-    buildlist = Build.objects.filter(job=build_obj.job.id)
-    ok = 0
-    for item in buildlist:
-      if (item.buildbin_result != ""):
-        ok += 1
-    if ok == num_builders:
-        job_id = build_obj.job.id
-        obj['job_id'] = job_id
-        json_str = json.dumps(obj)
-        this_frame = stomp.send({'destination': "/topic/buildcomplete",
-          'body': json_str,
-          'persistent': 'true'})
-        print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+    if (obj['status'] == "post_processing_complete"):
+        print("build is complete for this node, do we have all nodes?")
+        buildlist = Build.objects.filter(job=build_obj.job.id)
+        ok = 0
+        for item in buildlist:
+          if (item.buildbin_result != ""):
+            ok += 1
+        print("we have %d nodes" % ok)
+        if ok == num_builders:
+            print("we have enough nodes, sending a message")
+            job_id = build_obj.job.id
+            obj['job_id'] = job_id
+            json_str = json.dumps(obj)
+            this_frame = stomp.send({'destination': "/topic/buildcomplete",
+              'body': json_str,
+              'persistent': 'true'})
+            print("Receipt: %s" % this_frame.headers.get('receipt-id'))
 
 def handle_builder_event(obj):
     phases = ["building", "checking", "buildingbin", "preprocessing",
