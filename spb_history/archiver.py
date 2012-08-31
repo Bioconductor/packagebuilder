@@ -152,7 +152,10 @@ def handle_complete(obj, build_obj):
     build_obj.save()
     ##  did all builders finish this job?
     ## if so, send a message about it
-    if (obj['status'] == "post_processing_complete"):
+    if (obj['status'] == "post_processing_complete" \
+    and (obj['body']=="Synced repository to website" or \
+    obj['body']=='Syncing repository failed' or\
+    obj['body'] == "Post-processing complete.")):
         print("build is complete for this node, do we have all nodes?")
         buildlist = Build.objects.filter(job=build_obj.job.id)
         ok = 0
