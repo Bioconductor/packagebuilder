@@ -178,6 +178,7 @@ def handle_builder_event(obj):
             print("handling dcf info")
             handle_dcf_info(obj, build_obj)
         elif (status in phases):
+            send_completion_message(obj, build_obj)
             if obj['status'] == 'post_processing':
                 if obj.has_key('build_product'):
                     build_obj.build_product = obj['build_product']
@@ -265,6 +266,7 @@ def send_completion_message(obj, build_obj):
               'body': json_str,
               'persistent': 'true'})
             print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+            sys.stdout.flush()
     
 
 def callback(body, destination):
