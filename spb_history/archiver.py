@@ -243,7 +243,6 @@ def handle_builder_event(obj):
         # normal_end
 
 def send_completion_message(obj, build_obj):
-    print("in send_completion_message")
     ##  did all builders finish this job?
     ## if so, send a message about it
     if (obj['status'] == "post_processing_complete" \
@@ -256,7 +255,6 @@ def send_completion_message(obj, build_obj):
         for item in buildlist:
           if (item.buildbin_result != ""):
             ok += 1
-        print("we have %d nodes" % ok)
         if ok == num_builders:
             print("we have enough nodes, sending a message")
             job_id = build_obj.job.id
