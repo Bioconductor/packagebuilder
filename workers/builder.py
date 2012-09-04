@@ -595,7 +595,7 @@ def build_package(source_build):
         send_message({"status": status, "body": r_cmd})
         retcode = do_build(r_cmd, buildmsg, source_build)
     
-    if pkg_type == "mac.binary.leopard":
+    if pkg_type == "mac.binary.leopard" and (tempdir != None):
         shutil.rmtree(tempdir)
     
     # check for warnings
