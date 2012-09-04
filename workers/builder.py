@@ -13,8 +13,6 @@ import time
 import datetime
 import shlex
 import platform
-import tempfile
-import shutil
 from stompy import Stomp
 
 
@@ -521,7 +519,6 @@ def do_build(cmd, message_stream, source):
     
 def build_package(source_build):
     global pkg_type
-    tempdir = None
 
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
 
@@ -559,9 +556,8 @@ def build_package(source_build):
                 _call("rm -rf %s" % libdir, False)
             if (not (os.path.exists(libdir))):
                 os.mkdir(libdir)
-            tempdir = tempfile.mkdtemp()
             r_cmd = "../../build-universal.sh %s %s" % (\
-              get_source_tarball_name(), tempdir)
+              get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
         elif pkg_type == "win.binary":
             if (win_multiarch):
                 pass
@@ -594,9 +590,6 @@ def build_package(source_build):
     else:
         send_message({"status": status, "body": r_cmd})
         retcode = do_build(r_cmd, buildmsg, source_build)
-    
-    if pkg_type == "mac.binary.leopard" and (tempdir != None):
-        shutil.rmtree(tempdir)
     
     # check for warnings
     out_fh = open(outfile)
