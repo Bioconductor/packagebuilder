@@ -12,6 +12,7 @@ import ConfigParser
 from stompy import Stomp
 
 print("Starting monitor...\n")
+sys.stdout.flush()
 
 config = ConfigParser.ConfigParser()
 config.read('/home/biocadmin/packagebuilder/spb_history/aws.ini')
@@ -33,10 +34,12 @@ except:
 def handle_message(msg):
     body = msg.get_body()
     print("got this message: %s\n" % body)
+    sys.stdout.flush()
     this_frame = stomp.send({'destination': "/topic/buildjobs",
       'body': body,
       'persistent': 'true'})
     print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+    sys.stdout.flush()
     return True
 
 while (True):
