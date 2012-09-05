@@ -11,6 +11,7 @@ import time
 import ConfigParser
 from stompy import Stomp
 
+print("Starting monitor...\n")
 
 config = ConfigParser.ConfigParser()
 config.read('/home/biocadmin/packagebuilder/spb_history/aws.ini')
