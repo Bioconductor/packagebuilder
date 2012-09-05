@@ -9,7 +9,6 @@ from datetime import datetime
 import os
 import time
 import ConfigParser
-import base64
 from stompy import Stomp
 
 
@@ -23,8 +22,6 @@ conn = SQSConnection(access_key, secret_key)
 q = conn.get_queue("packagesubmitted")
 try:
     stomp = Stomp("merlot2.fhcrc.org", 61613)
-    # optional connect keyword args "username" and "password" like so:
-    # stomp.connect(username="user", password="pass")
     stomp.connect()
 except:
     print("Cannot connect")
@@ -33,18 +30,23 @@ except:
 
 
 def handle_message(msg):
-    body = base64.b64decode(msg.get_body())
+    body = msg.get_body()
     print("got this message: %s\n" % body)
     this_frame = stomp.send({'destination': "/topic/buildjobs",
       'body': body,
       'persistent': 'true'})
     print("Receipt: %s" % this_frame.headers.get('receipt-id'))
-    
+    return True
 
 while (True):
-    m = q.read()
-    if (m != None):
-        handle_message(m)
-
+    try:
+        m = q.read()
+        if (m != None):
+            result = handle_message(m)
+            if (result):
+                q.delete_message(m)
+    except KeyboardInterrupt:
+        stomp.disconnect()
+        break
 
 
