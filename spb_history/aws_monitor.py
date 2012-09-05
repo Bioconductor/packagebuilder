@@ -33,7 +33,7 @@ except:
 
 
 def handle_message(msg):
-    body = base64.base64decode(msg.get_body())
+    body = base64.b64decode(msg.get_body())
     print("got this message: %s\n" % body)
     this_frame = stomp.send({'destination': "/topic/buildjobs",
       'body': body,
