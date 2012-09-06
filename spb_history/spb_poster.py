@@ -199,7 +199,7 @@ def get_overall_build_result(job):
     for build in builds:
         if build.version == "0.0.0" and build.preprocessing_result == "":
             continue # filter out builds on wrong machines
-        buildbin_result == "OK"
+        buildbin_result = "OK"
         if "linux" in build.platform.lower():
             if not b.buildbin_result in ["OK", "skipped"]:
                 return(b.buildbin.result)
@@ -247,6 +247,8 @@ def main_loop():
 
 if __name__ == "__main__":
     # test it:
-    post_report_to_tracker(232)
-else:
+    #post_report_to_tracker(232)
     main_loop()
+#else:
+#    main_loop()
+
