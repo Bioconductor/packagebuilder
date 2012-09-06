@@ -111,11 +111,11 @@ def handle_completed_builds(obj, build_obj):
             #print("Receipt: %s" % this_frame.headers.get('receipt-id'))
             post_report_to_tracker(job_id)
 
-def post_report_to_tracker(job_id)
+def post_report_to_tracker(job_id):
     time.sleep(1) # need this?
     jobs = Job.objects.filter(id=job_id)
     job = jobs[0]
-    if (!"single_package_builder" in job.client_id):
+    if (not "single_package_builder" in job.client_id):
         print("This is not an SPB job, not posting it to tracker.\n")
         print("Job id = %s" % job_id)
         return
@@ -129,8 +129,7 @@ def callback(body, destination):
     print " [x] Received %r" % (body,)
     sys.stdout.flush() ## make sure we see everything
     received_obj = json.loads(body) # put this in try block to handle invalid json
-    elif (destination == '/topic/builderevents'):
-        handle_builder_event(received_obj)
+    handle_builder_event(received_obj)
     print("Destination: %s" % destination)
 
 print("Waiting for messages...")
