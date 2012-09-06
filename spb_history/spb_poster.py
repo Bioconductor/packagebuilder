@@ -6,7 +6,6 @@ import os
 import subprocess
 import platform
 import urllib2
-from datetime import datetime, date, time
 from stompy import Stomp
 
 ## this may need to change:
@@ -40,11 +39,6 @@ except:
 stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
 stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 
-def parse_time(time_str):
-    """ take a string like 'Tue Nov 29 2011 11:55:40 GMT-0800 (PST)'
-        and convert it to a DateTime """
-    segs = time_str.split(" GMT")
-    return(datetime.strptime(segs[0], "%a %b %d %Y %H:%M:%S"))
 
 def handle_dcf_info(obj, build):
     build.maintainer = obj['maintainer']
