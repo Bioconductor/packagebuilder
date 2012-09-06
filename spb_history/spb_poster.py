@@ -197,9 +197,9 @@ Please see the following build report for more details:
 def get_overall_build_result(job):
     builds = Build.objects.filter(job=job)
     for build in builds:
-        if build.version = "0.0.0" and build.preprocessing_result = "":
+        if build.version == "0.0.0" and build.preprocessing_result == "":
             continue # filter out builds on wrong machines
-        buildbin_result = "OK"
+        buildbin_result == "OK"
         if "linux" in build.platform.lower():
             if not b.buildbin_result in ["OK", "skipped"]:
                 return(b.buildbin.result)
