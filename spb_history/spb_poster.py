@@ -126,19 +126,20 @@ def callback(body, destination):
     handle_builder_event(received_obj)
     print("Destination: %s" % destination)
 
-print("Waiting for messages...")
-
-while True:
-    try:
-        frame = stomp.receive_frame()
-        stomp.ack(frame) # do this?
-        callback(frame.body, frame.headers.get('destination'))
-    except KeyboardInterrupt:
-        stomp.disconnect()
-        break
+def main_loop():
+    print("Waiting for messages...")
+    while True:
+        try:
+            frame = stomp.receive_frame()
+            stomp.ack(frame) # do this?
+            callback(frame.body, frame.headers.get('destination'))
+        except KeyboardInterrupt:
+            stomp.disconnect()
+            break
 
 
 if __name__ == "__main__":
     # test it:
     post_report_to_tracker(232)
-    
+else:
+    main_loop()
