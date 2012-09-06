@@ -5,7 +5,9 @@ import tempfile
 import os
 import subprocess
 import platform
-import urllib2
+import ConfigParser
+import requests
+import cookielib
 from stompy import Stomp
 
 ## this may need to change:
@@ -99,10 +101,6 @@ def handle_completed_builds(obj, build_obj):
             job_id = build_obj.job.id
             obj['job_id'] = job_id
             json_str = json.dumps(obj)
-            #this_frame = stomp.send({'destination': "/topic/buildcomplete",
-            #  'body': json_str,
-            #  'persistent': 'true'})
-            #print("Receipt: %s" % this_frame.headers.get('receipt-id'))
             post_report_to_tracker(job_id)
 
 def post_report_to_tracker(job_id):
@@ -118,13 +116,84 @@ def post_report_to_tracker(job_id):
     roundup_issue = segs[1]
     tarball_name = segs[2]
     url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
-    response = urllib2.urlopen(url)
-    html = response.read()
+    response = requests.get(url)
+    html = response.text
     html = filter_html(html)
     result = get_overall_build_result(job)
-    print("html is\n\n%s\n\n" % html)
+    url = copy_report_to_site(html, tarball_name)
+    post_text = get_post_text(result, url)
+    status  = post_to_tracker(roundup_issue, tarball_name, result, html, \
+        post_text, url)
     sys.stdout.flush()
 
+def copy_report_to_site(html, tarball_name):
+    t = tempfile.mkstemp()
+    f = open(t, "w")
+    f.write(html)
+    f.close
+    segs = tarball_name.split(".tar.gz")
+    pkg = segs[0]
+    now = time.localtime()
+    ts = time.strftime("%Y%m%d%H%M%S", now)
+    destfile = "%s_buildreport_%s.html" % (pkg, ts)
+    cmd = \
+      "scp -i ~/.ssh/pkgbuild_rsa %s /extra/www/bioc/spb_reports" % \
+      (t, destfile)
+    result = subprocess.call(cmd)
+    os.remove(t)
+    url = "http://bioconductor.org/spb_reports/%s" % destfile
+    return(url)
+
+def post_to_tracker(roundup_issue, tarball_name, result,\
+  html, post_text):
+    config = ConfigParser.ConfigParser()
+    config.read('/home/biocadmin/packagebuilder/spb_history/tracker.ini')
+    username = config.get("tracker", "username")
+    password = config.get("tracker", "password")
+    url = "http://tracker.fhcrc.org/roundup/bioc_submit/"
+    jar = cookielib.CookieJar()
+    params = {"__login_name": username, "__login_password": password,\
+      "@action": "login", "__came_from": \
+      "http://tracker.fhcrc.org/roundup/bioc_submit/"}
+    r = requests.get(url, params=params, cookies=jar)
+    url2 = url + "issue%s" % roundup_issue
+    params2 = {"@action": "edit", "@note": post_text}
+    r2 = requests.get(url2, params=params2, cookies=jar)
+    
+    
+
+def get_post_text(build_result, url):
+    ok = True
+    if not build_result == "OK":
+        ok = False
+    msg = """
+Dear Package contributor,
+
+This is the automated single package builder at bioconductor.org.
+
+Your package has been built on Linux, Mac, and Windows. 
+
+    """
+    if ok:
+        msg = msg + """
+Congratulations! The package built without errors or warnings
+on all platforms.
+        """
+    else:
+        msg = msg + """
+On one or more platforms, the build result was "%s".
+This may mean there is a problem with the package that you need to fix.
+Or it may mean that there is a problem with the build system itself.
+
+        """ % build_result
+    msg = msg + """
+Please see the following build report for more details:
+
+%s
+
+    """ % url
+    return(msg)
+    
 def get_overall_build_result(job):
     builds = Build.objects.filter(job=job)
     for build in builds:
