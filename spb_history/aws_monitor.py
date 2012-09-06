@@ -5,7 +5,6 @@ from boto.sqs.connection import SQSConnection
 from boto.sqs.message import Message
 import json
 import sys
-from datetime import datetime
 import os
 import time
 import ConfigParser
@@ -49,6 +48,7 @@ while (True):
             result = handle_message(m)
             if (result):
                 q.delete_message(m)
+        time.sleep(1)
     except KeyboardInterrupt:
         stomp.disconnect()
         break
