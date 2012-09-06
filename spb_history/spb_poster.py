@@ -104,7 +104,6 @@ def handle_completed_builds(obj, build_obj):
             post_report_to_tracker(job_id)
 
 def post_report_to_tracker(job_id):
-    time.sleep(1) # need this?
     jobs = Job.objects.filter(id=job_id)
     job = jobs[0]
     if (not "single_package_builder" in job.client_id):
