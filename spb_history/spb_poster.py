@@ -116,7 +116,7 @@ def post_report_to_tracker(job_id):
     url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
     response = urllib2.urlopen(url)
     html = response.read()
-    print("html is\n\n%d\n\n" % html)
+    print("html is\n\n%s\n\n" % html)
     sys.stdout.flush()
 
 def callback(body, destination):
