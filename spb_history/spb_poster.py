@@ -113,12 +113,50 @@ def post_report_to_tracker(job_id):
         print("This is not an SPB job, not posting it to tracker.\n")
         print("Job id = %s" % job_id)
         return
+    #single_package_builder_autobuild:558:spbtest_0.99.0.tar.gz
+    segs = job.client_id.split(":")
+    roundup_issue = segs[1]
+    tarball_name = segs[2]
     url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
     response = urllib2.urlopen(url)
     html = response.read()
+    html = filter_html(html)
+    result = get_overall_build_result(job)
     print("html is\n\n%s\n\n" % html)
     sys.stdout.flush()
 
+def get_overall_build_result(job):
+    builds = Build.objects.filter(job=job)
+    for build in builds:
+        if build.version = "0.0.0" and build.preprocessing_result = "":
+            continue # filter out builds on wrong machines
+        buildbin_result = "OK"
+        if "linux" in build.platform.lower():
+            if not b.buildbin_result in ["OK", "skipped"]:
+                return(b.buildbin.result)
+        else:
+            if not b.buildbin_result == "OK":
+                return(b.buildbin_result)
+        if not b.buildsrc_result == "OK":
+            return(b.buildsrc_result)
+        if not b.checksrc_result == "OK":
+            return(b.checksrc_result)
+        return "OK"
+
+def filter_html(html):
+    lines = html.split("\n")
+    good_lines = []
+    for line in lines:
+        if ("InstallCommand" in line):
+            segs = line.split("<pre")
+            line = segs[0]
+        if("pkgInstall(" in line):
+            segs = line.split("</pre>")
+            line = segs[1]
+        if (not "merlot2" in line):
+            good_lines.append(line)
+        return("\n".join(good_lines))
+    
 def callback(body, destination):
     print " [x] Received %r" % (body,)
     sys.stdout.flush() ## make sure we see everything
