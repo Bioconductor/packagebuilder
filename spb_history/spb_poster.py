@@ -144,10 +144,10 @@ def copy_report_to_site(html, tarball_name):
       "/usr/bin/scp -i /home/biocadmin/.ssh/pkgbuild_rsa %s webadmin@krait:/extra/www/bioc/spb_reports/%s" % \
       (t[1], destfile)
     print("cmd = %s\n" % cmd)
-    result = subprocess.call(cmd)
+    result = subprocess.call(cmd, shell=True)
     chmod_cmd = "/usr/bin/ssh -i /home/biocadmin/.ssh/pkgbuild_rsa webadmin@krait \"chmod a+r /extra/www/bioc/spb_reports/%s\"" % destfile
     print("chmod_cmd = %s\n" % chmod_cmd)
-    result = subprocess.call(chmod_cmd)
+    result = subprocess.call(chmod_cmd, shell=True)
     #time.sleep(1) # is this needed?
     #os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
