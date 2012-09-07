@@ -48,6 +48,8 @@ def handle_dcf_info(obj, build):
     build.save()
 
 def get_build_obj(obj):
+    print("in get_build_obj(), obj['job_id']==%s, obj['builder_id']==%s\n"\
+        % (obj['job_id'], obj['builder_id']))
     return(Build.objects.get(jid=obj['job_id'], builder_id=obj['builder_id']))
 
 
