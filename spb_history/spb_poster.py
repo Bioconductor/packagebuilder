@@ -70,6 +70,7 @@ def handle_builder_event(obj):
     if (obj.has_key('status')):
         status = obj['status']
         build_obj = get_build_obj(obj)
+        handle_completed_builds(obj, build_obj)
         if (status == 'dcf_info'):
             print("handling dcf info")
             handle_dcf_info(obj, build_obj)
@@ -86,6 +87,7 @@ def handle_builder_event(obj):
 def handle_completed_builds(obj, build_obj):
     ##  did all builders finish this job?
     ## if so, post it to the tracker
+    print("in handle_completed_builds()\n")
     if (obj['status'] == "post_processing_complete" \
     and (obj['body']=="Synced repository to website" or \
     obj['body']=='Syncing repository failed' or\
