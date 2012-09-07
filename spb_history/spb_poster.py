@@ -90,6 +90,8 @@ def handle_completed_builds(obj, build_obj):
     ##  did all builders finish this job?
     ## if so, post it to the tracker
     print("in handle_completed_builds()\n")
+    if(obj['status'] =='build_failed'):
+        print("obj['status'] is 'build_failed'!!!!")
     if ((obj['status'] == 'build_failed') or \
     (obj['status'] == "post_processing_complete" \
     and (obj['body']=="Synced repository to website" or \
