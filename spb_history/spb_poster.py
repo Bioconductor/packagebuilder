@@ -129,7 +129,7 @@ def post_report_to_tracker(job_id):
 
 def copy_report_to_site(html, tarball_name):
     t = tempfile.mkstemp()
-    f = open(t, "w")
+    f = open(t[1], "w")
     f.write(html)
     f.close
     segs = tarball_name.split(".tar.gz")
@@ -139,7 +139,7 @@ def copy_report_to_site(html, tarball_name):
     destfile = "%s_buildreport_%s.html" % (pkg, ts)
     cmd = \
       "scp -i ~/.ssh/pkgbuild_rsa %s /extra/www/bioc/spb_reports" % \
-      (t, destfile)
+      (t[1], destfile)
     result = subprocess.call(cmd)
     os.remove(t)
     url = "http://bioconductor.org/spb_reports/%s" % destfile
