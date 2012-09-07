@@ -123,7 +123,7 @@ def post_report_to_tracker(job_id):
     print("Sleeping for 10 seconds...\n")
     time.sleep(10)
     response = requests.get(url)
-    html = str(response.text)
+    html = response.text.encode('ascii', 'ignore')
     print("html before filtering: %s\n" % html)
     html = filter_html(html)
     print("html after filtering: %s\n" % html)
