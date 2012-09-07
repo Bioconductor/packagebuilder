@@ -202,15 +202,15 @@ def get_overall_build_result(job):
             continue # filter out builds on wrong machines
         buildbin_result = "OK"
         if "linux" in build.platform.lower():
-            if not b.buildbin_result in ["OK", "skipped"]:
-                return(b.buildbin.result)
+            if not build.buildbin_result in ["OK", "skipped"]:
+                return(build.buildbin.result)
         else:
-            if not b.buildbin_result == "OK":
-                return(b.buildbin_result)
-        if not b.buildsrc_result == "OK":
-            return(b.buildsrc_result)
-        if not b.checksrc_result == "OK":
-            return(b.checksrc_result)
+            if not build.buildbin_result == "OK":
+                return(build.buildbin_result)
+        if not build.buildsrc_result == "OK":
+            return(build.buildsrc_result)
+        if not build.checksrc_result == "OK":
+            return(build.checksrc_result)
         return "OK"
 
 def filter_html(html):
