@@ -155,7 +155,7 @@ def copy_report_to_site(html, tarball_name):
     print("chmod_cmd = %s\n" % chmod_cmd)
     result = subprocess.call(chmod_cmd, shell=True)
     #time.sleep(1) # is this needed?
-    #os.remove(t[1])
+    os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
     return(url)
 
