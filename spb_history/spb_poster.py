@@ -144,8 +144,8 @@ def copy_report_to_site(html, tarball_name):
       (t[1], destfile)
     print("cmd = %s\n" % cmd)
     result = subprocess.call(cmd)
-    time.sleep(1) # is this needed?
-    os.remove(t[1])
+    #time.sleep(1) # is this needed?
+    #os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
     return(url)
 
