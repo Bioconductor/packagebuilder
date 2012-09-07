@@ -63,8 +63,8 @@ class Tailer(threading.Thread):
                 break # not needed here but might be needed if program was to continue doing other stuff
                 # and we wanted the thread to exit
             
-            if (st.st_size > 0):
-                print("st.st_size = %d, prevsize = %s" % (st.st_size, prevsize))
+            #if (st.st_size > 0):
+            #    print("st.st_size = %d, prevsize = %s" % (st.st_size, prevsize))
             if (st.st_size > 0) and (st.st_size > prevsize):
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
@@ -941,6 +941,9 @@ if __name__ == "__main__":
             propagate_package()
             if (is_build_required):
                 update_packages_file()
+        else:
+            send_message({"status": "build_failed",\
+                "retcode": result, "body": "build failed"})
         if warnings: # todo separate build / check / build bin warnings
             body = "Build completed with warnings."
         else:
