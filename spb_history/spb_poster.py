@@ -119,9 +119,12 @@ def post_report_to_tracker(job_id):
     roundup_issue = segs[1]
     tarball_name = segs[2]
     url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
+    print("build report url: %s\n" %url)
     response = requests.get(url)
     html = response.text
+    print("html before filtering: %s\n" % html)
     html = filter_html(html)
+    print("html after filtering: %s\n" % html)
     result = get_overall_build_result(job)
     url = copy_report_to_site(html, tarball_name)
     post_text = get_post_text(result, url)
