@@ -130,6 +130,7 @@ def post_report_to_tracker(job_id):
     sys.stdout.flush()
 
 def copy_report_to_site(html, tarball_name):
+    print("HTML=\n\n%s\n\n" % html)
     t = tempfile.mkstemp()
     f = open(t[1], "w")
     f.write(html)
@@ -144,6 +145,9 @@ def copy_report_to_site(html, tarball_name):
       (t[1], destfile)
     print("cmd = %s\n" % cmd)
     result = subprocess.call(cmd)
+    chmod_cmd = "/usr/bin/ssh -i /home/biocadmin/.ssh/pkgbuild_rsa webadmin@krait \"chmod a+r /extra/www/bioc/spb_reports/%s\"" % destfile
+    print("chmod_cmd = %s\n" % chmod_cmd)
+    result = subprocess.call(chmod_cmd)
     #time.sleep(1) # is this needed?
     #os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
