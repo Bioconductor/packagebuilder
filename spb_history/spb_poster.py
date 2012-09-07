@@ -138,10 +138,10 @@ def copy_report_to_site(html, tarball_name):
     ts = time.strftime("%Y%m%d%H%M%S", now)
     destfile = "%s_buildreport_%s.html" % (pkg, ts)
     cmd = \
-      "scp -i ~/.ssh/pkgbuild_rsa %s /extra/www/bioc/spb_reports" % \
+      "scp -i ~/.ssh/pkgbuild_rsa %s /extra/www/bioc/spb_reports/%s" % \
       (t[1], destfile)
     result = subprocess.call(cmd)
-    os.remove(t)
+    os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
     return(url)
 
