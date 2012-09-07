@@ -130,6 +130,7 @@ def post_report_to_tracker(job_id):
     post_text = get_post_text(result, url)
     status  = post_to_tracker(roundup_issue, tarball_name, result, html, \
         post_text)
+    print("Done.\n")
     sys.stdout.flush()
 
 def copy_report_to_site(html, tarball_name):
