@@ -229,6 +229,7 @@ def get_overall_build_result(job):
 
 def filter_html(html):
     lines = html.split("\n")
+    print("in filter_html(), number of lines is %d\n" % len(lines))
     good_lines = []
     for line in lines:
         if ("InstallCommand" in line):
@@ -239,6 +240,8 @@ def filter_html(html):
             line = segs[1]
         if (not "merlot2" in line):
             good_lines.append(line)
+        else:
+            print("merlot2 match: %s\n" % line)
         return("\n".join(good_lines))
     
 def callback(body, destination):
