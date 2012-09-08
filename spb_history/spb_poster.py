@@ -38,7 +38,7 @@ except:
     raise
 
 # do we want acks?
-stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
+#stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
 stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 
 
