@@ -42,10 +42,6 @@ stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
 stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 
 
-def handle_dcf_info(obj, build):
-    build.maintainer = obj['maintainer']
-    build.version = obj['version']
-    build.save()
 
 def get_build_obj(obj):
     print("in get_build_obj(), obj['job_id']==%s, obj['builder_id']==%s\n"\
@@ -73,18 +69,6 @@ def handle_builder_event(obj):
         status = obj['status']
         build_obj = get_build_obj(obj)
         handle_completed_builds(obj, build_obj)
-        if (status == 'dcf_info'):
-            print("handling dcf info")
-            handle_dcf_info(obj, build_obj)
-        elif (status in phases):
-            handle_completed_builds(obj, build_obj)
-            if obj['status'] == 'post_processing':
-                if obj.has_key('build_product'):
-                    build_obj.build_product = obj['build_product']
-                if obj.has_key('filesize'):
-                    build_obj.filesize = obj['filesize']
-                    handle_completed_builds(obj, build_obj)
-                    return()
     else:
         print("job does not have status key!\n")
         sys.stdout.flush()
@@ -113,6 +97,8 @@ def handle_completed_builds(obj, build_obj):
             obj['job_id'] = job_id
             json_str = json.dumps(obj)
             post_report_to_tracker(job_id)
+        else:
+            print("we only have %d nodes, not sending a message" % ok)
 
 def post_report_to_tracker(job_id):
     jobs = Job.objects.filter(id=job_id)
