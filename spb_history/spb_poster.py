@@ -86,9 +86,9 @@ def handle_completed_builds(obj, build_obj):
     obj['body']=='Syncing repository failed' or\
     obj['body'] == "Post-processing complete."))):
         print("build is complete for this node, do we have all nodes?")
+        time.sleep(3)
         buildlist = Build.objects.filter(job=build_obj.job.id)
         ok = 0
-        time.sleep(3)
         for item in buildlist:
           if (item.buildbin_result != ""):
             ok += 1
