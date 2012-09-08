@@ -59,7 +59,6 @@ def handle_builder_event(obj):
     parent_job = None
     job_id = None
     if (obj.has_key('job_id')):
-        pass
         job_id = obj['job_id']
         try:
             parent_job = Job.objects.get(job_id=job_id)
