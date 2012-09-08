@@ -60,12 +60,12 @@ def handle_builder_event(obj):
     job_id = None
     if (obj.has_key('job_id')):
         pass
-    #    job_id = obj['job_id']
-    #    try:
-    #        parent_job = Job.objects.get(job_id=job_id)
-    #    except Job.DoesNotExist:
-    #        print("No parent job for %s; ignoring message." % job_id)
-    #        return()
+        job_id = obj['job_id']
+        try:
+            parent_job = Job.objects.get(job_id=job_id)
+        except Job.DoesNotExist:
+            print("No parent job for %s; ignoring message." % job_id)
+            return()
     else:
         print("Malformed message, ignoring it.")
         return
@@ -90,6 +90,7 @@ def handle_builder_event(obj):
 def handle_completed_builds(obj, build_obj):
     ##  did all builders finish this job?
     ## if so, post it to the tracker
+    sys.stdout.flush()
     print("in handle_completed_builds()\n")
     if(obj['status'] =='build_failed'):
         print("obj['status'] is 'build_failed'!!!!")
