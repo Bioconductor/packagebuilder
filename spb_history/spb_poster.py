@@ -99,6 +99,7 @@ def handle_completed_builds(obj, build_obj):
             post_report_to_tracker(job_id)
         else:
             print("we only have %d nodes, not sending a message" % ok)
+        sys.stdout.flush()
 
 def post_report_to_tracker(job_id):
     jobs = Job.objects.filter(id=job_id)
