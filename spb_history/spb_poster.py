@@ -59,12 +59,13 @@ def handle_builder_event(obj):
     parent_job = None
     job_id = None
     if (obj.has_key('job_id')):
-        job_id = obj['job_id']
-        try:
-            parent_job = Job.objects.get(job_id=job_id)
-        except Job.DoesNotExist:
-            print("No parent job for %s; ignoring message." % job_id)
-            return()
+        pass
+    #    job_id = obj['job_id']
+    #    try:
+    #        parent_job = Job.objects.get(job_id=job_id)
+    #    except Job.DoesNotExist:
+    #        print("No parent job for %s; ignoring message." % job_id)
+    #        return()
     else:
         print("Malformed message, ignoring it.")
         return
