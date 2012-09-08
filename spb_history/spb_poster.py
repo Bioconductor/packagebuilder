@@ -85,6 +85,9 @@ def handle_builder_event(obj):
                     build_obj.filesize = obj['filesize']
                     handle_completed_builds(obj, build_obj)
                     return()
+    else:
+        print("job does not have status key!\n")
+        sys.stdout.flush()
 
 def handle_completed_builds(obj, build_obj):
     ##  did all builders finish this job?
@@ -252,6 +255,7 @@ def callback(body, destination):
     received_obj = json.loads(body) # put this in try block to handle invalid json
     handle_builder_event(received_obj)
     print("Destination: %s" % destination)
+    sys.stdout.flush()
 
 def main_loop():
     print("Waiting for messages...")
