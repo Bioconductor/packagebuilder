@@ -48,7 +48,7 @@ while (True):
             result = handle_message(m)
             if (result):
                 q.delete_message(m)
-        time.sleep(1)
+        time.sleep(5)
     except KeyboardInterrupt:
         stomp.disconnect()
         break

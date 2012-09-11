@@ -83,3 +83,44 @@ https://bioc-internal.atlassian.net/browse/BUILD-6
 Roundup Tracker Integration
 ===========================
 
+When a tarball is submitted to the issue tracker
+(http://tracker.fhcrc.org/roundup/bioc_submit/), a job is
+submitted to the Single Package Builder (SPB).
+
+There are several components to this integration. The
+first is an add-on to Roundup known as a 'reactor'.
+
+The tracker lives on mamba at 
+webadmin@mamba:/extra/trackers/bioc_submit
+The tracker code is in svn at:
+https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Projects/bioc_submit_tracker/
+The reactor is here:
+https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Projects/bioc_submit_tracker/detectors/builder_reactor.py
+
+Integration Workflow
+--------------------
+When new messages are added to the tracker, the reactor is run.
+If a new tarball is detected, the reactor calls another
+python script 
+(https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Projects/bioc_submit_tracker/customizations/sendmessage.py).
+Another script is necessary because the tracker runs under 
+Python 2.3, but the libraries that are required to start
+an SPB job require a newer version of python (2.7 is used).
+
+This second script sends a message to an Amazon Simple Queue Service
+(SQS) queue. SQS is used here (instead of ActiveMQ which is used 
+for the rest of SPB) because mamba is in the DMZ and cannot connect
+to merlot2, where the ActiveMQ server is located.
+
+A script running on merlot2
+(https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/spb_history/aws_monitor.py)
+listens for messages posted to this SQS queue. When it receives a message,
+it sends another message to the ActiveMQ queue used to signal new builds.
+This starts the normal SPB workflow described at the start of this document.
+The message sent to SPB contains a flag indicating that this build was
+originated by the SPB.
+
+When the build is complete, another script on merlot2
+(https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/spb_history/spb_poster.py)
+is listening, and it posts a message to the tracker
+(using an HTTP request) including a link to the build report.
