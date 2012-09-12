@@ -86,7 +86,7 @@ def handle_completed_builds(obj, build_obj):
     obj['body']=='Syncing repository failed' or\
     obj['body'] == "Post-processing complete."))):
         print("build is complete for this node, do we have all nodes?")
-        time.sleep(3)
+        time.sleep(10)
         buildlist = Build.objects.filter(job=build_obj.job.id)
         ok = 0
         for item in buildlist:
@@ -96,7 +96,6 @@ def handle_completed_builds(obj, build_obj):
             print("we have enough nodes, sending a message")
             job_id = build_obj.job.id
             obj['job_id'] = job_id
-            json_str = json.dumps(obj)
             post_report_to_tracker(job_id)
         else:
             print("we only have %d nodes, not sending a message" % ok)
@@ -117,7 +116,7 @@ def post_report_to_tracker(job_id):
     print("build report url: %s\n" %url)
     print("Sleeping for 10 seconds...\n")
     sys.stdout.flush()
-    time.sleep(10)
+    time.sleep(20)
     response = requests.get(url)
     html = response.text.encode('ascii', 'ignore')
     print("html before filtering: %s\n" % html)
@@ -150,7 +149,6 @@ def copy_report_to_site(html, tarball_name):
     chmod_cmd = "/usr/bin/ssh -i /home/biocadmin/.ssh/pkgbuild_rsa webadmin@krait \"chmod a+r /extra/www/bioc/spb_reports/%s\"" % destfile
     print("chmod_cmd = %s\n" % chmod_cmd)
     result = subprocess.call(chmod_cmd, shell=True)
-    #time.sleep(1) # is this needed?
     os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
     return(url)
