@@ -208,7 +208,6 @@ def get_overall_build_result(job):
     for build in builds:
         if build.version == "0.0.0" and build.preprocessing_result == "":
             continue # filter out builds on wrong machines
-        buildbin_result = "OK"
         if "linux" in build.platform.lower():
             if not build.buildbin_result in ["OK", "skipped"]:
                 return(build.buildbin.result)
@@ -219,7 +218,7 @@ def get_overall_build_result(job):
             return(build.buildsrc_result)
         if not build.checksrc_result == "OK":
             return(build.checksrc_result)
-        return "OK"
+    return "OK"
 
 def filter_html(html):
     lines = html.split("\n")
