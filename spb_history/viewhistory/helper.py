@@ -38,10 +38,12 @@ def filter_out_wrong_versions(builds, job):
     if r_ver == "2.14":
         nodes = ['wilson2', 'pitt', 'moscato1']
     elif r_ver == "2.15":
+        if bioc_version == "2.11":
+            nodes = ['lamb1', 'perceval', 'moscato1']
+    elif r_ver == "2.16":
         if bioc_version == "2.12":
             nodes = ['lamb2', 'petty', 'moscato2']
-        elif bioc_version == "2.11":
-            nodes = ['lamb1', 'perceval', 'moscato1']
+
     else:
         raise Exception("Don't know the build nodes for R-%s" % r_ver)
     
