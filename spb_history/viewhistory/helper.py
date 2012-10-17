@@ -45,7 +45,7 @@ def filter_out_wrong_versions(builds, job):
             nodes = ['lamb2', 'petty', 'moscato2']
 
     else:
-        raise Exception("Don't know the build nodes for R-%s" % r_ver)
+        raise Exception("Don't know the build nodes for R-%s (BioC %s)" % (r_ver, bioc_version))
     
     ret = []
     for build in builds:
