@@ -67,7 +67,11 @@ def handle_builder_event(obj):
     build_obj = None
     if (obj.has_key('status')):
         status = obj['status']
-        build_obj = get_build_obj(obj)
+        try:
+            build_obj = get_build_obj(obj)
+        except DoesNotExist:
+            print("Caught DoesNotExist error, continuing...")
+            return()
         handle_completed_builds(obj, build_obj)
     else:
         print("job does not have status key!\n")
