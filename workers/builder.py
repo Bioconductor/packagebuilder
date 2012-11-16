@@ -13,7 +13,9 @@ import time
 import datetime
 import shlex
 import platform
+import unicodedata
 from stompy import Stomp
+
 
 
 class Tailer(threading.Thread):
@@ -95,6 +97,9 @@ def send_message(msg, status=None):
         merged_dict['body'] = msg
         if not (status == None):
             merged_dict['status'] = status
+    body = merged_dict['body']
+    merged_dict['body'] = \
+        unicodedata.normalize('NFKD', body).encode('ascii','ignore')
     json_str = json.dumps(merged_dict)
     print "sending message:"
     print json_str
