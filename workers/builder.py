@@ -98,7 +98,7 @@ def send_message(msg, status=None):
         if not (status == None):
             merged_dict['status'] = status
     if("body" in merged_dict):
-        body = unicode(merged_dict['body'])
+        body = unicode(merged_dict['body'], errors='replace')
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
     json_str = json.dumps(merged_dict)
