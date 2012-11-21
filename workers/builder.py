@@ -102,7 +102,7 @@ def send_message(msg, status=None):
         try:
             body = unicode(merged_dict['body'], errors='replace')
         except TypeError:
-            body <- merged_dict['body']
+            body = merged_dict['body']
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
     json_str = json.dumps(merged_dict)
