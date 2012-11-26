@@ -951,16 +951,11 @@ if __name__ == "__main__":
             propagate_package()
             if (is_build_required):
                 update_packages_file()
-        else:
-            send_message({"status": "build_failed",\
-                "retcode": result, "body": "build failed"})
         if warnings: # todo separate build / check / build bin warnings
             body = "Build completed with warnings."
         else:
             body = "Build was successful."
         # todo - rethink completion
         #send_message({"status": "complete", "result": result, "body": body, "warnings": warnings})
-    else:
-        send_message({"status": "build_failed", "retcode": result, "body": "build failed"})
     
     
