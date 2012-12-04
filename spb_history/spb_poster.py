@@ -138,9 +138,9 @@ def post_report_to_tracker(job_id):
     #time.sleep(30)
     response = requests.get(url)
     html = response.text.encode('ascii', 'ignore')
-    print("html before filtering: %s\n" % html)
+    #print("html before filtering: %s\n" % html)
     html = filter_html(html)
-    print("html after filtering: %s\n" % html)
+    #print("html after filtering: %s\n" % html)
     result = get_overall_build_result(job)
     url = copy_report_to_site(html, tarball_name)
     post_text = get_post_text(result, url)
@@ -153,7 +153,9 @@ def copy_report_to_site(html, tarball_name):
     print("HTML=\n\n%s\n\n" % html)
     t = tempfile.mkstemp()
     f = open(t[1], "w")
+    print("temp filename is %s" % t[1])
     f.write(html)
+    f.flush()
     f.close
     segs = tarball_name.split(".tar.gz")
     pkg = segs[0]
@@ -168,7 +170,7 @@ def copy_report_to_site(html, tarball_name):
     chmod_cmd = "/usr/bin/ssh -i /home/biocadmin/.ssh/pkgbuild_rsa webadmin@krait \"chmod a+r /extra/www/bioc/spb_reports/%s\"" % destfile
     print("chmod_cmd = %s\n" % chmod_cmd)
     result = subprocess.call(chmod_cmd, shell=True)
-    os.remove(t[1])
+    ## os.remove(t[1]) FIXME uncomment
     url = "http://bioconductor.org/spb_reports/%s" % destfile
     return(url)
 
