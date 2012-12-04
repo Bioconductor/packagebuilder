@@ -99,8 +99,11 @@ def handle_completed_builds(obj, build_obj):
             ok += 1
         if ok == num_builders:
             print("we have enough nodes, sending a message")
-            t = threading.Thread(target=worker, args=(obj, build_obj,))
-            t.start()
+            job_id = build_obj.job.id
+            obj['job_id'] = job_id
+            post_report_to_tracker(job_id)
+            #t = threading.Thread(target=worker, args=(obj, build_obj,))
+            #t.start()
             #job_id = build_obj.job.id
             #obj['job_id'] = job_id
             #post_report_to_tracker(job_id)
@@ -110,7 +113,7 @@ def handle_completed_builds(obj, build_obj):
 
 
 def worker(obj, build_obj):
-    timeout = 200
+    timeout = 10
     print("Sleeping for %s seconds" % timeout)
     time.sleep(timeout)
     job_id = build_obj.job.id
