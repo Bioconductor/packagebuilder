@@ -8,6 +8,7 @@ import platform
 import ConfigParser
 import requests
 import cookielib
+import threading
 from stompy import Stomp
 
 ## this may need to change:
@@ -98,12 +99,26 @@ def handle_completed_builds(obj, build_obj):
             ok += 1
         if ok == num_builders:
             print("we have enough nodes, sending a message")
-            job_id = build_obj.job.id
-            obj['job_id'] = job_id
-            post_report_to_tracker(job_id)
+            t = threading.Thread(target=worker, args=(obj, build_obj,))
+            t.start()
+            #job_id = build_obj.job.id
+            #obj['job_id'] = job_id
+            #post_report_to_tracker(job_id)
         else:
             print("we only have %d nodes, not sending a message" % ok)
         sys.stdout.flush()
+
+
+def worker(obj, build_obj):
+    timeout = 100
+    print("Sleeping for %s seconds" % timeout)
+    time.sleep(timeout)
+    job_id = build_obj.job.id
+    obj['job_id'] = job_id
+    post_report_to_tracker(job_id)
+
+
+
 
 def post_report_to_tracker(job_id):
     jobs = Job.objects.filter(id=job_id)
