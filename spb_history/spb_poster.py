@@ -133,9 +133,9 @@ def post_report_to_tracker(job_id):
     tarball_name = segs[2]
     url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
     print("build report url: %s\n" %url)
-    print("Sleeping for 30 seconds...\n")
     sys.stdout.flush()
-    time.sleep(30)
+    #print("Sleeping for 30 seconds...\n")
+    #time.sleep(30)
     response = requests.get(url)
     html = response.text.encode('ascii', 'ignore')
     print("html before filtering: %s\n" % html)
