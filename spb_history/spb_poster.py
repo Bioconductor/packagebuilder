@@ -156,7 +156,7 @@ def copy_report_to_site(html, tarball_name):
     print("HTML=\n\n%s\n\n" % html)
     t = tempfile.mkstemp()
     f = open(t[1], "w")
-    print("temp filename is %s" % t[1])
+    #print("temp filename is %s" % t[1])
     f.write(html)
     f.flush()
     f.close
@@ -173,7 +173,7 @@ def copy_report_to_site(html, tarball_name):
     chmod_cmd = "/usr/bin/ssh -i /home/biocadmin/.ssh/pkgbuild_rsa webadmin@krait \"chmod a+r /extra/www/bioc/spb_reports/%s\"" % destfile
     print("chmod_cmd = %s\n" % chmod_cmd)
     result = subprocess.call(chmod_cmd, shell=True)
-    ## os.remove(t[1]) FIXME uncomment
+    os.remove(t[1])
     url = "http://bioconductor.org/spb_reports/%s" % destfile
     return(url)
 
