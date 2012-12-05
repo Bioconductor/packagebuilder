@@ -89,6 +89,7 @@ def handle_completed_builds(obj, build_obj):
     (obj['status'] == "post_processing_complete" \
     and (obj['body']=="Synced repository to website" or \
     obj['body']=='Syncing repository failed' or\
+    ("_complete" in obj['status'] and obj['result_code'] != 0) or \
     obj['body'] == "Post-processing complete."))):
         print("build is complete for this node, do we have all nodes?")
         #time.sleep(10)
