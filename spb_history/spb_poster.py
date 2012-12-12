@@ -24,6 +24,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'spb_history.settings'
 # now you can do stuff like this:
 #from spb_history.viewhistory.models import Package
 #print Package.objects.count()
+completed_jobs = []
 
 from spb_history.viewhistory.models import Job
 from spb_history.viewhistory.models import Package
@@ -126,12 +127,18 @@ def worker(obj, build_obj):
 
 
 def post_report_to_tracker(job_id):
+    global completed_jobs
     jobs = Job.objects.filter(id=job_id)
     job = jobs[0]
     if (not "single_package_builder" in job.client_id):
         print("This is not an SPB job, not posting it to tracker.\n")
         print("Job id = %s" % job_id)
         return
+    if (job_id in completed_jobs):
+        print("Already completed job %s." % job_id)
+        return
+    else:
+        completed_jobs.append(job_id)
     #single_package_builder_autobuild:558:spbtest_0.99.0.tar.gz
     segs = job.client_id.split(":")
     roundup_issue = segs[1]
