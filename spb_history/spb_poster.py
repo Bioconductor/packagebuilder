@@ -270,7 +270,13 @@ def filter_html(html):
 def callback(body, destination):
     print " [x] Received %r" % (body,)
     sys.stdout.flush() ## make sure we see everything
-    received_obj = json.loads(body) # put this in try block to handle invalid json
+    received_obj = None
+    try:
+        received_obj = json.loads(body)
+    except ValueError as e:
+        print("!!!Received invalid JSON!!!")
+        print(inst)
+        return
     handle_builder_event(received_obj)
     print("Destination: %s" % destination)
     sys.stdout.flush()
