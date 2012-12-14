@@ -246,7 +246,7 @@ def callback(body, destination):
     sys.stdout.flush() ## make sure we see everything
     received_obj = None
     try:
-        received_obj = json.loads(body) # put this in try block to handle invalid json
+        received_obj = json.loads(body)
     except ValueError as e:
         print("!!!Received invalid JSON!!!")
         print(inst)
