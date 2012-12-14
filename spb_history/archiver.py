@@ -244,7 +244,14 @@ def handle_builder_event(obj):
 def callback(body, destination):
     print " [x] Received %r" % (body,)
     sys.stdout.flush() ## make sure we see everything
-    received_obj = json.loads(body) # put this in try block to handle invalid json
+    received_obj = None
+    try:
+        received_obj = json.loads(body) # put this in try block to handle invalid json
+    except ValueError as e:
+        print("!!!Received invalid JSON!!!")
+        print(inst)
+        return
+
     if (destination == '/topic/buildjobs'):
         handle_job_start(received_obj)
     elif (destination == '/topic/builderevents'):
