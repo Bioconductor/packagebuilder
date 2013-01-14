@@ -71,7 +71,7 @@ def handle_builder_event(obj):
         status = obj['status']
         try:
             build_obj = get_build_obj(obj)
-        except DoesNotExist:
+        except Job.DoesNotExist:
             print("Caught DoesNotExist error, continuing...")
             return()
         handle_completed_builds(obj, build_obj)
