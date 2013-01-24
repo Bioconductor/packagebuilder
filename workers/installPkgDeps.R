@@ -47,14 +47,14 @@ installPkg <- function(pkg)
 {
     if (pkg == "multicore" && .Platform$OS.type == "windows")
         return()
-    #lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
+    lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
     if (!getOption("pkgType") == "source")
     {
-        install.packages(pkg, repos=repos)
+        install.packages(pkg, repos=repos, lib=lib)
         if (!pkg %in% rownames(installed.packages()))
-		install.packages(pkg, type="source", repos=repos)
+		install.packages(pkg, type="source", repos=repos, lib=lib)
     } else {
-        install.packages(pkg, repos=repos)
+        install.packages(pkg, repos=repos, lib=lib)
     }
 }
 
