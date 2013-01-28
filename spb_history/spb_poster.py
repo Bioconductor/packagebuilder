@@ -118,6 +118,7 @@ def handle_completed_builds(obj, build_obj):
         for item in buildlist:
           print("item.buildbin_result==%s" % item.buildbin_result)
           print("builder_id is %s" % item.builder_id)
+          print("bioc_version is %s" % item.job.bioc_version)
           if (item.buildbin_result != ""):
             ok += 1
         if ok == num_builders:
