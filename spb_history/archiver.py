@@ -135,6 +135,7 @@ def handle_complete(obj, build_obj):
         if result == "ERROR":
             build_obj.checksrc_result = "skipped"
             build_obj.buildbin_result = "skipped"
+            print("build result was ERROR, node is %s, setting buildbin_result to skipped" % (obj['builder_id']))
             build_obj.postprocessing_result = "skipped"
     elif (obj['status'] == 'check_complete'):
         if result == "ERROR":
