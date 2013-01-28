@@ -119,7 +119,6 @@ def get_build_obj(obj):
 
 
 def handle_complete(obj, build_obj):
-    print("hi!\n\n\n")
     
     if obj.has_key("result_code"):
         obj['retcode'] = obj['result_code']
@@ -136,7 +135,6 @@ def handle_complete(obj, build_obj):
         if result == "ERROR":
             build_obj.checksrc_result = "skipped"
             build_obj.buildbin_result = "skipped"
-            print("build result was ERROR, node is %s, setting buildbin_result to skipped" % (obj['builder_id']))
             build_obj.postprocessing_result = "skipped"
     elif (obj['status'] == 'check_complete'):
         if result == "ERROR":
@@ -174,7 +172,6 @@ def handle_builder_event(obj):
         build_obj = handle_first_message(obj, parent_job)
     if (obj.has_key('status')):
         status = obj['status']
-        print ("STATUS==##%s##" % status)
         sys.stdout.flush()
         build_obj = get_build_obj(obj)
         if (status == 'dcf_info'):
@@ -206,12 +203,7 @@ def handle_builder_event(obj):
             build_obj.save()
         elif (status in ['build_complete', 'check_complete',
           'buildbin_complete', 'post_processing_complete']):
-            if (status == "build_complete"):
-                print("status is build_complete, expect handle_complete() now")
-                sys.stdout.flush()
             handle_complete(obj, build_obj)
-            print("i just came from there!")
-            sys.stdout.flush()
         elif (status == 'node_info'):
             build_obj.r_version = obj['r_version']
             build_obj.os = obj['os']

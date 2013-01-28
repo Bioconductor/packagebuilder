@@ -84,7 +84,6 @@ def handle_completed_builds(obj, build_obj):
     ## if so, post it to the tracker
     sys.stdout.flush()
 
-    print("HERE I AM")
 
     print("status is %s" % obj['status'])
     if ('result_code' in obj):
@@ -93,11 +92,6 @@ def handle_completed_builds(obj, build_obj):
     print("in handle_completed_builds()\n")
     if(obj['status'] =='build_failed'):
         print("obj['status'] is 'build_failed'!!!!")
-
-    if ("_complete" in obj['status'] and \
-    'result_code' in obj and obj['result_code'] != 0) or\
-    (obj['status'] == 'build_failed'):
-        print("Starting NOW!")
 
 
     if (("_complete" in obj['status'] and \
@@ -121,9 +115,6 @@ def handle_completed_builds(obj, build_obj):
         print("length of buildlist is %s" % len(buildlist))
         ok = 0
         for item in buildlist:
-          print("item.buildbin_result==%s" % item.buildbin_result)
-          print("builder_id is %s" % item.builder_id)
-          print("bioc_version is %s" % item.job.bioc_version)
           if (item.buildbin_result != ""):
             ok += 1
         if ok == num_builders:
