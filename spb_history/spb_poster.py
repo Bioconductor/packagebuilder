@@ -83,6 +83,11 @@ def handle_completed_builds(obj, build_obj):
     ##  did all builders finish this job?
     ## if so, post it to the tracker
     sys.stdout.flush()
+
+    print("status is %s" % obj['status'])
+    if ('result_code' in obj:)
+        print("result_code is %s" % obj['result_code'])
+
     print("in handle_completed_builds()\n")
     if(obj['status'] =='build_failed'):
         print("obj['status'] is 'build_failed'!!!!")
