@@ -87,6 +87,12 @@ def handle_completed_builds(obj, build_obj):
     if(obj['status'] =='build_failed'):
         print("obj['status'] is 'build_failed'!!!!")
 
+    if ("_complete" in obj['status'] and \
+    'result_code' in obj and obj['result-code'] != 0) or\
+    (obj['status'] == 'build_failed'):
+        print("Starting NOW!")
+
+
     if (("_complete" in obj['status'] and \
     'result_code' in obj and obj['result-code'] != 0) or\
     (obj['status'] == 'build_failed') or \
