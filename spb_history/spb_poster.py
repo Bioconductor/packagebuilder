@@ -87,7 +87,7 @@ def handle_completed_builds(obj, build_obj):
     print("HERE I AM")
 
     print("status is %s" % obj['status'])
-    if ('result_code' in obj:)
+    if ('result_code' in obj):
         print("result_code is %s" % obj['result_code'])
 
     print("in handle_completed_builds()\n")
