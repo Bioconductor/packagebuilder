@@ -112,6 +112,11 @@ def handle_completed_builds(obj, build_obj):
     obj['body'] == "Post-processing complete."))):
         print("build is complete for this node, do we have all nodes?")
         #time.sleep(10)
+        print("about to sleep...")
+        sys.stdout.flush()
+        time.sleep(2)
+        print("awake...")
+        sys.stdout.flush()
         buildlist = Build.objects.filter(job=build_obj.job.id)
         print("length of buildlist is %s" % len(buildlist))
         ok = 0
