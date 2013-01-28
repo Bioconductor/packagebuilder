@@ -86,7 +86,11 @@ def handle_completed_builds(obj, build_obj):
     print("in handle_completed_builds()\n")
     if(obj['status'] =='build_failed'):
         print("obj['status'] is 'build_failed'!!!!")
-    if ((obj['status'] == 'build_failed') or \
+
+    if (("_complete" in obj['status'] and \
+    'result_code' in obj and obj['result-code'] != 0) or\
+    (obj['status'] == 'build_failed') or \
+
     (obj['status'] == "post_processing_complete" \
     and (obj['body']=="Synced repository to website" or \
     obj['body']=='Syncing repository failed' or\
