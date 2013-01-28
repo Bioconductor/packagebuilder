@@ -208,6 +208,7 @@ def handle_builder_event(obj):
           'buildbin_complete', 'post_processing_complete']):
             if (status == "build_complete"):
                 print("status is build_complete, expect handle_complete() now")
+                sys.stdout.flush()
             handle_complete(obj, build_obj)
         elif (status == 'node_info'):
             build_obj.r_version = obj['r_version']
