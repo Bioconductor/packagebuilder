@@ -113,6 +113,7 @@ def handle_completed_builds(obj, build_obj):
         print("build is complete for this node, do we have all nodes?")
         #time.sleep(10)
         buildlist = Build.objects.filter(job=build_obj.job.id)
+        print("length of buildlist is %s" % len(buildlist))
         ok = 0
         for item in buildlist:
           if (item.buildbin_result != ""):
