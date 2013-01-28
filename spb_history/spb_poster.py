@@ -84,6 +84,8 @@ def handle_completed_builds(obj, build_obj):
     ## if so, post it to the tracker
     sys.stdout.flush()
 
+    print("HERE I AM")
+
     print("status is %s" % obj['status'])
     if ('result_code' in obj:)
         print("result_code is %s" % obj['result_code'])
