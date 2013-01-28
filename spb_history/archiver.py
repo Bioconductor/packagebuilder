@@ -119,6 +119,7 @@ def get_build_obj(obj):
 
 
 def handle_complete(obj, build_obj):
+    print("hi!\n\n\n")
     
     if obj.has_key("result_code"):
         obj['retcode'] = obj['result_code']
