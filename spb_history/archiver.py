@@ -175,6 +175,7 @@ def handle_builder_event(obj):
     if (obj.has_key('status')):
         status = obj['status']
         print ("STATUS==##%s##" % status)
+        sys.stdout.flush()
         build_obj = get_build_obj(obj)
         if (status == 'dcf_info'):
             print("handling dcf info")
