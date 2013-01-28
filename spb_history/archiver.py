@@ -174,6 +174,7 @@ def handle_builder_event(obj):
         build_obj = handle_first_message(obj, parent_job)
     if (obj.has_key('status')):
         status = obj['status']
+        print ("STATUS==##%s##" % status)
         build_obj = get_build_obj(obj)
         if (status == 'dcf_info'):
             print("handling dcf info")
