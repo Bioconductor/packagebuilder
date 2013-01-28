@@ -116,6 +116,7 @@ def handle_completed_builds(obj, build_obj):
         print("length of buildlist is %s" % len(buildlist))
         ok = 0
         for item in buildlist:
+          print("item.buildbin_result==%s" % item.buildbin_result)
           if (item.buildbin_result != ""):
             ok += 1
         if ok == num_builders:
