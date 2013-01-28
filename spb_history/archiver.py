@@ -206,6 +206,8 @@ def handle_builder_event(obj):
             build_obj.save()
         elif (status in ['build_complete', 'check_complete',
           'buildbin_complete', 'post_processing_complete']):
+            if (status == "build_complete"):
+                print("status is build_complete, expect handle_complete() now")
             handle_complete(obj, build_obj)
         elif (status == 'node_info'):
             build_obj.r_version = obj['r_version']
