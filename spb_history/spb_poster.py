@@ -30,6 +30,8 @@ from spb_history.viewhistory.models import Job
 from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
+from spb_history.viewhistory.models import MultipleObjectsReturned
+
 try:
     stomp = Stomp("merlot2.fhcrc.org", 61613)
     # optional connect keyword args "username" and "password" like so:
@@ -63,6 +65,9 @@ def handle_builder_event(obj):
         except Job.DoesNotExist:
             print("No parent job for %s; ignoring message." % job_id)
             return()
+        except MultipleObjectsReturned:
+            print("Multiple objects returned!")
+            return()
     else:
         print("Malformed message, ignoring it.")
         return
@@ -73,6 +78,9 @@ def handle_builder_event(obj):
             build_obj = get_build_obj(obj)
         except Job.DoesNotExist:
             print("Caught DoesNotExist error, continuing...")
+            return()
+        except MultipleObjectsReturned:
+            print("Multiple objects returned!")
             return()
         handle_completed_builds(obj, build_obj)
     else:
