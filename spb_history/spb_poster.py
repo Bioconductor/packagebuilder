@@ -105,7 +105,8 @@ def handle_completed_builds(obj, build_obj):
 
 
     if (("_complete" in obj['status'] and \
-    'result_code' in obj and obj['result_code'] != 0) or\
+#    'result_code' in obj and obj['result_code'] != 0) or\
+    'result_code' in obj) or\
     (obj['status'] == 'build_failed') or \
 
     (obj['status'] == "post_processing_complete" \
