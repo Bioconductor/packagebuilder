@@ -84,6 +84,9 @@ def handle_builder_event(obj):
         except Job.MultipleObjectsReturned:
             print("Multiple objects returned!")
             return()
+        except spb_history.viewhistory.models.DoesNotExist:
+            print("Model does not exist!")
+            return()
         handle_completed_builds(obj, build_obj)
     else:
         print("job does not have status key!\n")
