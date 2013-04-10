@@ -668,7 +668,7 @@ def propagate_package():
     
     
     if (platform.system() == "Darwin"):
-        os_seg = "bin/macosx/leopard/contrib/%s" % manifest['r_version']
+        os_seg = "bin/macosx/contrib/%s" % manifest['r_version']
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
@@ -783,7 +783,7 @@ def update_packages_file():
     global repos
     
     if (platform.system() == "Darwin"):
-        os_seg = "bin/macosx/leopard/contrib/%s" % manifest['r_version']
+        os_seg = "bin/macosx/contrib/%s" % manifest['r_version']
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
