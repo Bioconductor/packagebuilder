@@ -16,7 +16,7 @@ export BBS_USER="pkgbuild"
 export SVN_USER="pkgbuild"
 export SVN_PASS="buildpkg"
 
-export BBS_PYTHON_CMD="/Users/pkgbuild/python/bin/python"
+export BBS_PYTHON_CMD="/usr/python/bin/python"
 
 export SPB_R_LIBS="/Users/pkgbuild/packagebuilder/R-libs"
 
