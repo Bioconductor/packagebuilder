@@ -170,7 +170,7 @@ def is_build_required(manifest):
         'source': "src/contrib", \
         'win.binary': "bin/windows/contrib/" + r_version, \
         'win64.binary': "bin/windows64/contrib/" + r_version, \
-        'mac.binary.leopard': "bin/macosx/leopard/contrib/" + r_version \
+        'mac.binary': "bin/macosx/contrib/" + r_version \
     }
     # todo - put repos url in config file (or get it from user)
     if (manifest['repository'] == 'course'):
@@ -560,14 +560,14 @@ def build_package(source_build):
     if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        if pkg_type == "mac.binary.leopard":
+        if pkg_type == "mac.binary":
             libdir = "libdir"
             if os.path.exists(libdir):
                 _call("rm -rf %s" % libdir, False)
             if (not (os.path.exists(libdir))):
                 os.mkdir(libdir)
-            r_cmd = "../../build-universal.sh %s %s" % (\
-              get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
+            r_cmd = "R CMD INSTALL --build %s" % (\
+              get_source_tarball_name())
         elif pkg_type == "win.binary":
             if (win_multiarch):
                 pass
