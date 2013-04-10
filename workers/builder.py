@@ -566,8 +566,8 @@ def build_package(source_build):
                 _call("rm -rf %s" % libdir, False)
             if (not (os.path.exists(libdir))):
                 os.mkdir(libdir)
-            r_cmd = "R CMD INSTALL --build %s" % (\
-              get_source_tarball_name())
+            r_cmd = "R CMD INSTALL --build %s --library=%s" % (\
+              get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
         elif pkg_type == "win.binary":
             if (win_multiarch):
                 pass
