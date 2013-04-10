@@ -35,15 +35,9 @@ def get_messages(builds):
 def filter_out_wrong_versions(builds, job):
     r_ver = job.r_version
     bioc_version = job.bioc_version
-    if r_ver == "2.14":
-        nodes = ['wilson2', 'pitt', 'moscato1']
-    elif r_ver == "2.15":
-        if bioc_version == "2.11":
-            nodes = ['lamb1', 'perceval', 'moscato1']
-    elif r_ver == "2.16":
+    if (r_ver == "2.16" or r_ver == "3.0"):
         if bioc_version == "2.12":
             nodes = ['george2', 'petty', 'moscato2']
-    elif (r_ver == "3.0" or r_ver == "2.16"):
         if bioc_version == "2.13":
             nodes = ["zin1", "perceval", "moscato1"]
 
