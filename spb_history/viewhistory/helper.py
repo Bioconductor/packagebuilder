@@ -43,7 +43,7 @@ def filter_out_wrong_versions(builds, job):
     elif r_ver == "2.16":
         if bioc_version == "2.12":
             nodes = ['george2', 'petty', 'moscato2']
-    elif r_ver == "3.0":
+    elif (r_ver == "3.0" or r_ver == "2.16"):
         if bioc_version == "2.13":
             nodes = ["zin1", "perceval", "moscato1"]
 
