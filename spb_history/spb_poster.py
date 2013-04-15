@@ -67,9 +67,10 @@ def handle_builder_event(obj):
         except Job.MultipleObjectsReturned:
             print("Multiple objects returned!")
             return()
-        except spb_history.viewhistory.models.DoesNotExist:
-            print("Build matching query does not exist!")
+        except:
+            print("Another exception occurred: %s". sys.exc_info()[0])
             return()
+
     else:
         print("Malformed message, ignoring it.")
         return
@@ -84,8 +85,8 @@ def handle_builder_event(obj):
         except Job.MultipleObjectsReturned:
             print("Multiple objects returned!")
             return()
-        except spb_history.viewhistory.models.DoesNotExist:
-            print("Model does not exist!")
+        except:
+            print("Another exception occurred: %s". sys.exc_info()[0])
             return()
         handle_completed_builds(obj, build_obj)
     else:
