@@ -307,7 +307,6 @@ def callback(body, destination):
         received_obj = json.loads(body)
     except ValueError as e:
         print("!!!Received invalid JSON!!!")
-        print(inst)
         print("Invalid json was: %s" % body)
         return
     handle_builder_event(received_obj)
