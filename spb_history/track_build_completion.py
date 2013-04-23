@@ -14,6 +14,7 @@ import ConfigParser
 import requests
 import cookielib
 import threading
+import pprint
 from stompy import Stomp
 
 try:
@@ -32,12 +33,14 @@ hosts = ["zin1", "perceval", "moscato1"]
 
 def handle_builder_event(obj):
     global build_counter
+    pp = pprint.PrettyPrinter(indent=4)
     if ("client_id" in obj and  \
         "single_package_builder" in obj['client_id'] \
         and 'status' in obj and obj['status'] == 'autoexit'):
         builder_id = obj['builder_id']
         print("Looks like the build is complete on node %s" % \
           builder_id)
+        pp.pprint(build_counter)
         if (not builder_id in build_counter):
             build_counter[builder_id] = 1
         else:
