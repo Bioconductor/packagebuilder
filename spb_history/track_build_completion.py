@@ -25,6 +25,7 @@ except:
 
 stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 
+global build_counter
 build_counter = {}
 # bad hardcoding:
 hosts = ["zin1", "perceval", "moscato1"]
