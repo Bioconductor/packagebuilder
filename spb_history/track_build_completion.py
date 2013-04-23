@@ -38,14 +38,15 @@ def handle_builder_event(obj):
         "single_package_builder" in obj['client_id'] \
         and 'status' in obj and obj['status'] == 'autoexit'):
         builder_id = obj['builder_id']
+        job_id = obj['builder_id']
         print("Looks like the build is complete on node %s" % \
           builder_id)
         pp.pprint(build_counter)
-        if (not builder_id in build_counter):
-            build_counter[builder_id] = 1
+        if (not job_id in build_counter):
+            build_counter[job_id] = 1
         else:
-            build_counter[builder_id] += 1
-        if (build_counter[builder_id] == len(hosts)):
+            build_counter[job_id] += 1
+        if (build_counter[job_id] == len(hosts)):
             print("We have enough finished builds to send a report.")
 
 def callback(body, destination):
