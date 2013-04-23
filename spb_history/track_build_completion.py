@@ -38,7 +38,7 @@ def handle_builder_event(obj):
         "single_package_builder" in obj['client_id'] \
         and 'status' in obj and obj['status'] == 'autoexit'):
         builder_id = obj['builder_id']
-        job_id = obj['builder_id']
+        job_id = obj['job_id']
         print("Looks like the build is complete on node %s" % \
           builder_id)
         pp.pprint(build_counter)
