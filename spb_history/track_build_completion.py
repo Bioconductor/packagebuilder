@@ -30,8 +30,18 @@ build_counter = {}
 hosts = ["zin1", "perceval", "moscato1"]
 
 def handle_builder_event(obj):
-    
-    pass
+        if ("client_id" in obj and  \
+            "single_package_builder" in obj['client_id'] \
+            and 'status' in obj and obj['status'] == 'autoexit'):
+            builder_id = obj['builder_id']
+            print("Looks like the build is complete on node %s" % \
+              builder_id)
+            if (not builder_id in build_counter):
+                build_counter[builder_id] = 1
+            else:
+                build_counter[builder_id] += 1
+            if (build_counter[builder_id] == len(hosts)):
+                print("We have enough finished builds to send a report.")
 
 def callback(body, destination):
     print " [x] Received %r" % (body,)
