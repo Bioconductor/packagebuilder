@@ -14,6 +14,7 @@ import datetime
 import shlex
 import platform
 import unicodedata
+import atexit
 from stompy import Stomp
 
 
@@ -777,6 +778,8 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
     
     return(retcode)
 
+def onexit():
+    send_message({"body": "builder.py exited", "status": "autoexit", "retcode": -1})
 
 
 def update_packages_file():
@@ -901,6 +904,7 @@ if __name__ == "__main__":
     
     setup()
 
+    atexit.register(onexit)
 
     wanted_bioc_version = manifest['bioc_version']#r_bioc_map[manifest['r_version']]
     bioc_version = os.getenv("BBS_BIOC_VERSION")
