@@ -73,7 +73,7 @@ def handle_completed_build(obj):
     html = filter_html(html)
     #print("html after filtering: %s\n" % html)
 
-    f = urllib.urlopen("http://merlot2.fhcrc.org:8000/overall_build/status/%s"\
+    f = urllib.urlopen("http://merlot2.fhcrc.org:8000/overall_build_status/%s"\
         % job_id)
     result = f.read().strip().split(", ")
     url = copy_report_to_site(html, tarball_name)
