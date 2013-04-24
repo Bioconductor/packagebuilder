@@ -3,6 +3,11 @@
 # package builder, and posts build reports to the
 # issue tracker when it detects a completed build.
 
+
+# FIXME - be aware that builds for different BioC versions
+# may be occuring and we need to be aware of them and be able
+# to tell them apart. Right now we're ignoring this.
+
 import sys
 import json
 import time

@@ -17,7 +17,8 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'viewhistory.views.index'),
     url(r'^jobs/(?P<package_id>\d+)/$', 'viewhistory.views.jobs'),
-    url(r'^job/(?P<job_id>\d+)/$', 'viewhistory.views.job')
+    url(r'^job/(?P<job_id>\d+)/$', 'viewhistory.views.job'),
+    url(r'^jid/(?P<jid>\d+)/$', 'viewhistory.views.jid')
 )
 
 urlpatterns += staticfiles_urlpatterns()

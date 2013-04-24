@@ -30,3 +30,13 @@ def job(request, job_id):
     helper.get_messages(builds)
     return render_to_response('job.html', {"job": job, "builds": builds},
       context_instance=RequestContext(request))
+
+def jid(request, jid):
+    b = Build.objects.filter(jid=jid)
+    if (len(b) == 0):
+        res = 0
+    else:
+        res = b[0].job.id
+        return render_to_response('jid.html', {"res": res},
+            context_instance=RequestContext(request))
+
