@@ -70,6 +70,8 @@ def callback(body):
         job_dir = os.path.join(jobs_dir, job_id)
         if not os.path.exists(job_dir):
             os.mkdir(job_dir)
+        r_libs_dir = os.path.join(job_dir, "R-libs")
+        os.mkdir(r_libs_dir)
         
         jobfilename = os.path.join(packagebuilder_home, job_dir, "manifest.json")
         
