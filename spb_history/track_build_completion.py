@@ -19,6 +19,7 @@ import ConfigParser
 import requests
 import cookielib
 import threading
+import urllib
 from stompy import Stomp
 
 try:
@@ -50,6 +51,36 @@ def handle_builder_event(obj):
             build_counter[job_id] += 1
         if (build_counter[job_id] == len(hosts)):
             print("We have enough finished builds to send a report.")
+            post_report_to_tracker(obj)
+
+def post_report_to_tracker(obj):
+    segs = obj['client_id'].split(":")
+    roundup_issue = segs[1]
+    tarball_name = segs[2]
+    f = urllib.urlopen("http://merlot2.fhcrc.org:8000/jid/%s" % obj['job_id'])
+    job_id = f.read().strip()
+    if job_id == "0":
+        print("There is no build report for this job!")
+        return
+    url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
+    print("build report url: %s\n" %url)
+    sys.stdout.flush()
+    #print("Sleeping for 30 seconds...\n")
+    #time.sleep(30)
+    response = requests.get(url)
+    html = response.text.encode('ascii', 'ignore')
+    #print("html before filtering: %s\n" % html)
+    html = filter_html(html)
+    #print("html after filtering: %s\n" % html)
+    result = get_overall_build_result(job)
+    url = copy_report_to_site(html, tarball_name)
+    post_text = get_post_text(result, url)
+    status  = post_to_tracker(roundup_issue, tarball_name, result, html, \
+        post_text)
+    print("Done.\n")
+    sys.stdout.flush()
+
+
 
 def callback(body, destination):
     print " [x] Received %r" % (body,)
