@@ -87,6 +87,7 @@ def get_post_text(build_result, url):
     ok = True
     if not build_result[0] == "OK":
         ok = False
+    problem = ", ".join(build_result)
     msg = """
 Dear Package contributor,
 
@@ -106,7 +107,7 @@ On one or more platforms, the build results were: "%s".
 This may mean there is a problem with the package that you need to fix.
 Or it may mean that there is a problem with the build system itself.
 
-        """ % ", ".join(build_result)
+        """ % problem
     msg = msg + """
 Please see the following build report for more details:
 
