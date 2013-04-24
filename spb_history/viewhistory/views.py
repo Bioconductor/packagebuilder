@@ -45,8 +45,7 @@ def overall_build_status(request, job_id):
     ## Out of all the build results, (build, check, build bin, and
     ## post-processing), were there any that were not OK? (with the
     ## exception of build bin on linux which will always be SKIPPED).
-    ## if so, return the severest one (error > warning) or SKIPPED
-    ## which might be caused by an SPB config problem.
+    ## if so, return them, else return OK.
     job = Job.objects.get(id=job_id)
     builds = Build.objects.filter(job=job)
     build_statuses = []
@@ -61,6 +60,7 @@ def overall_build_status(request, job_id):
 
         build_statuses.append(build.postprocessing_result)
     result = filter(lambda x: x != 'OK', build_statuses)
+    #abnormal = filter(lambda x: x not in ["OK", "WARNINGS", "skipped"])
     if len(result) == 0:
         res = "OK"
     else:
