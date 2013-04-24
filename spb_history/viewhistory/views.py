@@ -37,6 +37,6 @@ def jid(request, jid):
         res = 0
     else:
         res = b[0].job.id
-        return render_to_response('jid.html', {"res": res},
-            context_instance=RequestContext(request))
+    return render_to_response('jid.html', {"res": res},
+        context_instance=RequestContext(request))
 
