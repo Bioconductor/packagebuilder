@@ -257,6 +257,8 @@ def setup():
     manifest['svn_url'] = manifest['svn_url'].strip()
     working_dir = os.path.split(sys.argv[1])[0]
     os.chdir(working_dir)
+    r_libs_dir = os.path.join(working_dir, "R-libs")
+    os.environ['R_LIBS_USER'] = r_libs_dir
     print("working dir is %s" % working_dir)
 
 
@@ -567,8 +569,11 @@ def build_package(source_build):
                 _call("rm -rf %s" % libdir, False)
             if (not (os.path.exists(libdir))):
                 os.mkdir(libdir)
-            r_cmd = "R CMD INSTALL --build %s --library=%s" % (\
+            #r_cmd = "R CMD INSTALL --build %s --library=%s" % (\
+            #  get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
+            r_cmd = "../../build-universal.sh %s %s" % (\
               get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
+
         elif pkg_type == "win.binary":
             if (win_multiarch):
                 pass
