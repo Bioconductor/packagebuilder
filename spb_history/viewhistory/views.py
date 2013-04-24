@@ -47,6 +47,7 @@ def overall_build_status(request, job_id):
     ## exception of build bin on linux which will always be SKIPPED).
     ## if so, return the severest one (error > warning) or SKIPPED
     ## which might be caused by an SPB config problem.
+    job = Job.objects.get(id=job_id)
     builds = Build.objects.filter(job=job)
     build_statuses = []
     for build in builds:
