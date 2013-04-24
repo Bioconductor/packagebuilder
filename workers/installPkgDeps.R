@@ -47,7 +47,9 @@ installPkg <- function(pkg)
 {
     if (pkg == "multicore" && .Platform$OS.type == "windows")
         return()
-    lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
+    #lib <- file.path(Sys.getenv("PACKAGEBUILDER_HOME"), "R-libs")
+    lib = Sys.getenv("R_LIBS_USER") # necessary?
+
     if (!getOption("pkgType") == "source")
     {
         install.packages(pkg, repos=repos, lib=lib)
