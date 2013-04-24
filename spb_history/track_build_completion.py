@@ -119,7 +119,7 @@ Please see the following build report for more details:
 
 
 def copy_report_to_site(html, tarball_name):
-    print("HTML=\n\n%s\n\n" % html)
+    #print("HTML=\n\n%s\n\n" % html)
     t = tempfile.mkstemp()
     f = open(t[1], "w")
     #print("temp filename is %s" % t[1])
