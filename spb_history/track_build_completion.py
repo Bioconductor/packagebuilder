@@ -20,6 +20,7 @@ import requests
 import cookielib
 import threading
 import urllib
+import pprint
 from stompy import Stomp
 
 try:
@@ -87,7 +88,11 @@ def get_post_text(build_result, url):
     ok = True
     if not build_result[0] == "OK":
         ok = False
+    pp = pprint.PrettyPrinter(indent=4)
+    print("PROBLEM:::::::")
+    pp.pprint(build_result)
     problem = ", ".join(build_result)
+
     msg = """
 Dear Package contributor,
 
