@@ -35,6 +35,9 @@ def get_messages(builds):
 def filter_out_wrong_versions(builds, job):
     r_ver = job.r_version
     bioc_version = job.bioc_version
+
+    nodes = []
+
     if (r_ver == "2.16" or r_ver == "3.0"):
         if bioc_version == "2.12":
             nodes = ['george2', 'petty', 'moscato2']
@@ -47,7 +50,7 @@ def filter_out_wrong_versions(builds, job):
             nodes = ["lamb2", "moscato2", "petty"]
     ## keep old stuff here so build history continues to work
 
-    else:
+    if (len(nodes) == 0):
         raise Exception("Don't know the build nodes for R-%s (BioC %s)" % (r_ver, bioc_version))
     
     ret = []
