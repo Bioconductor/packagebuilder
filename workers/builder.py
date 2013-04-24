@@ -572,7 +572,7 @@ def build_package(source_build):
             #r_cmd = "R CMD INSTALL --build %s --library=%s" % (\
             #  get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
             r_cmd = "../../build-universal.sh %s %s" % (\
-              get_source_tarball_name(), os.getenv("SPB_R_LIBS"))
+              get_source_tarball_name(), libdir)
 
         elif pkg_type == "win.binary":
             if (win_multiarch):
