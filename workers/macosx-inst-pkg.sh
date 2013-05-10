@@ -125,6 +125,12 @@ if [ -d "$so_path" ]; then
         # Packages that don't have a configure script should already have
         # their .so installed out-of-the-box for all the target archs by
         # the standard R CMD INSTALL command above.
+
+        if $SINGLE_ARCH ; then
+            arch=""
+        fi
+
+
         arch_so_path="$so_path/$arch"
         if [ ! -d "$arch_so_path" ]; then
             # The package has a configure script.
@@ -138,9 +144,6 @@ if [ -d "$so_path" ]; then
             echo ""
 
 
-            if $SINGLE_ARCH ; then
-                arch=""
-            fi
 
         fi
         for so_file in $arch_so_path/*.so; do
