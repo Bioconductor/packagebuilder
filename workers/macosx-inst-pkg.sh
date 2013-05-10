@@ -15,7 +15,9 @@ set -e  # Exit immediately if a simple command exits with a non-zero status
 # Extra .so for the following archs will be installed (in addition to the
 # native .so):
 #TARGET_ARCHS="ppc x86_64 ppc64"
-TARGET_ARCHS="i386 x86_64"
+TARGET_ARCHS="x86_64"
+SINGLE_ARCH=true
+
 
 # Change dynamic shared library path for
 LOCAL_DYLIB_DIR="/usr/local/lib"
@@ -134,6 +136,12 @@ if [ -d "$so_path" ]; then
             R_ARCH=/$arch $R_CMD CMD INSTALL --preclean --library="$R_LIBS" --libs-only "$srcpkg_filepath"
             echo ""
             echo ""
+
+
+            if $SINGLE_ARCH ; then
+                arch=""
+            fi
+
         fi
         for so_file in $arch_so_path/*.so; do
             echo ">>>>>>> "
