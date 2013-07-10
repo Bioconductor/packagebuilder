@@ -176,7 +176,10 @@ def handle_builder_event(obj):
     if (obj.has_key('status')):
         status = obj['status']
         sys.stdout.flush()
-        build_obj = get_build_obj(obj)
+        try:
+            build_obj = get_build_obj(obj)
+        except spb_history.viewhistory.models.DoesNotExist:
+            return
         if (status == 'dcf_info'):
             print("handling dcf info")
             handle_dcf_info(obj, build_obj)
