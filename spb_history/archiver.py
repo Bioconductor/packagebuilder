@@ -178,8 +178,8 @@ def handle_builder_event(obj):
         sys.stdout.flush()
         try:
             build_obj = get_build_obj(obj)
-        except spb_history.viewhistory.models.DoesNotExist:
-            print "Caught spb_history.viewhistory.models.DoesNotExist exception!"
+        except Exception as e:
+            print "Caught  exception: ", e
             return
         if (status == 'dcf_info'):
             print("handling dcf info")
