@@ -100,6 +100,7 @@ def callback(body):
           'body': json_str,
           'persistent': 'true'})
         print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+        sys.stdout.flush()
     else:
         print("Invalid JSON (missing job_id key)")
         sys.stdout.flush()
