@@ -63,6 +63,7 @@ def callback(body):
         received_obj = json.loads(body)
     except ValueError:
         print("Caught Value error, not a valid JSON object?")
+        sys.stdout.flush()
         return()
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
@@ -101,6 +102,7 @@ def callback(body):
         print("Receipt: %s" % this_frame.headers.get('receipt-id'))
     else:
         print("Invalid JSON (missing job_id key)")
+        sys.stdout.flush()
 
 while True:
     try:
