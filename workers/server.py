@@ -59,7 +59,11 @@ def callback(body):
     global shell_ext
     global packagebuilder_home
     print " [x] Received %r" % (body,)
-    received_obj = json.loads(body)
+    try:
+        received_obj = json.loads(body)
+    except ValueError:
+        print("Caught Value error, not a valid JSON object?")
+        return()
     if('job_id' in received_obj.keys()): # ignore malformed messages
         job_id = received_obj['job_id']
         bioc_version = received_obj['bioc_version']
@@ -95,6 +99,8 @@ def callback(body):
           'body': json_str,
           'persistent': 'true'})
         print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+    else:
+        print("Invalid JSON (missing job_id key)")
 
 while True:
     try:
