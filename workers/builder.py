@@ -211,7 +211,8 @@ def setup():
     global builder_id
     
     builder_id = os.getenv("BBS_NODE")
-    
+    if builder_id is None:
+        builder_id = os.getenv("BBS_NODE_HOSTNAME")
     callcount = 1
     
     ## BBS-specific imports
