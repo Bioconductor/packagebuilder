@@ -850,7 +850,6 @@ def get_r_version():
 
 def get_node_info():
     r_version = get_r_version()
-    print("builder_id = %s" % builder_id)
     os = BBScorevars.getNodeSpec(builder_id, "OS")
     arch = BBScorevars.getNodeSpec(builder_id, "Arch")
     plat = BBScorevars.getNodeSpec(builder_id, "Platform")
