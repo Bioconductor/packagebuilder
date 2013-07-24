@@ -259,12 +259,14 @@ def callback(body, destination):
         print("!!!Received invalid JSON!!!")
         print("Invalid json was: %s" % body)
         return
-
-    if (destination == '/topic/buildjobs'):
-        handle_job_start(received_obj)
-    elif (destination == '/topic/builderevents'):
-        handle_builder_event(received_obj)
-    print("Destination: %s" % destination)
+    if('job_id' in received_obj.keys()): 
+        if (destination == '/topic/buildjobs'):
+            handle_job_start(received_obj)
+        elif (destination == '/topic/builderevents'):
+            handle_builder_event(received_obj)
+        print("Destination: %s" % destination)
+    else:
+        print("Invalid json (no job_id key)")
 
 print("Waiting for messages...")
 
