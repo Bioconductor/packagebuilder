@@ -15,6 +15,9 @@ set SVN_USER=pkgbuild
 set SVN_PASS=buildpkg
 
 
+set BBS_R_HOME=D:\packagebuilder\R
+
+
 
 
 %BBS_PYTHON_CMD% builder.py %1
