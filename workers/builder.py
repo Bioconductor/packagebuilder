@@ -17,6 +17,7 @@ import unicodedata
 import atexit
 from stompy import Stomp
 
+bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
 
 
 class Tailer(threading.Thread):
@@ -162,7 +163,6 @@ def is_build_required(manifest):
         if (manifest['force'] == True):
             return(True)
         
-    bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
     #r_version = manifest['r_version']
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     #r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
