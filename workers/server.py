@@ -45,9 +45,10 @@ if (platform.system() == "Darwin" or platform.system() == "Linux"):
 else:
     shell_ext = ".bat"
 
-r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10"} # need a better way to determine bioc version
+# need a better way to determine bioc version
+r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9", "2.15": "2.10", "3.1": "2.14"} 
 
-bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16", "2.13": "2.16"}
+bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16", "2.13": "2.16", "2.14": "3.1"}
 
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
