@@ -20,3 +20,4 @@ export SVN_USER="pkgbuild"
 export SVN_PASS="buildpkg"
  
 $BBS_PYTHON_CMD builder.py $1
+ 

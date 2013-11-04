@@ -21,3 +21,4 @@ export SPB_R_LIBS="/Users/pkgbuild/packagebuilder/R-libs"
 
 $BBS_PYTHON_CMD builder.py $1
  
+ 
