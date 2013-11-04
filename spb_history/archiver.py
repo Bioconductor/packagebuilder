@@ -63,7 +63,7 @@ def handle_job_start(obj):
       force=obj['force'],
       client_id=obj['client_id'],
       bioc_version=obj['bioc_version'],
-      r_version=bioc_r_map[bioc_version])
+      r_version=bioc_r_map[obj['bioc_version']])
     j.save()
 
 def handle_dcf_info(obj, build):
