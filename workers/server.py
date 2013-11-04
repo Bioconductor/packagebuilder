@@ -30,6 +30,8 @@ os.environ['TRACKER_PASSWORD'] = 'buildpkg'
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
+builder_id = builder_id.replace(".local", "")
+
 ## Temporary hack
 if (builder_id.lower().startswith("dhcp") or \
   builder_id == 'PHS-ITs-Lion-Test-MacBook.local'):
