@@ -163,7 +163,8 @@ def is_build_required(manifest):
             return(True)
         
     bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
-    r_version = manifest['r_version']
+    #r_version = manifest['r_version']
+    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     #r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     
@@ -673,13 +674,13 @@ def propagate_package():
     #if retcode != 0:
     #    sys.exit("package install failed")
     
-    
+    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]    
     if (platform.system() == "Darwin"):
-        os_seg = "bin/macosx/contrib/%s" % manifest['r_version']
+        os_seg = "bin/macosx/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
-        os_seg = "bin/windows/contrib/%s" % manifest['r_version']
+        os_seg = "bin/windows/contrib/%s" % r_version
     
     if (manifest['repository'] == 'course'):
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
@@ -791,12 +792,14 @@ def onexit():
 def update_packages_file():
     global repos
     
+    
+    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     if (platform.system() == "Darwin"):
-        os_seg = "bin/macosx/contrib/%s" % manifest['r_version']
+        os_seg = "bin/macosx/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
-        os_seg = "bin/windows/contrib/%s" % manifest['r_version']
+        os_seg = "bin/windows/contrib/%s" % r_version
     
     
     if (manifest['repository'] == 'course'):
