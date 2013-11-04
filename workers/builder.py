@@ -17,7 +17,8 @@ import unicodedata
 import atexit
 from stompy import Stomp
 
-bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15"} # need a better way to determine R version
+# need a better way to determine R version
+bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15", "2.14": "3.1"} 
 
 
 class Tailer(threading.Thread):
