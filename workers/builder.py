@@ -854,11 +854,11 @@ def get_r_version():
 
 def get_node_info():
     r_version = get_r_version()
-    os = BBScorevars.getNodeSpec(builder_id, "OS")
+    osys = BBScorevars.getNodeSpec(builder_id, "OS")
     arch = BBScorevars.getNodeSpec(builder_id, "Arch")
     plat = BBScorevars.getNodeSpec(builder_id, "Platform")
     send_message({"status": "node_info", "r_version": r_version,
-        "os": os, "arch": arch, "platform": plat, "body": "node_info",
+        "os": osys, "arch": arch, "platform": plat, "body": "node_info",
         bioc_version: os.getenv("BBS_BIOC_VERSION")})
 
 
