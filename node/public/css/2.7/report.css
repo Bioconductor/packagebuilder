@@ -241,6 +241,19 @@ TABLE.mainrep .even .lamb2 {
     background: #9AB;
 }
 
+/* zin2 */
+DIV.zin2,
+TR.zin2 TD,
+TABLE.mainrep .zin2,
+TABLE.mainrep .odd .zin2 {
+    background: #ACD;
+}
+TABLE.mainrep .even .zin2 {
+    background: #8AB;
+}
+
+
+
 
 /* lamb2 */
 DIV.lamb2,

@@ -38,6 +38,9 @@ def filter_out_wrong_versions(builds, job):
 
     nodes = []
 
+    if (r_ver == "3.1"):
+        if bioc_version == "2.14":
+            nodes = ["zin2", "petty", "moscato2"]
     if (r_ver == "2.16" or r_ver == "3.0"):
         if bioc_version == "2.12":
             nodes = ['george2', 'petty', 'moscato2']
