@@ -11,6 +11,8 @@ from stompy import Stomp
 ## this may need to change:
 num_builders = 3
 
+bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15", "2.14": "3.1"} 
+
 # set up django environment
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 segs = path.split("/")
@@ -60,8 +62,8 @@ def handle_job_start(obj):
       pkg_url=obj['svn_url'],
       force=obj['force'],
       client_id=obj['client_id'],
-      r_version=obj['r_version'],
-      bioc_version=obj['bioc_version'])
+      bioc_version=obj['bioc_version'],
+      r_version=bioc_r_map[bioc_version])
     j.save()
 
 def handle_dcf_info(obj, build):
@@ -212,7 +214,8 @@ def handle_builder_event(obj):
           'buildbin_complete', 'post_processing_complete']):
             handle_complete(obj, build_obj)
         elif (status == 'node_info'):
-            build_obj.r_version = obj['r_version']
+            bioc_version = obj['bioc_version']
+            build_obj.r_version = bioc_r_map[bioc_version]
             build_obj.os = obj['os']
             build_obj.arch = obj['arch']
             build_obj.platform = obj['platform']
