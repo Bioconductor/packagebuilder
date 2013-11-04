@@ -858,7 +858,8 @@ def get_node_info():
     arch = BBScorevars.getNodeSpec(builder_id, "Arch")
     plat = BBScorevars.getNodeSpec(builder_id, "Platform")
     send_message({"status": "node_info", "r_version": r_version,
-        "os": os, "arch": arch, "platform": plat, "body": "node_info"})
+        "os": os, "arch": arch, "platform": plat, "body": "node_info",
+        bioc_version: os.getenv("BBS_BIOC_VERSION")})
 
 
 def is_valid_url():

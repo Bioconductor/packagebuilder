@@ -98,6 +98,7 @@ def callback(body):
         msg_obj['first_message'] = True
         msg_obj['job_id'] = job_id
         msg_obj['client_id'] = received_obj['client_id']
+        msg_obj['bioc_version'] = bioc_version
         json_str = json.dumps(msg_obj)
         this_frame = stomp.send({'destination': "/topic/builderevents",
           'body': json_str,
