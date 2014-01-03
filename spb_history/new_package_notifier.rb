@@ -13,10 +13,9 @@ puts "in new_package_notifier.rb!"
 server = "mx.fhcrc.org"
 from_name = "Bioconductor Build System"
 from_addr = "biocbuild@fhcrc.org"
-to = ['dtenenba@fhcrc.org']#, 'lg390@cam.ac.uk'] # TODO, add more emails after we're sure this works
+to = ['dtenenba@fhcrc.org', 'lg390@cam.ac.uk'] 
 
 
-# {"force": true, "job_id": "spbtest_20140103125912", "repository": "scratch", "bioc_version": "2.14", "svn_url": "http://tracker.fhcrc.org/roundup/bioc_submit/file3207/spbtest_0.99.0.tar.gz", "r_version": "3.1", "client_id": "single_package_builder_autobuild:558:spbtest_0.99.0.tar.gz", "time": "Fri Jan 03 2014 12:59:12 GMT-0700 (PST)"}
 
 if ARGV.length < 1
     puts "oops, no arg"
