@@ -13,7 +13,6 @@ puts "in new_package_notifier.rb!"
 server = "mx.fhcrc.org"
 from_name = "Bioconductor Build System"
 from_addr = "biocbuild@fhcrc.org"
-puts "REAL RECIPIENTS!"
 to = ['dtenenba@fhcrc.org', 'lg390@cam.ac.uk'] 
 
 
