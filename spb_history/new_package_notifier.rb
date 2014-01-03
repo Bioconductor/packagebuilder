@@ -62,7 +62,7 @@ If you no longer want to receive these notifications, please
 contact maintainer@bioconductor.org.
 
 MESSAGE_END
-        Net::SMTP.start('mx.fhcrc.org') do |smtp|
+        Net::SMTP.start(server) do |smtp|
             smtp.send_message message, from_addr, to
         end
         puts "sent email notification about #{title}"
