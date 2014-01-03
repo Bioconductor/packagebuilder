@@ -34,7 +34,6 @@ if obj["client_id"] =~ /^single_package_builder_autobuild/
         puts "oops, no tracker.yaml"
         exit
     end
-    puts "REMOVE THIS LINE!!!!"; issue_id = "828" # REMOVE ME!
     url = "http://tracker.fhcrc.org/roundup/bioc_submit/issue#{issue_id}"
     cfg = YAML::load(File.open("tracker.yaml"))
     @agent = Mechanize.new
@@ -67,6 +66,7 @@ MESSAGE_END
         Net::SMTP.start('mx.fhcrc.org') do |smtp|
             smtp.send_message message, from_addr, to
         end
+        puts "sent email notification about #{title}"
     else
         puts "not the first appearance of this package"
     end
