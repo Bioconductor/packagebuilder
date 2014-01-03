@@ -13,6 +13,7 @@ puts "in new_package_notifier.rb!"
 server = "mx.fhcrc.org"
 from_name = "Bioconductor Build System"
 from_addr = "biocbuild@fhcrc.org"
+puts "REAL RECIPIENTS!"
 to = ['dtenenba@fhcrc.org', 'lg390@cam.ac.uk'] 
 
 
@@ -42,8 +43,8 @@ if obj["client_id"] =~ /^single_package_builder_autobuild/
         "__came_from" => url,
         "@action" => "login"
     })
-    rows = page.search("table.files tr")
     title = page.search("title").text.split(":").last.split("-").first.strip
+    rows = page.search("table.messages tr")
     if rows.length == 3 # this is the first upload of a new package
         message = <<"MESSAGE_END"
 From: #{from_name} <#{from_addr}>
