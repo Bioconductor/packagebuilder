@@ -6,6 +6,8 @@ from boto.sqs.message import Message
 import json
 import sys
 import os
+import subprocess
+import base64
 import time
 import ConfigParser
 from stompy import Stomp
@@ -34,6 +36,11 @@ def handle_message(msg):
     body = msg.get_body()
     print("got this message: %s\n" % body)
     sys.stdout.flush()
+    # spawn another script to handle notifications of new packages:
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    cmd = "ruby %s/new_package_notifier.rb" % script_path
+    arg = base64.b64encode(body)
+    result_code = subprocess.call([cmd, arg])
     this_frame = stomp.send({'destination': "/topic/buildjobs",
       'body': body,
       'persistent': 'true'})
