@@ -38,9 +38,9 @@ def handle_message(msg):
     sys.stdout.flush()
     # spawn another script to handle notifications of new packages:
     script_path = os.path.dirname(os.path.realpath(__file__))
-    cmd = "ruby %s/new_package_notifier.rb" % script_path
     arg = base64.b64encode(body)
-    result_code = subprocess.call([cmd, arg])
+    cmd = "ruby %s/new_package_notifier.rb %s" % (script_path, arg)
+    result_code = subprocess.call(cmd, shell=True)
     this_frame = stomp.send({'destination': "/topic/buildjobs",
       'body': body,
       'persistent': 'true'})
