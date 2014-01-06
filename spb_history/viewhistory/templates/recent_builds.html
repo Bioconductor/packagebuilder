@@ -7,7 +7,7 @@
                 {% for build in recent_builds %}
                     <tr>
                         <td>{{build.package.name}}</td>
-                        <td>, time = {{build.time_started|date "c"}}</td>
+                        <td><abbr class="timeago" title="{{build.time_started|date:"c"}}">{{build.time_started|date:"c"}}</abbr></td>
                     </tr>
                 {% endfor %}
         </table>
