@@ -1,4 +1,4 @@
-Bioconductor Single Package Builder
+Bioconductor Single Package Builder 
 ====================================
 
 Can be found in this Subversion repository:
@@ -19,7 +19,7 @@ The user interacts with the web application written in node.js to kick off
 build jobs. The web application sends messages via ActiveMQ (a Java-based
 messaging framework) to listeners on each build machine. The build machines
 start building the package and send back progress messages to the web
-application, which can display them in real time without page reloading
+pplication, which can display them in real time without page reloading
 or Ajax. (This is why node.js is used, because it supports web sockets,
 full duplex communication, not just request/response.)
 
