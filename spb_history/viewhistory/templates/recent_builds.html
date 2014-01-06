@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Recent Builds{% endblock %}
+{% block content %}
+    {% if recent_builds %}
+            <ul>
+                {% for build in recent_builds %}
+                    <li>Package: {{build.name}}, time = {{build.time_started}}</li>
+                {% endfor %}
+            </ul>
+    {% endif %}
+{% endblock %}

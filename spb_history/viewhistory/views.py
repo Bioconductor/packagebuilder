@@ -31,6 +31,11 @@ def job(request, job_id):
     return render_to_response('job.html', {"job": job, "builds": builds},
       context_instance=RequestContext(request))
 
+def recent_builds():
+    j = Job.objects.order_by("-time_started")[:20]
+    return render_to_response("recent_builds.html", 
+        {"recent_builds": j}, context_instance=RequestContext(request))
+
 def jid(request, jid):
     b = Build.objects.filter(jid=jid)
     if (len(b) == 0):
