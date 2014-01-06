@@ -2,10 +2,14 @@
 {% block title %}Recent Builds{% endblock %}
 {% block content %}
     {% if recent_builds %}
-            <ul>
+            <table>
+
                 {% for build in recent_builds %}
-                    <li>Package: {{build.name}}, time = {{build.time_started}}</li>
+                    <tr>
+                        <td>{{build.package.name}}</td>
+                        <td>, time = {{build.time_started| date "c"}}</td>
+                    </tr>
                 {% endfor %}
-            </ul>
+        </table>
     {% endif %}
 {% endblock %}
