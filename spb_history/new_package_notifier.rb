@@ -34,7 +34,7 @@ if obj["client_id"] =~ /^single_package_builder_autobuild/
         exit
     end
     url = "http://tracker.fhcrc.org/roundup/bioc_submit/issue#{issue_id}"
-    cfg = YAML::load(File.open("tracker.yaml"))
+    cfg = YAML::load(File.open(trackerfile))
     @agent = Mechanize.new
     page = @agent.post(url, {
         "__login_name" => cfg['username'],
