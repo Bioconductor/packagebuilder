@@ -44,6 +44,7 @@ if obj["client_id"] =~ /^single_package_builder_autobuild/
     })
     title = page.search("title").text.split(":").last.split("-").first.strip
     rows = page.search("table.messages tr")
+    # FIXME TODO include first message text in email (pkg description)
     if rows.length == 3 # this is the first upload of a new package
         message = <<"MESSAGE_END"
 From: #{from_name} <#{from_addr}>
