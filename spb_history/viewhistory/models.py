@@ -55,6 +55,11 @@ class Build(models.Model):
     build_not_required = models.BooleanField()
     build_product = models.CharField(max_length=255)
     filesize = models.DecimalField(max_digits=10, decimal_places=2)
+    buildsrc_time = models.CharField(max_length=50)
+    buildbin_time = models.CharField(max_length=50)
+    check_time = models.CharField(max_length=50)
+
+
     
     def pkg_type(self):
         word = self.os.split(" ")[0]
