@@ -262,6 +262,9 @@ def setup():
     os.chdir(working_dir)
     r_libs_dir = os.path.join(working_dir, "R-libs")
     os.environ['R_LIBS_USER'] = r_libs_dir
+    os.environ['PATH'] = os.environ['PATH'] + \
+        os.pathsep + os.environ['R_HOME'] + os.sep + \
+        "bin"
     print("working dir is %s" % working_dir)
 
 
