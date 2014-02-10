@@ -42,7 +42,7 @@ bioc_version <- as.character(BiocInstaller:::BIOC_VERSION)
 repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
     bioc_version, sep="/"))
 
-if(!require(codetools)) biocLite("codetools")
+if(!require(codetools)) biocLite("codetools", type="source")
 if(!require(devtools)) biocLite("devtools")
 
 if (!require(BiocCheck))
