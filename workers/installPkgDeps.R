@@ -110,5 +110,6 @@ if (exists("Depends")) installDeps(Depends)
 if (exists("Imports")) installDeps(Imports)
 if (exists("Suggests")) installDeps(Suggests)
 if (exists("Enhances")) installDeps(Enhances)
+if (exists("LinkingTo")) installDeps(LinkingTo)
 
 
