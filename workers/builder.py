@@ -408,11 +408,12 @@ def do_check(cmd):
     background.stop()
 
     background.join()
-    # check for warnings
+    # check for warnings from R CMD check/BiocCheck
     out_fh = open(outfile)
     warnings = False
     for line in out_fh:
-        if line.rstrip().endswith("WARNING"):
+        if line.rstrip().endswith("WARNING") or \
+             line.startswith("* RECOMMENDED:"):
             warnings = True
             break
     out_fh.close()
