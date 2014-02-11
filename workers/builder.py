@@ -355,7 +355,7 @@ def install_pkg_deps():
     description = f.read()
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
-    fields = ("Depends", "Imports", "Suggests", "Enhances")
+    fields = ("Depends", "Imports", "Suggests", "Enhances", "LinkingTo")
     args = ""
     for field in fields:
         try:
