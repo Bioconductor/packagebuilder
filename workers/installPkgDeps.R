@@ -46,9 +46,9 @@ if(!require(codetools)) biocLite("codetools", type="source")
 if(!require(devtools)) biocLite("devtools")
 
 library(devtools)
-repos <- getOption("repos")
-repos["CRAN"] <- "http://cran.fhcrc.org"
-options(repos=repos)
+newrepos <- getOption("repos")
+newrepos["CRAN"] <- "http://cran.fhcrc.org"
+options(repos=newrepos)
 biocLite(c("graph", "biocViews"))
 install_github("BiocCheck", "Bioconductor")
 
