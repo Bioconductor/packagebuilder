@@ -49,6 +49,7 @@ library(devtools)
 repos <- getOption("repos")
 repos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=repos)
+biocLite(c("graph", "biocViews"))
 install_github("BiocCheck", "Bioconductor")
 
 
