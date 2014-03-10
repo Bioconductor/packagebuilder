@@ -117,3 +117,5 @@ if (exists("Enhances")) installDeps(Enhances)
 if (exists("LinkingTo")) installDeps(LinkingTo)
 
 
+if (.Platform$OS.type == "windows")
+    biocLite("lattice", type="source")
