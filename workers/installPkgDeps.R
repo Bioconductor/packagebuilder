@@ -50,7 +50,7 @@ newrepos <- getOption("repos")
 newrepos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=newrepos)
 biocLite(c("graph", "biocViews"))
-install_github("BiocCheck", "Bioconductor")
+install_github("BiocCheck", "Bioconductor", dependencies=c("Depends", "Imports", "Suggests"))
 
 
 installPkg <- function(pkg)
@@ -115,8 +115,6 @@ if (exists("Imports")) installDeps(Imports)
 if (exists("Suggests")) installDeps(Suggests)
 if (exists("Enhances")) installDeps(Enhances)
 if (exists("LinkingTo")) installDeps(LinkingTo)
-
-biocLite("knitrBootstrap")
 
 if (.Platform$OS.type == "windows")
     biocLite("lattice", type="source")
