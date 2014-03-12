@@ -413,7 +413,7 @@ def do_check(cmd):
     warnings = False
     for line in out_fh:
         if line.rstrip().endswith("WARNING") or \
-             line.startswith("* RECOMMENDED:"):
+             "* RECOMMENDED:" in line:
             warnings = True
             break
     out_fh.close()
