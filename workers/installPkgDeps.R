@@ -116,6 +116,7 @@ if (exists("Suggests")) installDeps(Suggests)
 if (exists("Enhances")) installDeps(Enhances)
 if (exists("LinkingTo")) installDeps(LinkingTo)
 
+biocLite("knitrBootstrap")
 
 if (.Platform$OS.type == "windows")
     biocLite("lattice", type="source")
