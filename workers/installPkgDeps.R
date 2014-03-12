@@ -49,8 +49,8 @@ library(devtools)
 newrepos <- getOption("repos")
 newrepos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=newrepos)
-biocLite(c("graph", "biocViews"))
-install_github("BiocCheck", "Bioconductor", dependencies=c("Depends", "Imports", "Suggests"))
+biocLite(c("graph", "biocViews", "knitrBootstrap"))
+install_github("BiocCheck", "Bioconductor")
 
 
 installPkg <- function(pkg)
