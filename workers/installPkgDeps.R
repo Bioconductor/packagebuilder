@@ -2,6 +2,8 @@
 # run me like this:
 # /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave "--args Depends=@@R (>= 2.10), utils@@; Imports=@@methods@@; Suggests=@@tools, tkWidgets, ALL@@;" /working_dir/../installPkgDeps.R /working_dir/installDeps.log
 
+options(useFancyQuotes=FALSE)
+
 args <- (commandArgs(TRUE))
 
 if (!require(BiocInstaller))
@@ -53,6 +55,16 @@ biocLite(c("graph", "biocViews", "knitrBootstrap"))
 install_github("BiocCheck", "Bioconductor")
 
 
+getWarnings <- function(expr)
+{
+    opts <- options(warn = 2)
+    on.exit(options(opts))
+    tryCatch(expr, warning=function(w) {
+            return(conditionMessage(w))
+    })
+}
+
+
 installPkg <- function(pkg)
 {
     if (pkg == "multicore" && .Platform$OS.type == "windows")
@@ -62,9 +74,19 @@ installPkg <- function(pkg)
 
     if (!getOption("pkgType") == "source")
     {
-        install.packages(pkg, repos=repos, lib=lib)
+        res <- getWarnings(install.packages(pkg, repos=repos, lib=lib))
         if (!pkg %in% rownames(installed.packages()))
             install.packages(pkg, type="source", repos=repos, lib=lib)
+        if(!is.null(res))
+        {
+            res <- res[grep("not available", res)]
+            if (length(res) == 0)
+                return
+            pkgs <- strsplit(res, "'")[[1]]
+            pkgs <- pkgs[grep(" ", pkgs, invert=TRUE)]
+            install.packages(pkgs, type="source", repos=repos, lib=lib)
+
+        }
     } else {
         install.packages(pkg, repos=repos, lib=lib)
     }
