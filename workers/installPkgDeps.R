@@ -64,7 +64,7 @@ installPkg <- function(pkg)
     {
         install.packages(pkg, repos=repos, lib=lib)
         if (!pkg %in% rownames(installed.packages()))
-		install.packages(pkg, type="source", repos=repos, lib=lib)
+            install.packages(pkg, type="source", repos=repos, lib=lib)
     } else {
         install.packages(pkg, repos=repos, lib=lib)
     }
