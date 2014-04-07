@@ -970,7 +970,8 @@ if __name__ == "__main__":
     if (result == 0):
         check_result = check_package()
         buildbin_result = build_package(False)
-        if buildbin_result == 0 and check_result == 0:
+
+        if buildbin_result == 0: # and check_result == 0:
             propagate_package()
             if (is_build_required):
                 update_packages_file()
