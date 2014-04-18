@@ -439,8 +439,10 @@ def win_multiarch_check():
     #cmd = ("%s CMD check --no-vignettes --timings --force-multiarch"
     #" --library=%s --install=\"check:%s-install.out\" %s") % \
     #  (os.getenv("BBS_R_CMD"), libdir, pkg, tarball)
+    ## NOTE: temporarily removing --new-package from BiocCheck 
+    ## command line, until SPB can be moved to Bioc-devel build machines.
     cmd = ("%s CMD check --no-vignettes --timings --force-multiarch"
-    " --library=%s %s && %s CMD BiocCheck --new-package %s") % \
+    " --library=%s %s && %s CMD BiocCheck  %s") % \
       (os.getenv("BBS_R_CMD"), libdir, tarball,
         os.getenv('BBS_R_CMD'), tarball)
     send_message({"status": "check_cmd", "body": cmd})
