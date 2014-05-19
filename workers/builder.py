@@ -577,7 +577,7 @@ def build_package(source_build):
     if (source_build):
         r_cmd = "%s CMD build %s %s" % (os.getenv("BBS_R_CMD"), flags, package_name)
     else:
-        if pkg_type == "mac.binary":
+        if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
             libdir = "libdir"
             if os.path.exists(libdir):
                 _call("rm -rf %s" % libdir, False)
