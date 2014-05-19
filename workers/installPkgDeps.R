@@ -45,19 +45,13 @@ repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
     bioc_version, sep="/"))
 
 if(!require(codetools)) biocLite("codetools", type="source")
-if(getOption("pkgType") == "mac.binary.mavericks")
-{
-    type="source"
-} else {
-    type=getOption("pkgType")
-}
-if(!require(devtools)) biocLite("devtools", type=type)
+if(!require(devtools)) biocLite("devtools")
 
 library(devtools)
 newrepos <- getOption("repos")
 newrepos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=newrepos)
-biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"),type=type)
+biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"))
 install_github("BiocCheck", "Bioconductor")
 
 
