@@ -175,7 +175,7 @@ def is_build_required(manifest):
         'win.binary': "bin/windows/contrib/" + r_version, \
         'win64.binary': "bin/windows64/contrib/" + r_version, \
         'mac.binary': "bin/macosx/contrib/" + r_version, \
-        'mac.binary.mavericks': "bin/macosx/mavericks/contrib" \
+        'mac.binary.mavericks': "bin/macosx/mavericks/contrib/" + r_version \
     }
     # todo - put repos url in config file (or get it from user)
     if (manifest['repository'] == 'course'):
