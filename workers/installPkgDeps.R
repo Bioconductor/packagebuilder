@@ -46,9 +46,11 @@ repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
 
 if(!require(codetools)) biocLite("codetools", type="source")
 if(getOption("pkgType") == "mac.binary.mavericks")
+{
     type="source"
-else
+} else {
     type=getOption("pkgType")
+}
 if(!require(devtools)) biocLite("devtools", type=type)
 
 library(devtools)
