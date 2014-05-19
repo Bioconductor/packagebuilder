@@ -11,7 +11,8 @@ from stompy import Stomp
 ## this may need to change:
 num_builders = 3
 
-bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14", "2.10": "2.15", "2.14": "3.1"} 
+bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
+    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1"} 
 
 # set up django environment
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
