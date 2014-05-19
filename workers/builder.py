@@ -809,7 +809,7 @@ def update_packages_file():
     r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
     if (platform.system() == "Darwin"):
         pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
-        if pkg_type = "mac.binary.leopard":
+        if pkg_type == "mac.binary.leopard":
             os_seg = "bin/macosx/mavericks/contrib/%s" % r_version
         else:
             os_seg = "bin/macosx/contrib/%s" % r_version
