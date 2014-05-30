@@ -19,6 +19,6 @@ set BBS_R_HOME=D:\packagebuilder\R
 set BBS_R_CMD=%BBS_R_HOME%\bin\R.exe
 
 
-
+set TMPDIR=
 
 %BBS_PYTHON_CMD% builder.py %1
