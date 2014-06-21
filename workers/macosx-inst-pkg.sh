@@ -21,7 +21,14 @@ SINGLE_ARCH=true
 
 # Change dynamic shared library path for
 LOCAL_DYLIB_DIR="/usr/local/lib"
-DYLIB_FILES="libgcc_s.1.dylib libgfortran.2.dylib libreadline.5.2.dylib libreadline.dylib"
+
+if  uname -a | grep -q "Version 13.1"
+then
+        DYLIB_FILES="libgcc_s.1.dylib libgfortran.3.dylib libreadline.5.2.dylib libreadline.dylib libquadmath.0.dylib"
+
+else
+        DYLIB_FILES="libgcc_s.1.dylib libgfortran.2.dylib libreadline.5.2.dylib libreadline.dylib"
+fi
 
 
 # -------- It is unlikely that you need to touch anything below this ---------
