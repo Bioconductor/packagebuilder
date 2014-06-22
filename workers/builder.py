@@ -443,10 +443,23 @@ def win_multiarch_check():
     #  (os.getenv("BBS_R_CMD"), libdir, pkg, tarball)
     ## NOTE: temporarily removing --new-package from BiocCheck 
     ## command line, until SPB can be moved to Bioc-devel build machines.
-    cmd = ("%s CMD check --no-vignettes --timings --force-multiarch"
-    " --library=%s %s && %s CMD BiocCheck  %s") % \
-      (os.getenv("BBS_R_CMD"), libdir, tarball,
-        os.getenv('BBS_R_CMD'), tarball)
+    # cmd = ("%s CMD check --no-vignettes --timings --force-multiarch"
+    # " --library=%s %s && %s CMD BiocCheck  %s") % \
+    #   (os.getenv("BBS_R_CMD"), libdir, tarball,
+    #     os.getenv('BBS_R_CMD'), tarball)
+
+    r = os.getenv('BBS_R_CMD')
+#rm -rf mzR.buildbin-libdir && mkdir mzR.buildbin-libdir && d:\packagebuilder\R\bin\R.exe 
+#CMD INSTALL --build --merge-multiarch --library=mzR.buildbin-libdir mzR_1.11.2.101.tar.gz 
+#>mzR-install.out 2>&1 && d:\packagebuilder\R\bin\R.exe CMD check --library=mzR.buildbin-libdir 
+#--install="check:mzR-install.out" --force-multiarch --no-vignettes --timings mzR_1.11.2.101.tar.gz
+# && mv mzR.buildbin-libdir/* mzR.Rcheck/ && rmdir mzR.buildbin-libdir
+    cmd = ("rm -rf %s.buildbin-libdir && mkdir %s.buildbin-libdir"
+    " && %s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
+    " %s >%s-install.out 2>&1 && %s CMD check --library=%s.buildbin-libdir"
+    " --install='check:%s-install.out' --force-multiarch --no-vignettes"
+    " --timings %s && %s CMD BiocCheck %s" % (pkg, pkg, r, pkg, tarball,
+    pkg, r, pkg, pkg, tarball, r, tarball))
     send_message({"status": "check_cmd", "body": cmd})
     
     send_message({"status": "checking", "sequence": 0, "body":\
