@@ -458,7 +458,7 @@ def win_multiarch_check():
     " && %s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
     " %s >%s-install.out 2>&1 && %s CMD check --library=%s.buildbin-libdir"
     " --install='check:%s-install.out' --force-multiarch --no-vignettes"
-    " --timings %s && %s CMD BiocCheck %s" % (pkg, pkg, r, pkg, tarball,
+    " --timings %s && %s CMD BiocCheck --new-package %s" % (pkg, pkg, r, pkg, tarball,
     pkg, r, pkg, pkg, tarball, r, tarball))
     send_message({"status": "check_cmd", "body": cmd})
     
