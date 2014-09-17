@@ -57,6 +57,12 @@ def handle_builder_event(obj):
       "post_processing"]
     parent_job = None
     job_id = None
+    if (obj.has_key('svn_url')):
+        global tracker_base_url
+        if 'tracker.bioconductor.org' in obj['svn_url']:
+            tracker_base_url = "https://tracker.bioconductor.org"
+    else:
+        tracker_base_url = "http://tracker.fhcrc.org/roundup/bioc_submit"
     if (obj.has_key('job_id')):
         job_id = obj['job_id']
         try:
@@ -224,13 +230,13 @@ def post_to_tracker(roundup_issue, tarball_name, result,\
     config.read('/home/biocadmin/packagebuilder/spb_history/tracker.ini')
     username = config.get("tracker", "username")
     password = config.get("tracker", "password")
-    url = "http://tracker.fhcrc.org/roundup/bioc_submit/"
+    url = tracker_base_url
     jar = cookielib.CookieJar()
     params = {"__login_name": username, "__login_password": password,\
       "@action": "login", "__came_from": \
-      "http://tracker.fhcrc.org/roundup/bioc_submit/"}
+      tracker_base_url}
     r = requests.get(url, params=params, cookies=jar)
-    url2 = url + "issue%s" % roundup_issue
+    url2 = url + "/issue%s" % roundup_issue
     params2 = {"@action": "edit", "@note": post_text}
     r2 = requests.get(url2, params=params2, cookies=jar)
     
