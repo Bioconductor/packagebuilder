@@ -31,6 +31,7 @@ except:
 
 stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 
+global tracker_base_url
 global build_counter
 build_counter = {}
 # bad hardcoding:
@@ -54,6 +55,13 @@ def handle_builder_event(obj):
             handle_completed_build(obj)
 
 def handle_completed_build(obj):
+    global tracker_base_url
+    if (obj.has_key('svn_url')):
+        if 'tracker.bioconductor.org' in obj['svn_url']:
+            tracker_base_url = "https://tracker.bioconductor.org"
+    else:
+        tracker_base_url = "http://tracker.fhcrc.org/roundup/bioc_submit"
+
     segs = obj['client_id'].split(":")
     roundup_issue = segs[1]
     tarball_name = segs[2]
@@ -146,17 +154,18 @@ def copy_report_to_site(html, tarball_name):
 
 def post_to_tracker(roundup_issue, tarball_name, \
   html, post_text):
+    global tracker_base_url
     config = ConfigParser.ConfigParser()
     config.read('/home/biocadmin/packagebuilder/spb_history/tracker.ini')
     username = config.get("tracker", "username")
     password = config.get("tracker", "password")
-    url = "http://tracker.fhcrc.org/roundup/bioc_submit/"
+    url = tracker_base_url
     jar = cookielib.CookieJar()
     params = {"__login_name": username, "__login_password": password,\
       "@action": "login", "__came_from": \
-      "http://tracker.fhcrc.org/roundup/bioc_submit/"}
+      tracker_base_url}
     r = requests.get(url, params=params, cookies=jar)
-    url2 = url + "issue%s" % roundup_issue
+    url2 = url + "/issue%s" % roundup_issue
     params2 = {"@action": "edit", "@note": post_text}
     r2 = requests.get(url2, params=params2, cookies=jar)
     
