@@ -895,7 +895,8 @@ def is_valid_url():
     # todo bulletproof this; sometimes fails bogusly on windows
     if (manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
         svn_url = True
-    elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1): # todo, ensure .tar.gz end
+    elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1 or
+      manifest['svn_url'].lower().find("tracker.bioconductor.org") > -1): # todo, ensure .tar.gz end
         svn_url = False
     else:
         return False
