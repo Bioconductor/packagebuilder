@@ -164,11 +164,14 @@ def post_to_tracker(roundup_issue, tarball_name, \
     params = {"__login_name": username, "__login_password": password,\
       "@action": "login", "__came_from": \
       tracker_base_url}
-    r = requests.get(url, params=params, cookies=jar, verify=False,
-        allow_redirects=False)
+    session = requests.session()
+    session.max_redirects = 50
+
+    r = session.get(url, params=params, cookies=jar, verify=False,
+        allow_redirects=True)
     url2 = url + "/issue%s" % roundup_issue
     params2 = {"@action": "edit", "@note": post_text}
-    r2 = requests.get(url2, params=params2, cookies=jar, verify=False)
+    r2 = session.get(url2, params=params2, cookies=jar, verify=False)
     
 
 
