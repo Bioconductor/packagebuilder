@@ -126,6 +126,8 @@ def send_dcf_info(dcf_file):
 def is_build_required(manifest):
     
     global package_name
+    global svn_url_global
+    svn_url_global = manifest['svn_url']
     package_name = manifest['job_id'].split("_")[0]
     
     
@@ -812,7 +814,9 @@ def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
     return(retcode)
 
 def onexit():
-    send_message({"body": "builder.py exited", "status": "autoexit", "retcode": -1})
+    global svn_url_global
+    send_message({"body": "builder.py exited", "status": "autoexit",
+        "retcode": -1, "svn_url": svn_url_global})
 
 
 def update_packages_file():
