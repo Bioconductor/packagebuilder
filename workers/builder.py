@@ -312,24 +312,43 @@ def extract_tarball():
         tracker_url = "https://tracker.bioconductor.org"
     else:
         tracker_url = "http://tracker.fhcrc.org/roundup/bioc_submit"
-    cmd = """curl -s --cookie-jar cookies.txt -d\
- "__login_name=%s&__login_password=%s\
-&__came_from=%s\
-&@action=login" \
-%s""" % \
-    (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"),
-        tracker_url, tracker_url)
+
+    br = mechanize.Browser()
+    br.open(tracker_url)
+    br.select_form(nr=2)
+    br["__login_name"] = os.getenv("TRACKER_LOGIN")
+    br["__login_password"] = os.getenv("TRACKER_PASSWORD")
+    res = br.submit()
+
+    segs = manifest['svn_url'].split("/")
+    local_file = segs[len(segs)-1]
+    try:
+        br.retrieve(manifest['svn_url'], local_file)
+        retcode = 0
+    except:
+        retcode = 255
+        print("Got an exception trying to download file: %s" % ex.message)
+        # retcode = ex.message
+
+
+#     cmd = """curl -s --cookie-jar cookies.txt -d\
+#  "__login_name=%s&__login_password=%s\
+# &__came_from=%s\
+# &@action=login" \
+# %s""" % \
+#     (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"),
+#         tracker_url, tracker_url)
     
-    retcode = subprocess.call(cmd, shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": \
-      "curl to log into tracker returned status %d" % retcode})
-    if (not retcode == 0):
-        sys.exit("curl to get cookie failed")
+    # retcode = subprocess.call(cmd, shell=True)
+    # send_message({"status": "post_processing", "retcode": retcode, "body": \
+    #   "curl to log into tracker returned status %d" % retcode})
+    # if (not retcode == 0):
+    #     sys.exit("curl to get cookie failed")
     
-    retcode = subprocess.call("curl -O -s --cookie cookies.txt %s" % \
-        manifest['svn_url'], shell=True)
+    # retcode = subprocess.call("curl -O -s --cookie cookies.txt %s" % \
+    #     manifest['svn_url'], shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": \
-        "curl of tarball completed with status %d" % retcode})
+        "download of tarball completed with status %d" % retcode})
     if (not retcode == 0):
         sys.exit("curl of tarball failed")
     
