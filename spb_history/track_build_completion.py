@@ -60,6 +60,8 @@ def handle_completed_build(obj):
     if (obj.has_key('svn_url')):
         if 'tracker.bioconductor.org' in obj['svn_url']:
             tracker_base_url = "https://tracker.bioconductor.org"
+        else:
+            tracker_base_url = "http://tracker.fhcrc.org/roundup/bioc_submit"    
     else:
         tracker_base_url = "http://tracker.fhcrc.org/roundup/bioc_submit"
 
