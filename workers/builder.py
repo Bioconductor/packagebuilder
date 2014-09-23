@@ -16,6 +16,7 @@ import platform
 import unicodedata
 import atexit
 from stompy import Stomp
+import mechanize
 
 # need a better way to determine R version
 bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
