@@ -21,6 +21,7 @@ import cookielib
 import threading
 import urllib
 from stompy import Stomp
+import mechanize
 
 try:
     stomp = Stomp("merlot2.fhcrc.org", 61613)
@@ -75,6 +76,7 @@ def handle_completed_build(obj):
     sys.stdout.flush()
     #print("Sleeping for 30 seconds...\n")
     #time.sleep(30)
+
     response = requests.get(url)
     html = response.text.encode('ascii', 'ignore')
     #print("html before filtering: %s\n" % html)
@@ -160,18 +162,38 @@ def post_to_tracker(roundup_issue, tarball_name, \
     username = config.get("tracker", "username")
     password = config.get("tracker", "password")
     url = tracker_base_url
-    jar = cookielib.CookieJar()
-    params = {"__login_name": username, "__login_password": password,\
-      "@action": "login", "__came_from": \
-      tracker_base_url}
-    session = requests.session()
-    session.max_redirects = 50
 
-    r = session.get(url, params=params, cookies=jar, verify=False,
-        allow_redirects=True)
+    br = mechanize.Browser()
+    br.open(url)
+    br.select_form(nr=2)
+    br["__login_name"] = username
+    br["__login_password"] = password
+    res = br.submit()
+
     url2 = url + "/issue%s" % roundup_issue
-    params2 = {"@action": "edit", "@note": post_text}
-    r2 = session.get(url2, params=params2, cookies=jar, verify=False)
+
+    br.open(url2)
+    br.select_form(nr=2)
+    #br['@action'] = 'edit'
+    br['@note'] = post_text
+    res2 = br.submit()
+
+
+
+
+
+    # jar = cookielib.CookieJar()
+    # params = {"__login_name": username, "__login_password": password,\
+    #   "@action": "login", "__came_from": \
+    #   tracker_base_url}
+    # session = requests.session()
+    # session.max_redirects = 50
+
+    # r = session.get(url, params=params, cookies=jar, verify=False,
+    #     allow_redirects=True)
+    # url2 = url + "/issue%s" % roundup_issue
+    # params2 = {"@action": "edit", "@note": post_text}
+    # r2 = session.get(url2, params=params2, cookies=jar, verify=False)
     
 
 
