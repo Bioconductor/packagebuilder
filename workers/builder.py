@@ -308,12 +308,17 @@ def extract_tarball():
     global package_name
     package_name = manifest['job_id'].split("_")[0]
     # first, log in to the tracker and get a cookie
+    if "tracker.bioconductor.org" in manifest['svn_url'].lower():
+        tracker_url = "https://tracker.bioconductor.org"
+    else:
+        tracker_url = "http://tracker.fhcrc.org/roundup/bioc_submit"
     cmd = """curl -s --cookie-jar cookies.txt -d\
  "__login_name=%s&__login_password=%s\
-&__came_from=http://tracker.fhcrc.org/roundup/bioc_submit/\
+&__came_from=%s\
 &@action=login" \
-http://tracker.fhcrc.org/roundup/bioc_submit/""" % \
-    (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"))
+%s""" % \
+    (os.getenv("TRACKER_LOGIN"), os.getenv("TRACKER_PASSWORD"),
+        tracker_url, tracker_url)
     
     retcode = subprocess.call(cmd, shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": \
