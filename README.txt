@@ -84,21 +84,23 @@ Roundup Tracker Integration
 ===========================
 
 When a tarball is submitted to the issue tracker
-(http://tracker.fhcrc.org/roundup/bioc_submit/), a job is
+(http://tracker.bioconductor.org/), a job is
 submitted to the Single Package Builder (SPB).
 
 There are several components to this integration. The
 first is an add-on to Roundup known as a 'reactor'.
 
-The tracker lives on mamba at 
-webadmin@mamba:/extra/trackers/bioc_submit
-The tracker code is in svn at:
-https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Projects/bioc_submit_tracker/
-The reactor is here:
+The tracker lives on habu at 
+www-data@habu:/var/www-trackers/bioc_submit
+The tracker code is in sourceforge (mercurial) at:
+https://sourceforge.net/u/dtenenba/roundup-bioc/ci/default/tree/
+The reactor will be migrated here (FIXME: do this):
 https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Projects/bioc_submit_tracker/detectors/builder_reactor.py
 
 Integration Workflow
 --------------------
+FIXME: update this
+
 When new messages are added to the tracker, the reactor is run.
 If a new tarball is detected, the reactor calls another
 python script 
@@ -123,4 +125,4 @@ originated by the SPB.
 When the build is complete, another script on merlot2
 (https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/spb_history/spb_poster.py)
 is listening, and it posts a message to the tracker
-(using an HTTP request) including a link to the build report.
+(using an HTTPS request) including a link to the build report.
