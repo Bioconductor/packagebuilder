@@ -121,8 +121,12 @@ def send_message(msg, status=None):
 
 
 def send_dcf_info(dcf_file):
+    try:
+        maintainer = dcf_file.getValue("Maintainer")
+    except:
+        maintainer = "unknown"
     send_message({"status": "dcf_info", "package_name": dcf_file.getValue("Package"),
-        "maintainer": dcf_file.getValue("Maintainer"), "version": dcf_file.getValue("Version")})
+        "maintainer": maintainer, "version": dcf_file.getValue("Version")})
 
 def is_build_required(manifest):
     
