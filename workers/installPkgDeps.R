@@ -54,6 +54,8 @@ options(repos=newrepos)
 biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"))
 install_github("Bioconductor/BiocCheck")
 
+options(install.packages.compile.from.source="always")
+biocLite(ask=FALSE)
 
 getWarnings <- function(expr)
 {
