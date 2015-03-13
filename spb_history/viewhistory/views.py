@@ -67,7 +67,7 @@ def overall_build_status(request, job_id):
     result = filter(lambda x: x != 'OK', build_statuses)
     # sometimes there is an empty string in the result, not sure 
     # why. Should look into it more. Meantime let's just filter them out:
-    #######result = filter(lambda x: x != "", result)
+    result = filter(lambda x: x != "", result)
 
 
     #abnormal = filter(lambda x: x not in ["OK", "WARNINGS", "skipped"])
@@ -75,5 +75,7 @@ def overall_build_status(request, job_id):
         res = "OK"
     else:
         res = ', '.join(set(result))
+    if len(build_statuses) == 0:
+        res = "abnormal"
     return render_to_response('overall_build_status.html', {"res": res},
         context_instance=RequestContext(request))
