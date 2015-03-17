@@ -82,7 +82,7 @@ installPkg <- function(pkg)
         if(!is.null(res))
         {
             res <- res[grep("not available", res)]
-            if (length(res) == 0)
+            if (!length(res))
                 return
             pkgs <- strsplit(res, "'")[[1]]
             pkgs <- pkgs[grep(" ", pkgs, invert=TRUE)]
