@@ -18,6 +18,7 @@ popd
 export BBS_USER="pkgbuild"
 export SVN_USER="pkgbuild"
 export SVN_PASS="buildpkg"
+export USER="pkgbuild"
  
 $BBS_PYTHON_CMD builder.py $1
  
