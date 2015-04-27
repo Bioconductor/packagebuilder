@@ -36,7 +36,7 @@ global tracker_base_url
 global build_counter
 build_counter = {}
 # bad hardcoding:
-hosts = ["zin1", "perceval", "moscato1", "oaxaca"]
+hosts = ["zin2", "petty", "moscato2", "morelia"]
 
 def handle_builder_event(obj):
     global build_counter
