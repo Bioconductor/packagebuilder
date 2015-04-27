@@ -12,7 +12,7 @@ from stompy import Stomp
 num_builders = 4
 
 bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
-    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2"} 
+    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2", "3.2": "3.2"} 
 
 # set up django environment
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
