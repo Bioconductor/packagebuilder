@@ -76,8 +76,8 @@ def handle_completed_build(obj):
     url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
     print("build report url: %s\n" %url)
     sys.stdout.flush()
-    #print("Sleeping for 30 seconds...\n")
-    #time.sleep(30)
+    print("Sleeping for 30 seconds...\n")
+    time.sleep(30)
 
     response = requests.get(url)
     html = response.text.encode('ascii', 'ignore')
