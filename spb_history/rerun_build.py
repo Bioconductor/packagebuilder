@@ -40,7 +40,7 @@ pkgname = segs[4]
 pkgname_bare = pkgname.split("_")[0]
 
 obj['force']  = True 
-obj['bioc_version'] = "3.1" # hardcode this?
+obj['bioc_version'] = "3.2" # hardcode this?
 obj['r_version'] = "3.2" # hardcode this?
 obj['svn_url'] = url
 obj['repository'] = 'scratch'
