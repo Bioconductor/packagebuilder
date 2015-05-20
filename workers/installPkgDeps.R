@@ -54,7 +54,11 @@ options(repos=newrepos)
 biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"))
 install_github("Bioconductor/BiocCheck")
 
-options(install.packages.compile.from.source="always")
+if(.Platform$pkgType == "mac.binary")
+    options(install.packages.compile.from.source="never")
+else
+    options(install.packages.compile.from.source="always")
+    
 update.packages(repos=biocinstallRepos(), instlib=.libPaths()[1], ask=FALSE)
 #####biocLite(ask=FALSE)
 
