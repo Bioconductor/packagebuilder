@@ -93,7 +93,7 @@ installPkg <- function(pkg)
         {
             res <- res[grep("not available", res)]
             if (!length(res))
-                return
+                return()
             pkgs <- strsplit(res, "'")[[1]]
             pkgs <- pkgs[grep(" ", pkgs, invert=TRUE)]
             install.packages(pkgs, type="source", repos=repos, lib=lib)
