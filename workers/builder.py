@@ -890,7 +890,7 @@ def update_packages_file():
             "build_product": build_product, "url": url})
         sys.exit("Updating packages failed")
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
-        command = "%s biocadmin@merlot2.fhcrc.org \"cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
+        command = "%s biocadmin@merlot2.fhcrc.org \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
             packagebuilder_ssh_cmd
         print("sync command = ")
         print(command)
