@@ -51,8 +51,6 @@ library(devtools)
 newrepos <- getOption("repos")
 newrepos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=newrepos)
-biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"))
-install_github("Bioconductor/BiocCheck")
 
 if(.Platform$pkgType == "mac.binary")
 {
@@ -60,6 +58,11 @@ if(.Platform$pkgType == "mac.binary")
 } else {
     options(install.packages.compile.from.source="always")
 }
+
+
+biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"))
+install_github("Bioconductor/BiocCheck")
+
 
 update.packages(repos=biocinstallRepos(), instlib=.libPaths()[1], ask=FALSE)
 #####biocLite(ask=FALSE)
