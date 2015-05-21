@@ -5,7 +5,7 @@
 
                 {% for build in recent_builds %}
                     <tr>
-                        <td><a href="http://merlot2.fhcrc.org:8000/job/{{build.id}}">{{build.package.name}}</a></td>
+                        <td><a href="http://pinot.fhcrc.org:8000/job/{{build.id}}">{{build.package.name}}</a></td>
                         <td><abbr class="timeago" title="{{build.time_started|date:"c"}}">{{build.time_started|date:"c"}}</abbr></td>
                     </tr>
                 {% endfor %}

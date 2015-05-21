@@ -24,7 +24,7 @@ from stompy import Stomp
 import mechanize
 
 try:
-    stomp = Stomp("merlot2.fhcrc.org", 61613)
+    stomp = Stomp("pinot.fhcrc.org", 61613)
     stomp.connect()
 except:
     print("Cannot connect")
@@ -68,12 +68,12 @@ def handle_completed_build(obj):
     segs = obj['client_id'].split(":")
     roundup_issue = segs[1]
     tarball_name = segs[2]
-    f = urllib.urlopen("http://merlot2.fhcrc.org:8000/jid/%s" % obj['job_id'])
+    f = urllib.urlopen("http://pinot.fhcrc.org:8000/jid/%s" % obj['job_id'])
     job_id = f.read().strip()
     if job_id == "0":
         print("There is no build report for this job!")
         return
-    url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
+    url = "http://pinot.fhcrc.org:8000/job/%s/" % job_id
     print("build report url: %s\n" %url)
     sys.stdout.flush()
     print("Sleeping for 30 seconds...\n")
@@ -85,7 +85,7 @@ def handle_completed_build(obj):
     html = filter_html(html)
     #print("html after filtering: %s\n" % html)
 
-    f = urllib.urlopen("http://merlot2.fhcrc.org:8000/overall_build_status/%s"\
+    f = urllib.urlopen("http://pinot.fhcrc.org:8000/overall_build_status/%s"\
         % job_id)
     result = f.read().strip().split(", ")
     url = copy_report_to_site(html, tarball_name)
@@ -209,7 +209,7 @@ def filter_html(html):
         if("pkgInstall(" in line):
             segs = line.split("</pre>")
             line = segs[1]
-        if (not "merlot2" in line):
+        if (not "pinot" in line):
             good_lines.append(line)
     return("\n".join(good_lines))
 

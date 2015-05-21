@@ -1,5 +1,5 @@
 
-require.paths.unshift(__dirname+"/lib/")
+//require.paths.unshift(__dirname+"/lib/")
 var sys = require('sys')
 var path = require('path')
 var url = require("url")
@@ -83,7 +83,7 @@ io.sockets.on('connection', function (socket) {
   
 });
 
-var client = new stomp.Client("merlot2.fhcrc.org", 61613);
+var client = new stomp.Client("pinot.fhcrc.org", 61613);
 
 sys.puts("before subscribing to queue");
 client.subscribe("/topic/builderevents", function(data){

@@ -280,7 +280,7 @@ def setup():
 def setup_stomp():
     global stomp
     try:
-        stomp = Stomp("merlot2.fhcrc.org", 61613)
+        stomp = Stomp("pinot.fhcrc.org", 61613)
         # optional connect keyword args "username" and "password" like so:
         # stomp.connect(username="user", password="pass")
         stomp.connect()
@@ -757,7 +757,7 @@ def propagate_package():
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
     if (platform.system() == "Windows"):
-        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'rm -f %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"], 
+        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@pinot.fhcrc.org 'rm -f %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"], 
           repos, package_name))
     else:
         retcode = ssh("rm -f %s" % files_to_delete)
@@ -773,11 +773,11 @@ def propagate_package():
         print("chmod_retcode = %d" % chmod_retcode)
         send_message({"status": "chmod_retcode", "body": \
           "chmod_retcode=%d" % chmod_retcode, "retcode": chmod_retcode})
-        command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@merlot2.fhcrc.org:%s/" % (os.environ["PACKAGEBUILDER_HOME"],
+        command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@pinot.fhcrc.org:%s/" % (os.environ["PACKAGEBUILDER_HOME"],
           build_product, repos)
         print("command = %s" % command)
         retcode = subprocess.call(command)
-        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@merlot2.fhcrc.org 'chmod a+r %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"],
+        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@pinot.fhcrc.org 'chmod a+r %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"],
           repos, package_name))
         print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
@@ -816,13 +816,13 @@ def _call(command_str, shell):
     else:
         return(subprocess.call(command_str, shell=shell))
 
-def ssh(command, user='biocadmin', host='merlot2.fhcrc.org'):
+def ssh(command, user='biocadmin', host='pinot.fhcrc.org'):
     command = "%s %s@%s \"%s\"" % (packagebuilder_ssh_cmd, user, host, command)
     print("ssh command: %s" % command)
     retcode = _call([command], shell=True)
     return(retcode)
 
-def scp(src, dest, srcLocal=True, user='biocadmin', host='merlot2.fhcrc.org'):
+def scp(src, dest, srcLocal=True, user='biocadmin', host='pinot.fhcrc.org'):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
         chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
@@ -878,7 +878,7 @@ def update_packages_file():
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
     command = \
-        "%s biocadmin@merlot2.fhcrc.org 'R -f %s/update-repo.R --args %s %s'" \
+        "%s biocadmin@pinot.fhcrc.org 'R -f %s/update-repo.R --args %s %s'" \
         % (packagebuilder_ssh_cmd, script_loc, repos, pkg_type)
     print("update packages command: ")
     print(command)
@@ -890,7 +890,7 @@ def update_packages_file():
             "build_product": build_product, "url": url})
         sys.exit("Updating packages failed")
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
-        command = "%s biocadmin@merlot2.fhcrc.org \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
+        command = "%s biocadmin@pinot.fhcrc.org \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\"" % \
             packagebuilder_ssh_cmd
         print("sync command = ")
         print(command)

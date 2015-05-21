@@ -1,2 +1,2 @@
 
-exports.socketServer = "merlot2.fhcrc.org";
+exports.socketServer = "pinot.fhcrc.org";

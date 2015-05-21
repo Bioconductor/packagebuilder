@@ -7,9 +7,9 @@ https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/
 Consists of three main components in three top-level directories:
 
 node - a web application written in node.js (server-side Javascript based on V8).
-  Accessible at http://merlot2.fhcrc.org:8000
+  Accessible at http://pinot.fhcrc.org:8000
 spb_history - a Django/Python web application that tracks build history
-  Accessible at http://merlot2.fhcrc.org:4000
+  Accessible at http://pinot.fhcrc.org:4000
 workers - python scripts that run on each build machine
 
 Overview
@@ -40,8 +40,8 @@ actual building.
 Deployment
 ==========
 
-The node and spb_history web applications are deployed on merlot2
-(see the 'single package builder' section of biocadmin@merlot2's crontab
+The node and spb_history web applications are deployed on pinot
+(see the 'single package builder' section of biocadmin@pinot's crontab
 to see how they are started).
 
 On the build machines, the listeners run as the user 'pkgbuild' 
@@ -112,9 +112,9 @@ an SPB job require a newer version of python (2.7 is used).
 This second script sends a message to an Amazon Simple Queue Service
 (SQS) queue. SQS is used here (instead of ActiveMQ which is used 
 for the rest of SPB) because mamba is in the DMZ and cannot connect
-to merlot2, where the ActiveMQ server is located.
+to pinot, where the ActiveMQ server is located.
 
-A script running on merlot2
+A script running on pinot
 (https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/spb_history/aws_monitor.py)
 listens for messages posted to this SQS queue. When it receives a message,
 it sends another message to the ActiveMQ queue used to signal new builds.
@@ -122,7 +122,7 @@ This starts the normal SPB workflow described at the start of this document.
 The message sent to SPB contains a flag indicating that this build was
 originated by the SPB.
 
-When the build is complete, another script on merlot2
+When the build is complete, another script on pinot
 (https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/spb_history/spb_poster.py)
 is listening, and it posts a message to the tracker
 (using an HTTPS request) including a link to the build report.

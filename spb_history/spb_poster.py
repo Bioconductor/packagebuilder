@@ -32,7 +32,7 @@ from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 
 try:
-    stomp = Stomp("merlot2.fhcrc.org", 61613)
+    stomp = Stomp("pinot.fhcrc.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
@@ -181,7 +181,7 @@ def post_report_to_tracker(job_id):
     segs = job.client_id.split(":")
     roundup_issue = segs[1]
     tarball_name = segs[2]
-    url = "http://merlot2.fhcrc.org:8000/job/%s/" % job_id
+    url = "http://pinot.fhcrc.org:8000/job/%s/" % job_id
     print("build report url: %s\n" %url)
     sys.stdout.flush()
     #print("Sleeping for 30 seconds...\n")
@@ -301,7 +301,7 @@ def filter_html(html):
         if("pkgInstall(" in line):
             segs = line.split("</pre>")
             line = segs[1]
-        if (not "merlot2" in line):
+        if (not "pinot" in line):
             good_lines.append(line)
     return("\n".join(good_lines))
     
