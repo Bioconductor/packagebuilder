@@ -83,7 +83,9 @@ io.sockets.on('connection', function (socket) {
   
 });
 
-var client = new stomp.Client("pinot.fhcrc.org", 61613);
+//var client = new stomp.Client("pinot.fhcrc.org", 61613);
+// when on pinot itself, it appears you have to use this ip:
+var client = new stomp.Client("140.107.134.207", 61613);
 
 sys.puts("before subscribing to queue");
 client.subscribe("/topic/builderevents", function(data){
