@@ -30,7 +30,7 @@ from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 try:
-    stomp = Stomp("pinot.fhcrc.org", 61613)
+    stomp = Stomp("staging.bioconductor.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()

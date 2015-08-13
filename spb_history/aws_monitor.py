@@ -24,7 +24,7 @@ conn = SQSConnection(access_key, secret_key)
 
 q = conn.get_queue("packagesubmitted")
 try:
-    stomp = Stomp("pinot.fhcrc.org", 61613)
+    stomp = Stomp("staging.bioconductor.org", 61613)
     stomp.connect()
 except:
     print("Cannot connect")

@@ -24,7 +24,7 @@ from stompy import Stomp
 import mechanize
 
 try:
-    stomp = Stomp("pinot.fhcrc.org", 61613)
+    stomp = Stomp("staging.bioconductor.org", 61613)
     stomp.connect()
 except:
     print("Cannot connect")

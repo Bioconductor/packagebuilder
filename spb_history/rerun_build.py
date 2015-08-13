@@ -58,7 +58,7 @@ json = json.dumps(obj)
 #print(json)
 
 try:
-    stomp = Stomp("pinot.fhcrc.org", 61613)
+    stomp = Stomp("staging.bioconductor.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()

@@ -83,7 +83,7 @@ io.sockets.on('connection', function (socket) {
   
 });
 
-var client = new stomp.Client("pinot.fhcrc.org", 61613);
+var client = new stomp.Client("staging.bioconductor.org", 61613);
 
 sys.puts("before subscribing to queue");
 client.subscribe("/topic/builderevents", function(data){
