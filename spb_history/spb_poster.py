@@ -181,7 +181,7 @@ def post_report_to_tracker(job_id):
     segs = job.client_id.split(":")
     roundup_issue = segs[1]
     tarball_name = segs[2]
-    url = "http://pinot.fhcrc.org:8000/job/%s/" % job_id
+    url = "http://staging.bioconductor.org:8000/job/%s/" % job_id
     print("build report url: %s\n" %url)
     sys.stdout.flush()
     #print("Sleeping for 30 seconds...\n")
@@ -301,7 +301,7 @@ def filter_html(html):
         if("pkgInstall(" in line):
             segs = line.split("</pre>")
             line = segs[1]
-        if (not "pinot" in line):
+        if (not "staging" in line):
             good_lines.append(line)
     return("\n".join(good_lines))
     

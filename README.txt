@@ -7,9 +7,9 @@ https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/
 Consists of three main components in three top-level directories:
 
 node - a web application written in node.js (server-side Javascript based on V8).
-  Accessible at http://pinot.fhcrc.org:8000
+  Accessible at http://staging.bioconductor.org:8000
 spb_history - a Django/Python web application that tracks build history
-  Accessible at http://pinot.fhcrc.org:4000
+  (eventually will be) Accessible at http://staging.bioconductor.org:4000
 workers - python scripts that run on each build machine
 
 Overview
@@ -40,8 +40,10 @@ actual building.
 Deployment
 ==========
 
-The node and spb_history web applications are deployed on pinot
-(see the 'single package builder' section of biocadmin@pinot's crontab
+The node and spb_history web applications are deployed on
+staging.bioconductor.org
+(see the 'single package builder' section of 
+biocadmin@staging.bioconductor.org's crontab
 to see how they are started).
 
 On the build machines, the listeners run as the user 'pkgbuild' 
