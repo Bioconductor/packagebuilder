@@ -31,6 +31,9 @@ packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 if sys.platform == "win32":
+    # bad hardcoding! I don't know why this is necessary:
+    if builder_id in ["windows1", "windows2"]:
+        os.environ["USERDNSDOMAIN"] = "bioconductor.org"
     if "USERDNSDOMAIN" in os.environ:
         builder_id += "." + os.environ['USERDNSDOMAIN'].lower()
 builder_id = builder_id.replace(".local", "")
