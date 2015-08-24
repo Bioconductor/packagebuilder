@@ -30,6 +30,9 @@ os.environ['TRACKER_PASSWORD'] = 'buildpkg'
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
+if sys.platform == "win32":
+    if "USERDNSDOMAIN" in os.environ:
+        builder_id += "." + os.environ['USERDNSDOMAIN'].lower()
 builder_id = builder_id.replace(".local", "")
 
 ## Temporary hack
