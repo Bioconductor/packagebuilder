@@ -53,34 +53,34 @@
                 </tr>
 		</tbody><tbody>
 		    {% for build in builds %}
-		        <tr class="{{build.builder_id}}">
+		        <tr class="{{build.builder_id|replace(".", "_")}}">
 		            <td>{{build.builder_id}}</td>
 		            <td>{{build.os}}/{{build.arch}}</td>
 		            <td style="width: 110px;" align="left" class="status {{build.builder_id}} buildsrc">
-                        <span id="{{build.builder_id}}_buildstatus">
+                        <span id="{{build.builder_id|replace(".", "_")}}_buildstatus">
                             <a href="#{{build.builder_id}}_buildsrc_anchor">
-                                <span class="{{build.builder_id}}_EVENT {{build.buildsrc_result}}">&nbsp;&nbsp;{{build.buildsrc_result}}&nbsp;&nbsp;</span>
+                                <span class="{{build.builder_id|replace(".", "_")}}_EVENT {{build.buildsrc_result}}">&nbsp;&nbsp;{{build.buildsrc_result}}&nbsp;&nbsp;</span>
                             </a>
                         </span>
                     </td>
                     <td style="width: 110px;" align="left" class="status {{build.builder_id}} checksrc">
-                        <span id="{{build.builder_id}}_checkstatus">
+                        <span id="{{build.builder_id|replace(".", "_")}}_checkstatus">
                             <a href="#{{build.builder_id}}_check_anchor">
-                                <span id="{{build.builder_id}}_check_event" class="{{build.builder_id}}_CHECK_EVENT {{build.checksrc_result}}">&nbsp;&nbsp;{{build.checksrc_result}}&nbsp;&nbsp;</span>
+                                <span id="{{build.builder_id|replace(".", "_")}}_check_event" class="{{build.builder_id|replace(".", "_")}}_CHECK_EVENT {{build.checksrc_result}}">&nbsp;&nbsp;{{build.checksrc_result}}&nbsp;&nbsp;</span>
                             </a>
                         </span>
                     </td>
                     <td style="width: 110px;" align="left" class="status {{build.builder_id}} buildbin">
-                        <span id="{{build.builder_id}}_buildbinstatus">
+                        <span id="{{build.builder_id|replace(".", "_")}}_buildbinstatus">
                             <a href="#{{build.builder_id}}_buildbin_anchor">
-                                <span id="{{build.builder_id}}_buildbin_event" class="moscato2_BUILDBIN_EVENT {{build.buildbin_result}}">&nbsp;&nbsp;{{build.buildbin_result}}&nbsp;&nbsp;</span>
+                                <span id="{{build.builder_id|replace(".", "_")}}_buildbin_event" class="{{build.builder_id|replace(".", "_")}}_BUILDBIN_EVENT {{build.buildbin_result}}">&nbsp;&nbsp;{{build.buildbin_result}}&nbsp;&nbsp;</span>
                             </a>
                         </span>
                     </td>
                     <td style="width: 140px;" align="left" class="status {{build.builder_id}} postprocessing">
-                        <span id="{{build.builder_id}}_postprocessingstatus">
+                        <span id="{{build.builder_id|replace(".", "_")}}_postprocessingstatus">
                             <a href="#{{build.builder_id}}_anchor">
-                                <span id="{{build.builder_id}}_postprocessing_event" class="moscato2_POSTPROCESSING_EVENT {{build.postprocessing_result}}">&nbsp;&nbsp;{{build.postprocessing_result}}&nbsp;&nbsp;</span>
+                                <span id="{{build.builder_id|replace(".", "_")}}_postprocessing_event" class="{{build.builder_id|replace(".", "_")}}_POSTPROCESSING_EVENT {{build.postprocessing_result}}">&nbsp;&nbsp;{{build.postprocessing_result}}&nbsp;&nbsp;</span>
                             </a>
                         </span>
                     </td>
@@ -96,28 +96,28 @@
 		<div id="summaries">
 		    {% for build in builds %}
 		        			<hr>
-                			<a name="{{build.builder_id}}_anchor"></a>
+                			<a name="{{build.builder_id|replace(".", "_")}}_anchor"></a>
                 			<h2>{{build.builder_id}} Summary</h2> 
                 			<p><a href="#top">[top]</a></p>
-                			<div class="{{build.builder_id}}" style="margin-left: 12px;"> 
+                			<div class="{{build.builder_id|replace(".", "_")}}" style="margin-left: 12px;"> 
                 				<table> 
-                					<tbody><tr><td><b>Package</b>: <span id="{{build.builder_id}}_package_name">{{job.package}}</span></td></tr> 
-                					<tr><td><b>Version</b>: <span id="{{build.builder_id}}_version">{{build.version}}</span></td></tr> 
-                					<tr><td><b>RVersion</b>: <span id="{{build.builder_id}}_r_version">{{build.r_version}}
+                					<tbody><tr><td><b>Package</b>: <span id="{{build.builder_id|replace(".", "_")}}_package_name">{{job.package}}</span></td></tr> 
+                					<tr><td><b>Version</b>: <span id="{{build.builder_id|replace(".", "_")}}_version">{{build.version}}</span></td></tr> 
+                					<tr><td><b>RVersion</b>: <span id="{{build.builder_id|replace(".", "_")}}_r_version">{{build.r_version}}
                 </span></td></tr> 
-                					<tr><td><b>BiocVersion</b>: <span id="{{build.builder_id}}_r_version">{{job.bioc_version}}
+                					<tr><td><b>BiocVersion</b>: <span id="{{build.builder_id|replace(".", "_")}}_r_version">{{job.bioc_version}}
                 </span></td></tr> 
 
-                					<tr><td><b>BuildCommand</b>: <span id="{{build.builder_id}}_command">{{build.r_cmd}}</span></td></tr> 
-                					<tr><td><b>CheckCommand</b>: <span id="{{build.builder_id}}_check_command">{{build.check_cmd}}</span></td></tr> 
-                					<tr><td><b>BuildBinCommand</b>: <span id="{{build.builder_id}}_buildbin_command">{{build.r_buildbin_cmd}}</span></td></tr> 
-                					<tr><td><b>Status</b>: <span id="{{build.builder_id}}_status" class="{{build.builder_id}}_EVENT OK">{{build.postprocessing_result}}</span></td></tr> 
-                					<tr><td><b>PackageFile</b>: <span id="{{build.builder_id}}_build_product"><a href="http://bioconductor.org/scratch-repos/{{job.bioc_version}}/{{build.pkg_type}}/{{build.build_product}}"> {{build.build_product}}</a></span></td></tr> 
-                					<tr><td><b>PackageFileSize</b>: <span id="{{build.builder_id}}_file_size">{{build.filesize}}</span> <a href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</a></td></tr> 
-                					<tr><td><b>BuildID:</b>: <span id="{{build.builder_id}}_build_id">{{job.job_id}}</span></td></tr> 
-                					<tr><td><b>PreProcessing</b>: <span id="{{build.builder_id}}_pre_processing">{{build.preprocessing_message}}</span></td></tr> 
-                					<tr><td><b>PostProcessing</b>: <span id="{{build.builder_id}}_post_processing">{{build.post_processing_message}}</span></td></tr> 
-                					<tr><td><b>InstallCommand</b>: <br><pre id="{{build.builder_id}}_install_command">source("http://bioconductor.org/scratch-repos/pkgInstall.R")
+                					<tr><td><b>BuildCommand</b>: <span id="{{build.builder_id|replace(".", "_")}}_command">{{build.r_cmd}}</span></td></tr> 
+                					<tr><td><b>CheckCommand</b>: <span id="{{build.builder_id|replace(".", "_")}}_check_command">{{build.check_cmd}}</span></td></tr> 
+                					<tr><td><b>BuildBinCommand</b>: <span id="{{build.builder_id|replace(".", "_")}}_buildbin_command">{{build.r_buildbin_cmd}}</span></td></tr> 
+                					<tr><td><b>Status</b>: <span id="{{build.builder_id|replace(".", "_")}}_status" class="{{build.builder_id|replace(".", "_")}}_EVENT OK">{{build.postprocessing_result}}</span></td></tr> 
+                					<tr><td><b>PackageFile</b>: <span id="{{build.builder_id|replace(".", "_")}}_build_product"><a href="http://bioconductor.org/scratch-repos/{{job.bioc_version}}/{{build.pkg_type}}/{{build.build_product}}"> {{build.build_product}}</a></span></td></tr> 
+                					<tr><td><b>PackageFileSize</b>: <span id="{{build.builder_id|replace(".", "_")}}_file_size">{{build.filesize}}</span> <a href="http://en.wikipedia.org/wiki/KiB" target="_blank">KiB</a></td></tr> 
+                					<tr><td><b>BuildID:</b>: <span id="{{build.builder_id|replace(".", "_")}}_build_id">{{job.job_id}}</span></td></tr> 
+                					<tr><td><b>PreProcessing</b>: <span id="{{build.builder_id|replace(".", "_")}}_pre_processing">{{build.preprocessing_message}}</span></td></tr> 
+                					<tr><td><b>PostProcessing</b>: <span id="{{build.builder_id|replace(".", "_")}}_post_processing">{{build.post_processing_message}}</span></td></tr> 
+                					<tr><td><b>InstallCommand</b>: <br><pre id="{{build.builder_id|replace(".", "_")}}_install_command">source("http://bioconductor.org/scratch-repos/pkgInstall.R")
                 pkgInstall("{{job.package}}")</pre></td></tr>
                 				</tbody></table> 
                 			</div> 
@@ -125,24 +125,24 @@
                 			    <a name="{{build.builder_id}}_buildsrc_anchor"></a>
                 				<h3>{{build.builder_id}} BUILD SRC output</h3> 
                     			<p><a href="#top">[top]</a></p>
-                				<div class="{{build.builder_id}}" style="margin-left: 12px;"> 
-                					<pre id="{{build.builder_id}}_console" style="font-size: smaller; padding: 2px;">{{build.building_message}}</pre>
+                				<div class="{{build.builder_id|replace(".", "_")}}" style="margin-left: 12px;"> 
+                					<pre id="{{build.builder_id|replace(".", "_")}}_console" style="font-size: smaller; padding: 2px;">{{build.building_message}}</pre>
                 				</div> 
 
                 			<hr> 
-                			    <a name="{{build.builder_id}}_check_anchor"></a>
+                			    <a name="{{build.builder_id|replace(".", "_")}}_check_anchor"></a>
                 				<h3>{{build.builder_id}} CHECK output</h3> 
                     			<p><a href="#top">[top]</a></p>
-                				<div class="{{build.builder_id}}" style="margin-left: 12px;"> 
-                					<pre id="moscato2_check_console" style="font-size: smaller; padding: 2px;">{{build.checking_message}}</pre>
+                				<div class="{{build.builder_id|replace(".", "_")}}" style="margin-left: 12px;"> 
+                					<pre id="{{build.builder_id|replace(".", "_")}}_check_console" style="font-size: smaller; padding: 2px;">{{build.checking_message}}</pre>
                 				</div> 
 
                             <hr> 
-                                <a name="{{build.builder_id}}_buildbin_anchor">
+                                <a name="{{build.builder_id|replace(".", "_")}}_buildbin_anchor">
                 				<h3>{{build.builder_id}} BUILD BIN output</h3> 
-                    			</a><p><a name="{{build.builder_id}}_buildbin_anchor"></a><a href="#top">[top]</a></p>
-                				<div class="{{build.builder_id}}" style="margin-left: 12px;"> 
-                					<pre id="{{build.builder_id}}_buildbin_console" style="font-size: smaller; padding: 2px;">{{build.buildingbin_message}}</pre>
+                    			</a><p><a name="{{build.builder_id|replace(".", "_")}}_buildbin_anchor"></a><a href="#top">[top]</a></p>
+                				<div class="{{build.builder_id|replace(".", "_")}}" style="margin-left: 12px;"> 
+                					<pre id="{{build.builder_id|replace(".", "_")}}_buildbin_console" style="font-size: smaller; padding: 2px;">{{build.buildingbin_message}}</pre>
                 				</div> 
                 
 		    {% endfor %}
