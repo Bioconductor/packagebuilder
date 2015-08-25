@@ -24,7 +24,7 @@ from stompy import Stomp
 import mechanize
 
 try:
-    stomp = Stomp("staging.bioconductor.org", 61613)
+    stomp = Stomp("broker.bioconductor.org", 61613)
     stomp.connect()
 except:
     print("Cannot connect")
@@ -36,7 +36,7 @@ global tracker_base_url
 global build_counter
 build_counter = {}
 # bad hardcoding:
-hosts = ["zin2", "petty", "moscato2", "morelia"]
+hosts = ["linux1.bioconductor.org", "perceval", "windows1.bioconductor.org", "oaxaca"]
 
 def handle_builder_event(obj):
     global build_counter
