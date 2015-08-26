@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Package(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=40)
     last_built_at = models.DateTimeField(auto_now=True)
     added_at = models.DateTimeField(auto_now_add=True)
     
@@ -33,8 +33,8 @@ class Build(models.Model):
         ('OK', 'OK'),
     )
     job = models.ForeignKey(Job)
-    jid = models.CharField(max_length=50)
-    builder_id = models.CharField(max_length=20)
+    jid = models.CharField(max_length=100)
+    builder_id = models.CharField(max_length=40)
     maintainer = models.CharField(max_length=255)
     version = models.CharField(max_length=10)
     preprocessing_result = models.CharField(max_length=20)
