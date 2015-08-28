@@ -7,6 +7,7 @@ import subprocess
 import platform
 from datetime import datetime, date, time
 from stompy import Stomp
+from django.db import connection
 
 ## this may need to change:
 num_builders = 4
@@ -251,12 +252,21 @@ def handle_builder_event(obj):
         # chmod_retcode*,
         # normal_end
 
+def is_connection_usable():
+    try:
+        connection.connection.ping()
+    except:
+        return False
+    else:
+        return True
     
 
 def callback(body, destination):
     print " [x] Received %r" % (body,)
     sys.stdout.flush() ## make sure we see everything
     received_obj = None
+    if not is_connection_usable():
+        connection.close()
     try:
         received_obj = json.loads(body)
     except ValueError as e:
