@@ -10,13 +10,15 @@ import os
 import subprocess
 import platform
 from stompy import Stomp
+builder_id = platform.node().lower().replace(".fhcrc.org","")
+builder_id = builder_id.replace(".local", "")
 
 
 try:
     stomp = Stomp("pinot.fhcrc.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
-    stomp.connect()
+    stomp.connect(clientid=builder_id)
 except:
     print("Cannot connect")
     raise
@@ -29,8 +31,6 @@ os.environ['TRACKER_PASSWORD'] = 'buildpkg'
 
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
-builder_id = platform.node().lower().replace(".fhcrc.org","")
-builder_id = builder_id.replace(".local", "")
 
 ## Temporary hack
 if (builder_id.lower().startswith("dhcp") or \
