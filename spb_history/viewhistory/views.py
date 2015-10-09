@@ -28,6 +28,8 @@ def job(request, job_id):
     builds = helper.filter_out_wrong_versions(builds, job)
     #builds = helper.re_sort(builds)
     helper.get_messages(builds)
+    for build in builds:
+        build.builder_id = build.builder_id.replace(".", "_")
     return render_to_response('job.html', {"job": job, "builds": builds},
       context_instance=RequestContext(request))
 

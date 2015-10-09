@@ -7,6 +7,7 @@ import subprocess
 import platform
 from datetime import datetime, date, time
 from stompy import Stomp
+from django.db import connection
 
 ## this may need to change:
 num_builders = 4
@@ -30,7 +31,7 @@ from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 try:
-    stomp = Stomp("staging.bioconductor.org", 61613)
+    stomp = Stomp("broker.bioconductor.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
@@ -251,12 +252,21 @@ def handle_builder_event(obj):
         # chmod_retcode*,
         # normal_end
 
+def is_connection_usable():
+    try:
+        connection.connection.ping()
+    except:
+        return False
+    else:
+        return True
     
 
 def callback(body, destination):
     print " [x] Received %r" % (body,)
     sys.stdout.flush() ## make sure we see everything
     received_obj = None
+    if not is_connection_usable():
+        connection.close()
     try:
         received_obj = json.loads(body)
     except ValueError as e:

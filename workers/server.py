@@ -18,7 +18,7 @@ builder_id = builder_id.replace(".local", "")
 
 
 try:
-    stomp = Stomp("staging.bioconductor.org", 61613)
+    stomp = Stomp("broker.bioconductor.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect(clientid=builder_id)
@@ -34,6 +34,17 @@ os.environ['TRACKER_PASSWORD'] = 'buildpkg'
 
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
+<<<<<<< HEAD
+=======
+builder_id = platform.node().lower().replace(".fhcrc.org","")
+if sys.platform == "win32":
+    # bad hardcoding! I don't know why this is necessary:
+    if builder_id in ["windows1", "windows2"]:
+        os.environ["USERDNSDOMAIN"] = "bioconductor.org"
+    if "USERDNSDOMAIN" in os.environ:
+        builder_id += "." + os.environ['USERDNSDOMAIN'].lower()
+builder_id = builder_id.replace(".local", "")
+>>>>>>> move_broker_to_cloud
 
 ## Temporary hack
 if (builder_id.lower().startswith("dhcp") or \
