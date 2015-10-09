@@ -10,6 +10,8 @@ import os
 import subprocess
 import platform
 from stompy import Stomp
+builder_id = platform.node().lower().replace(".fhcrc.org","")
+builder_id = builder_id.replace(".local", "")
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 builder_id = builder_id.replace(".local", "")
