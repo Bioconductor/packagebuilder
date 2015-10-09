@@ -34,8 +34,6 @@ os.environ['TRACKER_PASSWORD'] = 'buildpkg'
 
 packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
 
-<<<<<<< HEAD
-=======
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 if sys.platform == "win32":
     # bad hardcoding! I don't know why this is necessary:
@@ -44,7 +42,6 @@ if sys.platform == "win32":
     if "USERDNSDOMAIN" in os.environ:
         builder_id += "." + os.environ['USERDNSDOMAIN'].lower()
 builder_id = builder_id.replace(".local", "")
->>>>>>> move_broker_to_cloud
 
 ## Temporary hack
 if (builder_id.lower().startswith("dhcp") or \
