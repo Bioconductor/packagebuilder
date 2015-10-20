@@ -69,9 +69,11 @@ if (Sys.info()['sysname'] == "Darwin")
 {
     bootstrap_libdir <- sprintf("~/Library/R/%s.%s/library",
         major, minor)
-} else  if (.Platform$OS.type == "windows") {
-    bootstrap.libdir <- "C:/packagebuilder/R/library"
-} else { # linux
+} else if (.Platform$OS.type == "windows") 
+{
+    bootstrap_libdir <- "C:/packagebuilder/R/library"
+} else 
+{ # linux
     bootstrap_libdir <- file.path(home, 'R',
         paste0(R.version$platform, '-library'),
         sprintf("%s.%s", major, minor))
@@ -81,7 +83,7 @@ if (Sys.info()['sysname'] == "Darwin")
 ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
 ip <- rownames(installed.packages())
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
-    "BiocCheck")
+    "BiocCheck", "devtools")
 
 for (pkg in bootstrap_pkgs)
 {
