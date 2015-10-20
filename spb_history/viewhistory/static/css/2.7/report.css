@@ -252,6 +252,17 @@ TABLE.mainrep .even .lamb2 {
     background: #9AB;
 }
 
+/* linux2_bioconductor_org */
+DIV.linux2_bioconductor_org,
+TR.linux2_bioconductor_org TD,
+TABLE.mainrep .linux2_bioconductor_org,
+TABLE.mainrep .odd .linux2_bioconductor_org {
+    background: #BCD;
+}
+TABLE.mainrep .even .lamb2 {
+    background: #9AB;
+}
+
 
 /* zin2 */
 DIV.zin2,
@@ -496,6 +507,17 @@ TABLE.mainrep .odd .windows1_bioconductor_org {
     background: #EBA;
 }
 TABLE.mainrep .even .windows1_bioconductor_org {
+    background: #C98;
+}
+
+/* windows21_bioconductor_org */
+DIV.windows21_bioconductor_org,
+TR.windows21_bioconductor_org TD,
+TABLE.mainrep .windows21_bioconductor_org,
+TABLE.mainrep .odd .windows21_bioconductor_org {
+    background: #EBA;
+}
+TABLE.mainrep .even .windows21_bioconductor_org {
     background: #C98;
 }
 
