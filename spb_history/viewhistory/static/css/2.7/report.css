@@ -510,14 +510,14 @@ TABLE.mainrep .even .windows1_bioconductor_org {
     background: #C98;
 }
 
-/* windows21_bioconductor_org */
-DIV.windows21_bioconductor_org,
-TR.windows21_bioconductor_org TD,
-TABLE.mainrep .windows21_bioconductor_org,
-TABLE.mainrep .odd .windows21_bioconductor_org {
+/* windows2_bioconductor_org */
+DIV.windows2_bioconductor_org,
+TR.windows2_bioconductor_org TD,
+TABLE.mainrep .windows2_bioconductor_org,
+TABLE.mainrep .odd .windows2_bioconductor_org {
     background: #EBA;
 }
-TABLE.mainrep .even .windows21_bioconductor_org {
+TABLE.mainrep .even .windows2_bioconductor_org {
     background: #C98;
 }
 
