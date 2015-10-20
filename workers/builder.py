@@ -18,9 +18,10 @@ import atexit
 from stompy import Stomp
 import mechanize
 
-# need a better way to determine R version
+# FIXME get this from config.yaml
 bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
-    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2", "3.2": "3.2"} 
+    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1",
+    "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"} 
 
 
 class Tailer(threading.Thread):

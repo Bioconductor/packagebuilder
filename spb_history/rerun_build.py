@@ -40,8 +40,10 @@ pkgname = segs[4]
 pkgname_bare = pkgname.split("_")[0]
 
 obj['force']  = True 
-obj['bioc_version'] = "3.2" # hardcode this?
-obj['r_version'] = "3.2" # hardcode this?
+#FIXME don't hardcode this
+obj['bioc_version'] = "3.3"
+# FIXME don't hardcode this
+obj['r_version'] = "3.3"
 obj['svn_url'] = url
 obj['repository'] = 'scratch'
 now = pacific.localize(now0)
