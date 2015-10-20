@@ -97,7 +97,8 @@ for (pkg in bootstrap_pkgs)
 install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 
 
-update.packages(repos=biocinstallRepos(), instlib=.libPaths()[1], ask=FALSE)
+update.packages(repos=biocinstallRepos(), lib.loc=bootstrap_libdir,
+    instlib=bootstrap_libdir, ask=FALSE)
 #####biocLite(ask=FALSE)
 
 getWarnings <- function(expr)
