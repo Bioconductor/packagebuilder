@@ -18,7 +18,7 @@ class Job(models.Model):
     time_started = models.DateTimeField()
     pkg_url = models.CharField(max_length=200)
     force = models.BooleanField()
-    client_id = models.CharField(max_length=30)
+    client_id = models.CharField(max_length=255)
     
     
     
