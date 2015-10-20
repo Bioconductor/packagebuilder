@@ -60,7 +60,8 @@ if(.Platform$pkgType == "mac.binary")
 }
 
 
-biocLite(c("graph", "biocViews", "knitr", "knitrBootstrap"))
+update.packages(c("graph", "biocViews", "knitr", "knitrBootstrap"),
+    lib.loc=.libPaths()[2], repos=biocinstallRepos())
 install_github("Bioconductor/BiocCheck")
 
 
