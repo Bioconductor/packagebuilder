@@ -35,8 +35,8 @@ stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 global tracker_base_url
 global build_counter
 build_counter = {}
-# bad hardcoding:
-hosts = ["linux1.bioconductor.org", "perceval", "windows1.bioconductor.org", "oaxaca"]
+# FIXME - get this from canonical source (config.yaml)
+hosts = ["linux2.bioconductor.org", "morelia", "windows2.bioconductor.org"]
 
 def handle_builder_event(obj):
     global build_counter
