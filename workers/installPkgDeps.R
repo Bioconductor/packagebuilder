@@ -60,9 +60,41 @@ if(.Platform$pkgType == "mac.binary")
 }
 
 
-update.packages(c("graph", "biocViews", "knitr", "knitrBootstrap"),
-    lib.loc=.libPaths()[2], repos=biocinstallRepos())
-install_github("Bioconductor/BiocCheck")
+major <- R.Version()$major
+minor <- strsplit(R.Version()$minor, ".", fixed=TRUE)[[1]][1]
+home <- path.expand("~")
+
+
+if (Sys.info()['sysname'] == "Darwin")
+{
+    bootstrap_libdir <- sprintf("~/Library/R/%s.%s/library",
+        major, minor)
+} else  if (.Platform$OS.type == "windows") {
+    bootstrap.libdir <- "C:/packagebuilder/R/library"
+} else { # linux
+    bootstrap_libdir <- file.path(home, 'R',
+        paste0(R.version$platform, '-library'),
+        sprintf("%s.%s", major, minor))
+}
+
+
+ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
+ip <- rownames(installed.packages(bootstrap_libdir))
+bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
+    "BiocCheck")
+
+for (pkg in bootstrap_pkgs)
+{
+    print(pkg)
+    av <- package_version(ap[pkg, "Version"])
+    if ((!pkg %in% ip) || packageVersion(pkg) < av)
+        install.packages(pkg, bootstrap_libdir,
+            repos=biocinstallRepos())
+}
+
+
+
+install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 
 
 update.packages(repos=biocinstallRepos(), instlib=.libPaths()[1], ask=FALSE)
