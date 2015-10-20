@@ -3,11 +3,11 @@ set packagebuilderhome=c:\packagebuilder
 set PACKAGEBUILDER_RSAKEY=c:/packagebuilder/.packagebuilder.private_key.rsa
 
 
-D:
-cd c:\biocbld\bbs\%2\bioc\windows1.bioconductor.org
+rem D:
+cd c:\biocbld\bbs\%2\bioc\windows2.bioconductor.org
 call config.bat
 
-D:
+rem D:
 cd %packagebuilderhome%
 
 set BBS_USER=pkgbuild
