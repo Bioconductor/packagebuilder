@@ -36,7 +36,7 @@ global tracker_base_url
 global build_counter
 build_counter = {}
 # FIXME - get this from canonical source (config.yaml)
-hosts = ["linux2.bioconductor.org", "morelia", "windows2.bioconductor.org"]
+hosts = ["zin2", "morelia", "moscato2"]
 
 def handle_builder_event(obj):
     global build_counter
