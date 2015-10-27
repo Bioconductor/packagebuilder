@@ -94,7 +94,7 @@ for (pkg in bootstrap_pkgs)
             repos=biocinstallRepos())
 }
 
-library(devtools)
+library(devtools, lib.loc=bootstrap_libdir)
 
 
 install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
