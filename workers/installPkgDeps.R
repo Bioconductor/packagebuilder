@@ -44,10 +44,7 @@ bioc_version <- as.character(BiocInstaller:::BIOC_VERSION)
 repos <- c(biocinstallRepos(), paste("http://bioconductor.org/scratch-repos",
     bioc_version, sep="/"))
 
-if(!require(codetools)) biocLite("codetools", type="source")
-if(!require(devtools)) biocLite("devtools")
 
-library(devtools)
 newrepos <- getOption("repos")
 newrepos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=newrepos)
@@ -86,7 +83,7 @@ if (Sys.info()['sysname'] == "Darwin")
 ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
 ip <- rownames(installed.packages())
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
-    "BiocCheck", "devtools")
+    "BiocCheck", "devtools", "codetools")
 
 for (pkg in bootstrap_pkgs)
 {
@@ -97,6 +94,7 @@ for (pkg in bootstrap_pkgs)
             repos=biocinstallRepos())
 }
 
+library(devtools)
 
 
 install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
