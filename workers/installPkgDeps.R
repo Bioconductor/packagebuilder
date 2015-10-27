@@ -98,6 +98,10 @@ library(devtools, lib.loc=bootstrap_libdir)
 library(httr, lib.loc=bootstrap_libdir)
 library(curl, lib.loc=bootstrap_libdir)
 
+old.libPaths <- .libPaths()
+
+.libPaths(c(.libPaths(), bootstrap_libdir))
+
 
 install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 
@@ -105,6 +109,9 @@ install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 update.packages(repos=biocinstallRepos(), lib.loc=bootstrap_libdir,
     instlib=bootstrap_libdir, ask=FALSE)
 #####biocLite(ask=FALSE)
+
+
+.libPaths(old.libPaths)
 
 getWarnings <- function(expr)
 {
