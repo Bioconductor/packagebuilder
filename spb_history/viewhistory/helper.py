@@ -41,7 +41,7 @@ def filter_out_wrong_versions(builds, job):
     # FIXME get this info from a central source (config.yaml)
     if (r_ver == "3.3"):
         if bioc_version == "3.3":
-            nodes = ["linux2.bioconductor.org", "windows2.bioconductor.org", "morelia"]
+            nodes = ["zin2", "moscato2", "morelia"]
     if (r_ver == "3.2"):
         if bioc_version == "3.1":
             nodes = ["zin2", "petty", "moscato2", "morelia"]
