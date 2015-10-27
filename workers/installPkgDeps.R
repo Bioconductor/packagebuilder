@@ -95,6 +95,8 @@ for (pkg in bootstrap_pkgs)
 }
 
 library(devtools, lib.loc=bootstrap_libdir)
+library(httr, lib.loc=bootstrap_libdir)
+library(curl, lib.loc=bootstrap_libdir)
 
 
 install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
