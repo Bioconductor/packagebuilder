@@ -83,7 +83,7 @@ if (Sys.info()['sysname'] == "Darwin")
 ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
 ip <- rownames(installed.packages())
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
-    "BiocCheck", "devtools", "codetools")
+    "BiocCheck", "devtools", "codetools", "httr")
 
 for (pkg in bootstrap_pkgs)
 {
