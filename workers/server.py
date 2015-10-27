@@ -9,6 +9,7 @@ import tempfile
 import os
 import subprocess
 import platform
+import uuid
 from stompy import Stomp
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 builder_id = builder_id.replace(".local", "")
@@ -21,7 +22,7 @@ try:
     stomp = Stomp("broker.bioconductor.org", 61613)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
-    stomp.connect(clientid=builder_id)
+    stomp.connect(clientid=uuid.uuid4().hex)
 except:
     print("Cannot connect")
     raise
