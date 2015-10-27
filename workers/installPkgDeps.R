@@ -72,8 +72,8 @@ if (Sys.info()['sysname'] == "Darwin")
 } else if (.Platform$OS.type == "windows") 
 {
     pkgbuilderHome <- Sys.getenv("PACKAGEBUILDER_HOME")
-    pkgbuilderHome <- gsub(gsub("\\", "/", pkgbuilderHome,
-        fixed=TRUE))
+    pkgbuilderHome <- gsub("\\", "/", pkgbuilderHome,
+        fixed=TRUE)
     bootstrap_libdir <- file.path(pkgbuilderHome, "R", "library")
 } else 
 { # linux
