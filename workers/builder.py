@@ -242,9 +242,9 @@ def setup():
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
     
     if (platform.system() == "Windows"):
-        packagebuilder_scp_cmd = "c:/cygwin64/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
+        packagebuilder_scp_cmd = "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
             os.environ["PACKAGEBUILDER_RSAKEY"]
-        packagebuilder_ssh_cmd = "c:/cygwin64/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
+        packagebuilder_ssh_cmd = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
             os.environ["PACKAGEBUILDER_RSAKEY"]
 
     
@@ -758,7 +758,7 @@ def propagate_package():
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
     
     if (platform.system() == "Windows"):
-        retcode = subprocess.call("c:/cygwin64/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'rm -f %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"], 
+        retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'rm -f %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"], 
           repos, package_name))
     else:
         retcode = ssh("rm -f %s" % files_to_delete)
@@ -774,11 +774,11 @@ def propagate_package():
         print("chmod_retcode = %d" % chmod_retcode)
         send_message({"status": "chmod_retcode", "body": \
           "chmod_retcode=%d" % chmod_retcode, "retcode": chmod_retcode})
-        command = "c:/cygwin64/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@staging.bioconductor.org:%s/" % (os.environ["PACKAGEBUILDER_HOME"],
+        command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@staging.bioconductor.org:%s/" % (os.environ["PACKAGEBUILDER_HOME"],
           build_product, repos)
         print("command = %s" % command)
         retcode = subprocess.call(command)
-        remote_chmod_retcode = subprocess.call("c:/cygwin64/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'chmod a+r %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"],
+        remote_chmod_retcode = subprocess.call("c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'chmod a+r %s/%s_*.zip'" % (os.environ["PACKAGEBUILDER_HOME"],
           repos, package_name))
         print("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
