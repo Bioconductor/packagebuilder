@@ -1,8 +1,8 @@
 Bioconductor Single Package Builder 
 ====================================
 
-Can be found in this Subversion repository:
-https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/admin/build/packagebuilder/
+Can be found in this Github repository:
+https://github.com/Bioconductor/packagebuilder
 
 Consists of three main components in three top-level directories:
 
