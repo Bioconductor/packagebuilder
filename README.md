@@ -284,7 +284,7 @@ An example URL is:
 So now with these two pieces of information you
 can restart an SPB build as follows:
 
-python rerun_build.py 558 https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz
+    python rerun_build.py 558 https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz
 
 You can then monitor the build by going to 
 [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)
