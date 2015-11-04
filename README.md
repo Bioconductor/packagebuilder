@@ -6,21 +6,23 @@ https://github.com/Bioconductor/packagebuilder
 
 Consists of three main components in three top-level directories:
 
-node - a web application written in node.js (server-side Javascript based on V8).
-  Accessible at http://staging.bioconductor.org:8000
-spb_history - a Django/Python web application that tracks build history
-  (eventually will be) Accessible at http://staging.bioconductor.org:4000
-workers - python scripts that run on each build machine
+* node - a web application written in node.js (server-side Javascript based on V8). Currently disabled. Formerly
+  accessible at http://staging.bioconductor.org:4000
+* spb_history - a Django/Python web application that tracks build history
+  Accessible at http://staging.bioconductor.org:4000
+* workers - python scripts that run on each build machine
 
 Overview
 ========
 
-The user interacts with the web application written in node.js to kick off
-build jobs. The web application sends messages via ActiveMQ (a Java-based
+Build jobs are kicked off by 1) submitting tarballs to the tracker,
+2) running the spb_history/rerun_build.py script, or 3) using
+the node.js gui front end (which is currently disabled).
+These all send messages via ActiveMQ (a Java-based
 messaging framework) to listeners on each build machine. The build machines
-start building the package and send back progress messages to the web
-pplication, which can display them in real time without page reloading
-or Ajax. (This is why node.js is used, because it supports web sockets,
+start building the package and send back progress messages.
+If using the (currently disabled) node.js web app, these messages
+are displayed on receipt without page reloading or Ajax. (This is why node.js is used, because it supports web sockets,
 full duplex communication, not just request/response.)
 
 The spb_history web application is simply another listener that writes
