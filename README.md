@@ -25,8 +25,11 @@ If using the (currently disabled) node.js web app, these messages
 are displayed on receipt without page reloading or Ajax. (This is why node.js is used, because it supports web sockets,
 full duplex communication, not just request/response.)
 
-The spb_history web application is simply another listener that writes
-all build events to a database.
+
+There is another listener (called archiver.py) which
+writes build events to a database, where they can 
+then be displayed by the spb_history web application
+(written in Python's Django framework).
 
 Where possible, the code uses existing code from the Bioconductor Build
 System (BBS). In particular, it uses BBS scripts to set environment variables
