@@ -85,8 +85,10 @@ The tracker lives on habu at
 www-data@habu:/var/www-trackers/bioc_submit
 The tracker code is in sourceforge (mercurial) at:
 https://sourceforge.net/u/dtenenba/roundup-bioc/ci/default/tree/
-The reactor will be migrated here (FIXME: do this):
-https://hedgehog.fhcrc.org/bioconductor/trunk/bioC/Projects/bioc_submit_tracker/detectors/builder_reactor.py
+
+The reactor is here:
+https://github.com/dtenenba/bioc_submit/blob/master/detectors/builder2_reactor.py
+
 
 Integration Workflow
 --------------------
