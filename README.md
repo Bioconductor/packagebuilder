@@ -56,8 +56,8 @@ On the build machines, the listeners run as the user 'pkgbuild'
 
 On Mac and Linux, the listeners are started as follows:
 
-cd ~/packagebuilder
-nohup python server.py > server.log 2>&1 &
+    cd ~/packagebuilder
+    nohup python server.py > server.log 2>&1 &
 
 On Windows, the listener is configured as a service (called
 BioC Single Package Builder) which can be restarted under
