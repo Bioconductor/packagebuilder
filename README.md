@@ -291,3 +291,11 @@ You can then monitor the build by going to
 and then navigating to the package and latest build. You can
 periodically refresh the page to see progress.
 
+You might wonder why you have to ssh to staging.biooconductor.org
+to run this script. Seemingly you should be able to check out
+and run the rerun_build.py script on your own machine.
+The reason is that not every machine has access to the 
+security group under which the ActiveMQ broker runs. 
+You can give your IP (or subnet) access to this
+group [here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=stomp;sort=Name).
+
