@@ -181,8 +181,8 @@ Here are the moving parts, first briefly and then in more detail.
 ### Unix Nodes
 
  For unix nodes (Linux and Mac) you should `ssh` to
- the build node as the `pkgbuild` user; (the "credentials")
- Google Doc can tell you how to do this.
+ the build node as the `pkgbuild` user; (the "credentials"
+ Google Doc can tell you how to do this).
 
  You should `cd` to the `~/packagebuilder` directory.
  Then do this to see if the `server.py` script is running:
@@ -301,4 +301,5 @@ The reason is that not every machine has access to the
 security group under which the ActiveMQ broker runs. 
 You can give your IP (or subnet) access to this
 group [here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=stomp;sort=Name).
+You need to enable TCP access on port 61613 (the STOMP port).
 
