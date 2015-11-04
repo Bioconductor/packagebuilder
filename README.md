@@ -176,7 +176,7 @@ Here are the moving parts, first briefly and then in more detail.
  more build nodes are not responding, you probably need to
  restart the listener (server.py) on those nodes (see next section).
 
- # Restarting listeners on build nodes
+## Restarting listeners on build nodes
 
 ### Unix Nodes
 
