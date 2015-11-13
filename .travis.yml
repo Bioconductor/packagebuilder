@@ -1,0 +1,17 @@
+# This configuration is only meant to do some 
+# linting of the code.  It's based in part, on
+# this blog: http://cramer.io/2012/05/03/using-travis-ci/
+#
+# More code should be analyzed, but for now
+# server.py and archiver.py seem most critical.
+language: python
+python: 
+  - "2.7"
+before_install:
+  - pip install pyflakes
+  - pyflakes workers/server.py spb_history/archiver.py
+script:
+  - python -c 'print "Finished static analysis"'
+notifications:
+  email:
+    - brian@bioconductor.org
