@@ -1,5 +1,6 @@
 Bioconductor Single Package Builder 
 ====================================
+[![Build Status](https://travis-ci.org/Bioconductor/packagebuilder.svg)](https://travis-ci.org/Bioconductor/packagebuilder)
 
 Can be found in this Github repository:
 https://github.com/Bioconductor/packagebuilder
