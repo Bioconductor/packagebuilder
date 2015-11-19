@@ -49,12 +49,7 @@ newrepos <- getOption("repos")
 newrepos["CRAN"] <- "http://cran.fhcrc.org"
 options(repos=newrepos)
 
-if(.Platform$pkgType == "mac.binary")
-{
-    options(install.packages.compile.from.source="never")
-} else {
-    options(install.packages.compile.from.source="always")
-}
+options(install.packages.compile.from.source="always")
 
 
 major <- R.Version()$major
