@@ -103,7 +103,7 @@ class MyListener(stomp.ConnectionListener):
             msg_obj['client_id'] = received_obj['client_id']
             msg_obj['bioc_version'] = bioc_version
             json_str = json.dumps(msg_obj)
-            this_frame = stomp.send(destination="/topic/builderevents", body=json_str, persistent="true")
+            this_frame = stomp.send(destination="/topic/builderevents", body=json_str, headers={"persistent": "true"})
             logMsg("Receipt: %s" % this_frame.headers.get('receipt-id'))
             sys.stdout.flush()
         else:
