@@ -8,12 +8,9 @@ import os
 import subprocess
 import platform
 import uuid
-
-# Stomp client imports
 import stomp
-import stomp.exception as exception
-import stomp.utils as utils
 
+waitingCounter=0
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 builder_id = builder_id.replace(".local", "")
@@ -24,7 +21,7 @@ builder_id = builder_id.replace(".local", "")
 # TODO: Replace with a logging framework
 def logMsg(msg):
     print "[%s] %s" % (datetime.datetime.now(), msg)
-
+    sys.stdout.flush()
 
 # TODO: Name the callback for it's functionality, not usage.  This seems like it's as
 #       useful as 'myFunction' or 'myMethod'.  Why not describe capability provided ?
@@ -103,11 +100,8 @@ class MyListener(stomp.ConnectionListener):
             msg_obj['client_id'] = received_obj['client_id']
             msg_obj['bioc_version'] = bioc_version
             json_str = json.dumps(msg_obj)
-            this_frame = stomp.send({'destination': "/topic/builderevents",
-              'body': json_str,
-              'persistent': 'true'})
-            logMsg("Receipt: %s" % this_frame.headers.get('receipt-id'))
-            sys.stdout.flush()
+            stomp.send(destination="/topic/builderevents", body=json_str, headers={"persistent": "true"})
+            # logMsg("Receipt: %s" % this_frame.headers.get('receipt-id'))
         else:
             logMsg("Invalid JSON (missing job_id key)")
             sys.stdout.flush()
@@ -179,5 +173,9 @@ logMsg(' [*] Waiting for messages. To exit press CTRL+C')
 sys.stdout.flush()
 
 while True:
-    logMsg("Waiting to do work ... ")
+    waitingCounter+=1
+
+    if (waitingCounter % 20 == 0):
+        logMsg("Waiting to do work ... ")
+
     time.sleep(15)
