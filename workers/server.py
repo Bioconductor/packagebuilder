@@ -19,10 +19,14 @@ def logMsg(msg):
     print "[%s] %s" % (datetime.datetime.now(), msg)
 
 try:
-    stomp = Stomp("broker.bioconductor.org", 61613)
+    stompBroker="broker.bioconductor.org"
+    stompBrokerPort=61613
+    logMsg("Attempting to connect to stomp broker '%s:%s'" % (stompBroker, stompBrokerPort))
+    stomp = Stomp(stompBroker, stompBrokerPort)
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect(clientid=uuid.uuid4().hex)
+    logMsg("Connected to stomp broker '%s:%s'" % (stompBroker, stompBrokerPort))
 except:
     logMsg("Cannot connect")
     raise
