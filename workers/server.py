@@ -27,8 +27,8 @@ try:
     # stomp.connect(username="user", password="pass")
     stomp.connect(clientid=uuid.uuid4().hex)
     logMsg("Connected to stomp broker '%s:%s'" % (stompBroker, stompBrokerPort))
-except:
-    logMsg("Cannot connect")
+except (stomp.ConnectionError, stomp.ConnectionTimeoutError) as e:
+    logMsg("Error connecting to ActiveMQ.  Error: %s" % e)
     raise
 
 stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
