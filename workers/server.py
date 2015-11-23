@@ -8,12 +8,9 @@ import os
 import subprocess
 import platform
 import uuid
-
-# Stomp client imports
 import stomp
-import stomp.exception as exception
-import stomp.utils as utils
 
+waitingCounter=0
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 builder_id = builder_id.replace(".local", "")
@@ -176,5 +173,9 @@ logMsg(' [*] Waiting for messages. To exit press CTRL+C')
 sys.stdout.flush()
 
 while True:
-    logMsg("Waiting to do work ... ")
+    waitingCounter+=1
+
+    if (waitingCounter % 20 == 0):
+        logMsg("Waiting to do work ... ")
+
     time.sleep(15)
