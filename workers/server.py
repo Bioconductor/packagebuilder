@@ -4,8 +4,6 @@
 
 import sys
 import json
-import time
-import tempfile
 import os
 import subprocess
 import platform
