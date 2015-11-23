@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-
-
+import datetime
 import sys
 import json
 import os
@@ -15,6 +14,9 @@ builder_id = builder_id.replace(".local", "")
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 builder_id = builder_id.replace(".local", "")
 
+# TODO: Replace with a logging framework
+def logMsg(msg):
+    print "[%s] %s" % (datetime.datetime.now(), msg)
 
 try:
     stomp = Stomp("broker.bioconductor.org", 61613)
@@ -22,7 +24,7 @@ try:
     # stomp.connect(username="user", password="pass")
     stomp.connect(clientid=uuid.uuid4().hex)
 except:
-    print("Cannot connect")
+    logMsg("Cannot connect")
     raise
 
 stomp.subscribe({'destination': "/topic/buildjobs", 'ack': 'client'})
@@ -48,7 +50,7 @@ if (builder_id.lower().startswith("dhcp") or \
     if ("PACKAGEBUILDER_HOST" in os.environ.keys()):
         builder_id = os.environ["PACKAGEBUILDER_HOST"]
     else:
-        print "who ami i?"
+        logMsg("who ami i?")
         raise
 
 shell_ext = None
@@ -69,7 +71,7 @@ bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16",
 "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"}
 
 
-print ' [*] Waiting for messages. To exit press CTRL+C'
+logMsg(' [*] Waiting for messages. To exit press CTRL+C')
 sys.stdout.flush()
 
 # TODO: Name the callback for it's functionality, not usage.  This seems like it's as
@@ -81,11 +83,11 @@ def callback(body):
     global r_bioc_map
     global shell_ext
     global packagebuilder_home
-    print " [x] Received %r" % (body,)
+    logMsg(" [x] Received %r" % (body,))
     try:
         received_obj = json.loads(body)
     except ValueError:
-        print("Caught Value error, not a valid JSON object?")
+        logMsg("Caught Value error, not a valid JSON object?")
         sys.stdout.flush()
         return()
     if('job_id' in received_obj.keys()): # ignore malformed messages
@@ -101,15 +103,15 @@ def callback(body):
         r_libs_dir = os.path.join(job_dir, "R-libs")
         if (not os.path.exists(r_libs_dir)):
             os.mkdir(r_libs_dir)
-        
+
         jobfilename = os.path.join(packagebuilder_home, job_dir, "manifest.json")
-        
+
         jobfile = open(jobfilename, "w")
         jobfile.write(body)
         jobfile.close
-        print "Wrote job info to %s." % jobfilename
+        logMsg("Wrote job info to %s." % jobfilename)
         shell_cmd = os.path.join(packagebuilder_home, "%s%s" % (builder_id, shell_ext))
-        print "shell_cmd = %s" % shell_cmd
+        logMsg("shell_cmd = %s" % shell_cmd)
         builder_log = open(os.path.join(job_dir, "builder.log"), "w")
         pid = subprocess.Popen([shell_cmd,jobfilename, bioc_version,],
             stdout=builder_log, stderr=subprocess.STDOUT).pid # todo - somehow close builder_log filehandle if possible
@@ -124,10 +126,10 @@ def callback(body):
         this_frame = stomp.send({'destination': "/topic/builderevents",
           'body': json_str,
           'persistent': 'true'})
-        print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+        logMsg("Receipt: %s" % this_frame.headers.get('receipt-id'))
         sys.stdout.flush()
     else:
-        print("Invalid JSON (missing job_id key)")
+        logMsg("Invalid JSON (missing job_id key)")
         sys.stdout.flush()
 
 while True:
@@ -140,4 +142,3 @@ while True:
     except KeyboardInterrupt:
         stomp.disconnect()
         break
-
