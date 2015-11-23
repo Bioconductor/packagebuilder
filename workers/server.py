@@ -57,9 +57,12 @@ if (platform.system() == "Darwin" or platform.system() == "Linux"):
 else:
     shell_ext = ".bat"
 
-# FIXME get this info from config.yaml
+# FIXME Get this information dynamically.  Consider bioc-cm or
+#       master.bioconductor.org/config.yaml
+#
+# FIXME: Name the next two variables more clearly.  Their names seeem cryptic.
 r_bioc_map = {"2.12": "2.7", "2.13": "2.8", "2.14": "2.9",
-  "2.15": "2.10", "3.1": "3.0", "3.2": "3.2", "3.3": "3.3"} 
+  "2.15": "2.10", "3.1": "3.0", "3.2": "3.2", "3.3": "3.3"}
 
 bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16",
 "2.13": "2.16", "2.14": "3.1", "3.0": "3.1",
@@ -69,8 +72,12 @@ bioc_r_map = {"2.10": "2.15", "2.11": "2.15", "2.12": "2.16",
 print ' [*] Waiting for messages. To exit press CTRL+C'
 sys.stdout.flush()
 
-
+# TODO: Name the callback for it's functionality, not usage.  This seems like it's as
+#       useful as 'myFunction' or 'myMethod'.  Why not describe capability provided ?
 def callback(body):
+    # FIXME : The maps defined above seem to be an anti-pattern.  Also, it's very odd
+    #           IMHO that we're invoking 'global' here.  The variable is in scope and
+    #           we're not attempting any read or assignment.
     global r_bioc_map
     global shell_ext
     global packagebuilder_home
