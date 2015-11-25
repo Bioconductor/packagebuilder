@@ -39,6 +39,7 @@ try:
     stomp.connect()
 except:
     print("Cannot connect")
+    sys.stdout.flush()
     raise
 
 # do we want acks?
@@ -136,6 +137,7 @@ def handle_complete(obj, build_obj):
     else:
         result = "ERROR"
     print("in handle_complete(), status is %s and result is %s." % (obj['status'], result))
+    sys.stdout.flush()
     if (obj['status'] == 'build_complete'):
         build_obj.buildsrc_result = result
         if result == "ERROR":
@@ -168,16 +170,20 @@ def handle_builder_event(obj):
             parent_job = Job.objects.get(job_id=job_id)
         except Job.DoesNotExist:
             print("No parent job for %s; ignoring message." % job_id)
+            sys.stdout.flush()
             return()
         except Job.MultipleObjectsReturned:
             print("Multiple objects returned!")
+            sys.stdout.flush()
             return()
     else:
         print("Malformed message, ignoring it.")
+        sys.stdout.flush()
         return
     build_obj = None
     if(obj.has_key('first_message') and obj['first_message'] == True):
         print("handling first message")
+        sys.stdout.flush()
         build_obj = handle_first_message(obj, parent_job)
     if (obj.has_key('status')):
         status = obj['status']
@@ -186,9 +192,11 @@ def handle_builder_event(obj):
             build_obj = get_build_obj(obj)
         except Exception as e:
             print "Caught  exception: ", e
+            sys.stdout.flush()
             return
         if (status == 'dcf_info'):
             print("handling dcf info")
+            sys.stdout.flush()
             handle_dcf_info(obj, build_obj)
         elif (status in phases):
             if obj['status'] == 'post_processing':
@@ -246,8 +254,10 @@ def handle_builder_event(obj):
             build_obj.save()
         else:
             print("ignoring message:%s" % obj)
+            sys.stdout.flush()
     else:
         print("invalid message, no 'status' key: %s" % obj)
+        sys.stdout.flush()
         # svn_result,
         # clear_check_console, starting_check,
         # starting_buildbin, svn_info,
@@ -268,31 +278,56 @@ def callback(body, destination):
     sys.stdout.flush() ## make sure we see everything
     received_obj = None
     if not is_connection_usable():
+        print("Closing connection")
+        sys.stdout.flush()
         connection.close()
     try:
+        print("Parsing JSON")
+        sys.stdout.flush()
         received_obj = json.loads(body)
     except ValueError as e:
         print("!!!Received invalid JSON!!!")
+        sys.stdout.flush()
         print("Invalid json was: %s" % body)
+        sys.stdout.flush()
         return
     if('job_id' in received_obj.keys()): 
+        print("Checking destination")
+        sys.stdout.flush()
         if (destination == '/topic/buildjobs'):
+            print("Invoking handle_job_start")
+            sys.stdout.flush()
             handle_job_start(received_obj)
         elif (destination == '/topic/builderevents'):
+            print("Invoking handle_builder_event")
+            sys.stdout.flush()
             handle_builder_event(received_obj)
         print("Destination: %s" % destination)
+        sys.stdout.flush()
     else:
         print("Invalid json (no job_id key)")
+        sys.stdout.flush()
 
 print("Waiting for messages...")
-
+sys.stdout.flush()
 while True:
     try:
+        print("Begin while(true) loop.")
+        sys.stdout.flush()
         frame = stomp.receive_frame()
+        print("Got frame")
+        sys.stdout.flush()
         stomp.ack(frame) # do this?
+        print("Frame acknowledged")
+        sys.stdout.flush()
         callback(frame.body, frame.headers.get('destination'))
+        print("Callback finished")
+        sys.stdout.flush()
     except KeyboardInterrupt:
+        print("KeyboardInterrupt")
+        sys.stdout.flush()
         stomp.disconnect()
         break
 
-
+print("Exiting")
+sys.stdout.flush()
