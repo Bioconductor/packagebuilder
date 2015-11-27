@@ -16,11 +16,16 @@ import unicodedata
 import atexit
 from stompy import Stomp
 import mechanize
+import logging
 
 # FIXME get this from config.yaml
-bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
+BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
     "2.10": "2.15", "2.14": "3.1", "3.0": "3.1",
     "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"} 
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
 
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
@@ -37,7 +42,6 @@ class Tailer(threading.Thread):
         prevsize = 0
         while 1:
             time.sleep(0.2)
-            #print ("in tail loop (%s)" % self.status)
             print ".",
             if not os.path.isfile(self.filename):
                 continue
@@ -46,43 +50,45 @@ class Tailer(threading.Thread):
                 continue
             
             if self.stopped():
-                print ("stopped() == True (%s)" % self.status)
+                logging.info("stopped() == True (%s)" % self.status)
                 if (st.st_size == 0):
-                    print("0 bytes in output file, exiting tailer...")
+                    logging.debug("0 bytes in output file, exiting tailer...")
                     return()
                 num_bytes_to_read = st.st_size - prevsize
-                print("num_bytes_to_read == %d" % num_bytes_to_read)
+                logging.debug("num_bytes_to_read == %d" % num_bytes_to_read)
                 if (num_bytes_to_read == 0):
-                    print("0 bytes remaining to read, exiting tailer...")
+                    logging.debug("0 bytes to read, exiting tailer...")
                     return()
                 
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                print bytes,
-                sys.stdout.flush()
-                send_message({"status": self.status,
-                              "sequence": self.message_sequence, "body": bytes})
+                logging.debug("read %d bytes", bytes)
+                send_message({
+                    "status": self.status,
+                    "sequence": self.message_sequence,
+                    "body": bytes
+                })
                 prevsize = st.st_size
-                print "Thread says I'm done %s" % self.status
+                logging.info("Thread says I'm done %s" % self.status)
                 break
                 # not needed here but might be needed if program was
                 # to continue doing other stuff and we wanted the
                 # thread to exit
             
-            #if (st.st_size > 0):
-            #    print("st.st_size = %d, prevsize = %s" % (st.st_size, prevsize))
             if (st.st_size > 0) and (st.st_size > prevsize):
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                print bytes,
-                sys.stdout.flush()
-                send_message({"status": self.status,
-                              "sequence": self.message_sequence, "body": bytes})
+                logging.debug("read %d bytes", bytes)
+                send_message({
+                    "status": self.status,
+                    "sequence": self.message_sequence,
+                    "body": bytes
+                })
                 self.message_sequence += 1
                 prevsize = st.st_size
 
@@ -111,15 +117,13 @@ def send_message(msg, status=None):
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
     json_str = json.dumps(merged_dict)
-    print "sending message:"
-    print json_str
-    print
+    logging.info("sending message: %s" % json_str)
     this_frame = stomp.send({
         'destination': "/topic/builderevents",
         'body': json_str,
         'persistent': 'true'
     })
-    print("Receipt: %s" % this_frame.headers.get('receipt-id'))
+    logging.info("Receipt: %s" % this_frame.headers.get('receipt-id'))
 
 def send_dcf_info(dcf_file):
     try:
@@ -141,9 +145,11 @@ def is_build_required(manifest):
     
     if (is_svn_package()):
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-        print "description_url = " + description_url
-        print "svn_user ="  + os.getenv("SVN_USER")
-        print "svn_pass = " + os.getenv("SVN_PASS")
+        logging.info(
+            "is_build_required()" +
+            " description_url = " + description_url +
+            " svn_user ="  + os.getenv("SVN_USER") +
+            " svn_pass = " + os.getenv("SVN_PASS"))
         try:
             description = subprocess.Popen([
                 "curl", "-k", "-s", "--user", "%s:%s" %
@@ -152,11 +158,11 @@ def is_build_required(manifest):
             ], stdout=subprocess.PIPE).communicate()[0]
             # TODO - handle it if description does not exist
         except:
-            print "Unexpected error:", sys.exc_info()[0]
-        
-        print "debug -- description ="
-        print description
-        print "description length = %d" % len(description)
+            logging.error("Unexpected error in is_build_required(): %s",
+                          sys.exc_info()[0])
+
+        logging.debug("description = %s; length = %d" %
+                      (description, len(description)))
         
         dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
         send_dcf_info(dcf_file)
@@ -173,7 +179,7 @@ def is_build_required(manifest):
         if (manifest['force'] == True):
             return(True)
         
-    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
+    r_version = BIOC_R_MAP[os.getenv("BBS_BIOC_VERSION")]
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     
     cran_repo_map = {
@@ -204,8 +210,8 @@ def is_build_required(manifest):
             break
     if not repository_version:
         return True # package hasn't been pushed to repo before
-    print "[%s] svn version is %s, repository version is %s" % \
-        (package_name, svn_version, repository_version)
+    logging.info("[%s] svn version is %s, repository version is %s" %
+                 (package_name, svn_version, repository_version))
     return(svn_version != repository_version)
 
 def setup():
@@ -217,6 +223,7 @@ def setup():
         packagebuilder_rsync_rsh_cmd, packagebuilder_scp_cmd
     global callcount
     global builder_id
+    logging.info("setup() Starting.")
     
     builder_id = os.getenv("BBS_NODE")
     if builder_id is None:
@@ -245,25 +252,29 @@ def setup():
         packagebuilder_ssh_cmd = \
             "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
             os.environ["PACKAGEBUILDER_RSAKEY"]
-    
-    print("argument is %s" % sys.argv[1])
-    print("cwd is %s" % os.getcwd())
-    print("does %s exist? %s" % (sys.argv[1], os.path.exists(sys.argv[1])))
-    print("size of %s: %d" % (sys.argv[1], os.stat(sys.argv[1]).st_size))
+
+    logging.debug("\n    argument is %s" % sys.argv[1] + 
+                  "\n    cwd is %s" % os.getcwd() + 
+                  "\n    does %s exist? %s" % (
+                      sys.argv[1], os.path.exists(sys.argv[1])) +
+                  "\n    size of %s: %d" % (
+                      sys.argv[1], os.stat(sys.argv[1]).st_size))
+
     timeout = 10
     i = 0
     while (os.stat(sys.argv[1]).st_size == 0):
-        print("manifest file is empty, waiting...")
+        logging.debug("manifest file is empty, waiting...")
         time.sleep(1)
         i += 1
         if i == timeout:
+            logging.warning("setup() timeout -- empty manifest file")
             # todo - send a message and do something with it
             break
     time.sleep(1)
     manifest_fh = open(sys.argv[1], "r")
     manifest_json = manifest_fh.read()
     manifest_fh.close()
-    print("manifest_json is %s" % manifest_json)
+    logging.debug("manifest_json is %s" % manifest_json)
     manifest = json.loads(manifest_json)
     manifest['svn_url'] = manifest['svn_url'].strip()
     working_dir = os.path.split(sys.argv[1])[0]
@@ -273,7 +284,8 @@ def setup():
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + os.environ['BBS_R_HOME'] + os.sep + \
         "bin"
-    print("working dir is %s" % working_dir)
+    logging.debug("working dir is %s" % working_dir)
+    logging.info("setup() Finished.")
 
 def setup_stomp():
     global stomp
@@ -283,7 +295,7 @@ def setup_stomp():
         # stomp.connect(username="user", password="pass")
         stomp.connect()
     except:
-        print("Cannot connect")
+        logging.error("setup_stomp(): Cannot connect")
         raise
 
 def svn_export():
@@ -326,7 +338,7 @@ def extract_tarball():
         retcode = 0
     except:
         retcode = 255
-        print("Got an exception trying to download file: %s" % ex.message)
+        logging.error("Exception downloading file: %s" % ex.message)
         # retcode = ex.message
 
     send_message({"status": "post_processing", "retcode": retcode, "body": \
@@ -380,11 +392,13 @@ def install_pkg_deps():
         "status": "preprocessing",
         "retcode": 0
     })
-    print("command to install dependencies:")
-    print(cmd)
+    logging.debug("Command to install dependencies:\n    %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
-    send_message({"body": "Result of installing dependencies: %d" % retcode,
-      "status": "post_processing", "retcode": retcode})
+    send_message({
+        "body": "Result of installing dependencies: %d" % retcode,
+        "status": "post_processing",
+        "retcode": retcode
+    })
     return retcode
 
 def get_source_tarball_name():
@@ -484,10 +498,11 @@ def win_multiarch_buildbin(message_stream):
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
         retcode = _call("rm -rf %s" % libdir, False)
-    print("does %s exist? %s" % (libdir, os.path.exists(libdir)))
+    logging.debug("Does %s exist? %s" % (libdir, os.path.exists(libdir)))
     if not (os.path.exists(libdir)):
         os.mkdir(libdir)
-    print("after mkdir: does %s exist? %s" % (libdir, os.path.exists(libdir)))
+    logging.debug("after mkdir: does %s exist? %s" %
+                  (libdir, os.path.exists(libdir)))
     time.sleep(1)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
       (os.getenv("BBS_R_CMD"), libdir, tarball)
@@ -535,7 +550,7 @@ def do_build(cmd, message_stream, source):
         os.remove(outfile)
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    print("starting build tailer with message %s." % message_stream)
+    logging.info("Starting do_build(); message %s." % message_stream)
     background = Tailer(outfile, message_stream)
     background.start()
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
@@ -550,10 +565,10 @@ def do_build(cmd, message_stream, source):
     background.stop()
     out_fh.close()
     
-    print("before joining background thread...")
+    logging.debug("Before joining background thread...")
     background.join()
-    print("after joining background thread...")
-    print "Done"
+    logging.debug("after joining background thread...")
+    logging.info("Done do_build()")
     return(retcode)
     
     
@@ -608,7 +623,7 @@ def build_package(source_build):
     else:
         status = "r_buildbin_cmd"
         outfile = "Rbuildbin.out"
-    print("before build, working dir is %s" % working_dir)
+    logging.debug("Before build, working dir is %s" % working_dir)
     
     if ((not source_build) and win_multiarch and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
@@ -648,11 +663,11 @@ def svn_info():
     #global manifest
     
     # todo - make more bulletproof 
-    print "svn_url is %s" % manifest['svn_url']
+    logging.debug("svn_info() svn_url is %s" % manifest['svn_url'])
     svn_info = subprocess.Popen([
         "svn", "info", manifest['svn_url']
     ], stdout=subprocess.PIPE).communicate()[0]
-    print("svn info is:\n%s" % svn_info)
+    logging.debug("svn_info() svn_info is:\n%s" % svn_info)
     dcf_records = dcf.DcfRecordParser(svn_info.rstrip().split("\n"))
     keys = ['Path', 'URL', 'Repository Root', 'Repository UUID', 'Revision',
             'Node Kind', 'Last Changed Author', 'Last Changed Rev',
@@ -673,7 +688,7 @@ def propagate_package():
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
     build_product = filter(lambda x: x.endswith(ext), files)[0]
-    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]    
+    r_version = BIOC_R_MAP[os.getenv("BBS_BIOC_VERSION")]    
     if (platform.system() == "Darwin"):
         os_seg = "bin/macosx/mavericks/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
@@ -709,7 +724,7 @@ def propagate_package():
     else:
         retcode = ssh("rm -f %s" % files_to_delete)
     
-    print("result of deleting files: %d" % retcode)
+    logging.debug("Result of deleting files: %d" % retcode)
     send_message({
         "body": "Pruning older packages from repository",
         "status": "post_processing",
@@ -719,10 +734,10 @@ def propagate_package():
         sys.exit("repos prune failed")
     
     if (platform.system() == "Windows"):
-        print("platform.system() == 'Windows', running chmod commands...")
+        logging.debug("platform.system() == 'Windows', running chmod")
         chmod_retcode = subprocess.call(
             "chmod a+r %s" % os.path.join(working_dir, package_name))
-        print("chmod_retcode = %d" % chmod_retcode)
+        logging.debug("chmod_retcode = %d" % chmod_retcode)
         send_message({
             "status": "chmod_retcode",
             "body": "chmod_retcode=%d" % chmod_retcode,
@@ -731,19 +746,19 @@ def propagate_package():
         command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@staging.bioconductor.org:%s/"
         command = command % (
             os.environ["PACKAGEBUILDER_HOME"], build_product, repos)
-        print("command = %s" % command)
+        logging.debug("command = %s" % command)
         retcode = subprocess.call(command)
         command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'chmod a+r %s/%s_*.zip'"
         command = command % (
             os.environ["PACKAGEBUILDER_HOME"], repos, package_name)
         remote_chmod_retcode = subprocess.call(command)
-        print("remote_chmod_retcode = %s" % remote_chmod_retcode)
+        logging.debug("remote_chmod_retcode = %s" % remote_chmod_retcode)
     else:
-        print("chmod code not run, because platform.system() == %s" %
-              platform.system())
+        logging.warning("chmod not run, platform.system() == %s" %
+                        platform.system())
         retcode = scp(build_product, repos)
     
-    print("result of copying file: %d" % retcode)
+    logging.debug("Result of copying file: %d" % retcode)
     send_message({
         "body": "Copied build file to repository",
         "status": "post_processing",
@@ -766,10 +781,10 @@ def _call(command_str, shell):
         
         callcount += 1
         # ignore shell arg
-        print("right before _call, command_str is")
+        logging.debug("Before _call, command_str is")
         command_str = str(command_str)
-        print("size = %d" % len(command_str))
-        print(command_str)
+        logging.debug("len(command_str) = %d; %s" %
+                      (len(command_str), command_str))
         retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh,
                                   stderr=stderr_fh)
         stdout_fh.close()
@@ -780,7 +795,7 @@ def _call(command_str, shell):
 
 def ssh(command, user='biocadmin', host='staging.bioconductor.org'):
     command = "%s %s@%s \"%s\"" % (packagebuilder_ssh_cmd, user, host, command)
-    print("ssh command: %s" % command)
+    logging.debug("ssh() command: %s" % command)
     retcode = _call([command], shell=True)
     return(retcode)
 
@@ -796,7 +811,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
         })
         if chmod_retcode != 0:
             sys.exit("chmod failed")
-        print("chmod retcode: %s" % chmod_retcode)
+        logging.debug("scp() chmod retcode: %s" % chmod_retcode)
         send_message({
             "status": "chmod_retcode",
             "body": "chmod_retcode=%d" % chmod_retcode,
@@ -807,13 +822,14 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
     else:
         command = "%s %s@%s:%s %s" % (
             packagebuilder_scp_cmd, user, host, src, dest)
-    print("scp command: %s" % command)
+    logging.debug("scp() command: %s" % command)
     retcode = _call([command], shell=True)
     
     return(retcode)
 
 def onexit():
     global svn_url_global
+    logging.info("onexit() autoexit.")
     send_message({
         "body": "builder.py exited",
         "status": "autoexit",
@@ -824,7 +840,7 @@ def onexit():
 def update_packages_file():
     global repos
     
-    r_version = bioc_r_map[os.getenv("BBS_BIOC_VERSION")]
+    r_version = BIOC_R_MAP[os.getenv("BBS_BIOC_VERSION")]
     if (platform.system() == "Darwin"):
         pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
         if pkg_type == "mac.binary.leopard":
@@ -854,10 +870,9 @@ def update_packages_file():
         pkg_type = "mac.binary"
     command = "%s biocadmin@staging.bioconductor.org 'R -f %s/update-repo.R --args %s %s'"
     command = command % (packagebuilder_ssh_cmd, script_loc, repos, pkg_type)
-    print("update packages command: ")
-    print(command)
+    logging.debug("update_packages_file() command: %s"  % command)
     retcode = subprocess.call(command, shell=True)
-    print "retcode for update packages: %d" % retcode
+    logging.debug("update_packages_file() retcode: %d" % retcode)
     send_message({
         "status": "post_processing",
         "retcode": retcode,
@@ -875,8 +890,7 @@ def update_packages_file():
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
         command = "%s biocadmin@staging.bioconductor.org \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\""
         command = command % packagebuilder_ssh_cmd
-        print("sync command = ")
-        print(command)
+        logging.debug("update_packages_file() sync command = %s" % command)
         retcode = subprocess.call(command, shell=True)
         send_message({
             "status": "post_processing",
@@ -901,7 +915,7 @@ def update_packages_file():
             "url": url})
         
 def get_r_version():
-    print("BBS_R_CMD == %s" % os.getenv("BBS_R_CMD"))
+    logging.debug("get_r_version() BBS_R_CMD == %s" % os.getenv("BBS_R_CMD"))
     r_version_raw, stderr = subprocess.Popen([
         os.getenv("BBS_R_CMD"),"--version"
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
@@ -947,7 +961,7 @@ def is_valid_url():
                 "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
                 description_url
             ], stdout=subprocess.PIPE).communicate()[0]
-            print ("possibly bogus svn output, trying again...")
+            logging.warning("is_valid_url() invalid svn output, trying again.")
             time.sleep(0.5)
             if (len(description) > 0):
                 break
@@ -965,8 +979,9 @@ def is_svn_package():
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
     if (len(sys.argv) < 2):
-        sys.exit("builder.py started without manifest file and R version arguments, exiting...")
-    print "Builder has been started"
+        logging.error("main() missing manifest and R version arguments")
+        sys.exit(1)
+    logging.info("Starting builder.py.")
 
     setup()
     atexit.register(onexit)
@@ -975,8 +990,7 @@ if __name__ == "__main__":
     bioc_version = os.getenv("BBS_BIOC_VERSION")
     
     if (wanted_bioc_version != bioc_version):
-        print("Can't build this package, we don't build BioC-%s." % \
-            manifest['bioc_version'])
+        logging.error("BioC-%s not supported." % manifest['bioc_version'])
         sys.exit(1)
 
     setup_stomp()
@@ -984,7 +998,11 @@ if __name__ == "__main__":
     send_message("Builder has been started")
     
     if not is_valid_url():
-        send_message({"status": "invalid_url", "body": "Invalid SVN url."})
+        send_message({
+            "status": "invalid_url",
+            "body": "Invalid SVN url."
+        })
+        logging.error("Invalid SVN url")
         sys.exit(0)
     
     get_node_info()
@@ -996,12 +1014,13 @@ if __name__ == "__main__":
         pkg_type = 'svn' if (is_svn_package()) else 'tarball'
         send_message({
             "status": "build_not_required",
-            "body": "Build not required (versions identical in %s and repository)." % pkg_type
+            "body": "Identical versions for %s." % pkg_type
         })
         send_message({
             "status": "normal_end",
-            "body": "Build process is ending normally."
+            "body": "Build not required."
         })
+        logging.info("Normal build completion; build not required.")
         sys.exit(0)
     
     if (is_svn_package()):
@@ -1011,6 +1030,7 @@ if __name__ == "__main__":
     
     result = install_pkg_deps()
     if (result != 0):
+        logging.error("install_pkg_deps() failed: %d" % result)
         sys.exit(0)
     
     result = build_package(True)
@@ -1026,6 +1046,12 @@ if __name__ == "__main__":
             body = "Build completed with warnings."
         else:
             body = "Build was successful."
+
+        send_message({
+            "status": "normal_end",
+            "body": body
+        })
+        logging.info("Normal build completion, %s" % body)
 
         # send_message({
         #     "status": "complete",
