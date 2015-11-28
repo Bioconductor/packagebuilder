@@ -46,7 +46,7 @@ if (builder_id.lower().startswith("dhcp") or \
     if ("PACKAGEBUILDER_HOST" in os.environ.keys()):
         builder_id = os.environ["PACKAGEBUILDER_HOST"]
     else:
-        logging.error("Who ami i?")
+        logging.error("main() Cannot determine who I am")
         raise
 shell_ext = ".bat"
 if (platform.system() == "Darwin" or platform.system() == "Linux"):
@@ -57,33 +57,33 @@ if (platform.system() == "Darwin" or platform.system() == "Linux"):
 # describe capability provided ?
 class MyListener(stomp.ConnectionListener):
     def on_connecting(self, host_and_port):
-        logging.debug('on_connecting %s %s' % host_and_port)
+        logging.debug('on_connecting() %s %s.' % host_and_port)
 
     def on_connected(self, headers, body):
-        logging.debug('on_connected %s %s' % (headers, body))
+        logging.debug('on_connected() %s %s.' % (headers, body))
 
     def on_disconnected(self):
-        logging.debug('on_disconnected')
+        logging.debug('on_disconnected().')
 
     def on_heartbeat_timeout(self):
-        logging.debug('on_heartbeat_timeout')
+        logging.debug('on_heartbeat_timeout().')
 
     def on_before_message(self, headers, body):
-        logging.debug('on_before_message %s %s' % (headers, body))
+        logging.debug('on_before_message() %s %s.' % (headers, body))
         return headers, body
 
     def on_receipt(self, headers, body):
-        logging.debug('on_receipt %s %s' % (headers, body))
+        logging.debug('on_receipt() %s %s.' % (headers, body))
 
     def on_send(self, frame):
-        logging.debug('on_send %s %s %s' %
+        logging.debug('on_send() %s %s %s.' %
                       (frame.cmd, frame.headers, frame.body))
 
     def on_heartbeat(self):
-        logging.debug('on_heartbeat')
+        logging.debug('on_heartbeat().')
 
     def on_error(self, headers, message):
-        logging.debug('received an error "%s"' % message)
+        logging.debug('on_error(): "%s".' % message)
 
     def on_message(self, headers, body):
         # FIXME : The maps defined above seem to be an anti-pattern.
@@ -93,11 +93,11 @@ class MyListener(stomp.ConnectionListener):
         global shell_ext
         global packagebuilder_home
 
-        logging.info("Received %r" % (body,))
+        logging.info("Message received in on_message(): %r." % (body,))
         try:
             received_obj = json.loads(body)
         except ValueError:
-            logging.error("Caught ValueError, not a valid JSON object?")
+            logging.error("on_message() ValueError: invalid JSON?")
             return()
         if ('job_id' in received_obj.keys()): # ignore malformed messages
             job_id = received_obj['job_id']
@@ -119,11 +119,11 @@ class MyListener(stomp.ConnectionListener):
             jobfile = open(jobfilename, "w")
             jobfile.write(body)
             jobfile.close
-            logging.debug("Wrote job info to %s." % jobfilename)
+            logging.debug("on_message() jobfilename = %s." % jobfilename)
 
             shell_cmd = os.path.join(packagebuilder_home,
                                      "%s%s" % (builder_id, shell_ext))
-            logging.debug("shell_cmd = %s" % shell_cmd)
+            logging.debug("on_message() shell_cmd = %s." % shell_cmd)
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
             pid = subprocess.Popen([shell_cmd, jobfilename, bioc_version,],
@@ -139,9 +139,10 @@ class MyListener(stomp.ConnectionListener):
             json_str = json.dumps(msg_obj)
             stomp.send(destination=DESTINATION['events'], body=json_str,
                        headers={"persistent": "true"})
-            logging.info("Sent %s" % this_frame.headers.get('receipt-id'))
+            logging.info("Sent message receipt-id in on_message(): %s" %
+                         this_frame.headers.get('receipt-id'))
         else:
-            logging.error("Invalid JSON (missing job_id key)")
+            logging.error("on_message() Invalid JSON: missing job_id key.")
 
         # Acknowledge that the message has been processed
         self.message_received = True
@@ -153,22 +154,21 @@ try:
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect() # clientid=uuid.uuid4().hex)
-    logging.info("Connected to host '%s:%s'" %
-                 (BROKER['host'], BROKER['port']))
+    logging.info("Connected to '%s:%s'." % (BROKER['host'], BROKER['port']))
     stomp.subscribe(destination=DESTINATION['jobs'], id=uuid.uuid4().hex,
                     ack='client')
     logging.info("Subscribed to destination %s" % DESTINATION['JOBS'])
 except Exception as e:
-    logging.error("Could not connect to ActiveMQ. %s" % e)
+    logging.error("main() Could not connect to ActiveMQ: %s." % e)
     raise
 
-logging.info('Waiting for messages. To exit press CTRL+C')
+logging.info('Waiting for messages; CTRL-C to exit.')
 
 waitingCounter = 0
 while True:
     waitingCounter += 1
     if (waitingCounter % 20 == 0):
-        logging.info("Waiting to do work ... ")
+        logging.debug("main() Waiting to do work.")
     time.sleep(15)
 
-logging.info("Done")
+logging.info("Done.")
