@@ -28,13 +28,10 @@ ENVIR = {
     'bbs_R_cmd': "",
     'bbs_Bioc_version': "",
 
-
-    'packagebuilder_host': "",
     'packagebuilder_home': "",
 
     'bbs_RSA_key': os.getenv("BBS_RSAKEY"),
     'packagebuilder_RSA_key': os.getenv("PACKAGEBUILDER_RSAKEY"),
-
     'svn_user': os.getenv("SVN_USER"),
     'svn_pass': os.getenv("SVN_PASS"),
     'tracker_user': os.getenv("TRACKER_USER"),
@@ -44,7 +41,7 @@ ENVIR = {
 HOSTS = {
     'svn': 'https://hedgehog.fhcrc.org',
     'tracker': 'https://tracker.bioconductor.org',
-    'bioc': 'https://bioconductor.org',
+    'bioc': 'https://bioconductor.org'
 }
 
 BROKER = {
@@ -309,8 +306,7 @@ def setup():
     manifest['svn_url'] = manifest['svn_url'].strip()
     working_dir = os.path.split(sys.argv[1])[0]
     os.chdir(working_dir)
-    r_libs_dir = os.path.join(working_dir, "R-libs")
-    os.environ['R_LIBS_USER'] = r_libs_dir
+    os.environ['R_LIBS_USER'] = os.path.join(working_dir, "R-libs")
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
         "bin"
