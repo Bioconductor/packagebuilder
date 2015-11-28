@@ -10,7 +10,6 @@ import subprocess
 import threading
 import time
 import datetime
-import shlex
 import platform
 import unicodedata
 import atexit
@@ -18,14 +17,44 @@ from stompy import Stomp
 import mechanize
 import logging
 
-# FIXME get this from config.yaml
-BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
-    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1",
-    "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"} 
-
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
+
+ENVIR = {
+    'bbs_home': "",
+    'bbs_R_home': "",
+    'bbs_node_hostname': "",
+    'bbs_R_cmd': "",
+    'bbs_Bioc_version': "",
+
+
+    'packagebuilder_host': "",
+    'packagebuilder_home': "",
+
+    'bbs_RSA_key': os.getenv("BBS_RSAKEY"),
+    'packagebuilder_RSA_key': os.getenv("PACKAGEBUILDER_RSAKEY"),
+
+    'svn_user': os.getenv("SVN_USER"),
+    'svn_pass': os.getenv("SVN_PASS"),
+    'tracker_user': os.getenv("TRACKER_USER"),
+    'tracker_pass': os.getenv("TRACKER_PASS")
+}
+
+HOSTS = {
+    'svn': 'https://hedgehog.fhcrc.org',
+    'tracker': 'https://tracker.bioconductor.org',
+    'bioc': 'https://bioconductor.org',
+}
+
+BROKER = {
+    "host": "broker.bioconductor.org",
+    "port": 61613
+}
+
+BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
+    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1",
+    "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"} 
 
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
@@ -40,9 +69,8 @@ class Tailer(threading.Thread):
         return self._stop.isSet()
     def run(self):
         prevsize = 0
-        while 1:
+        while True:
             time.sleep(0.2)
-            print ".",
             if not os.path.isfile(self.filename):
                 continue
             st = os.stat(self.filename)
@@ -50,28 +78,29 @@ class Tailer(threading.Thread):
                 continue
             
             if self.stopped():
-                logging.info("stopped() == True (%s)" % self.status)
+                logging.debug("Tailer.run() stopped: %s." % self.status)
                 if (st.st_size == 0):
-                    logging.debug("0 bytes in output file, exiting tailer...")
+                    logging.debug("Tailer.run() 0 bytes in output; exiting.")
                     return()
                 num_bytes_to_read = st.st_size - prevsize
-                logging.debug("num_bytes_to_read == %d" % num_bytes_to_read)
+                logging.debug("Tailer.run() num_bytes_to_read = %d." %
+                              num_bytes_to_read)
                 if (num_bytes_to_read == 0):
-                    logging.debug("0 bytes to read, exiting tailer...")
+                    logging.debug("Tailer.run() 0 bytes to read; exiting.")
                     return()
                 
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                logging.debug("read %d bytes", bytes)
+                logging.debug("Tailer.run() stopped; read %d bytes." % bytes)
                 send_message({
                     "status": self.status,
                     "sequence": self.message_sequence,
                     "body": bytes
                 })
                 prevsize = st.st_size
-                logging.info("Thread says I'm done %s" % self.status)
+                logging.debug("Tailer.run() done %s" % self.status)
                 break
                 # not needed here but might be needed if program was
                 # to continue doing other stuff and we wanted the
@@ -83,7 +112,7 @@ class Tailer(threading.Thread):
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                logging.debug("read %d bytes", bytes)
+                logging.debug("Tailer.run() read %d bytes" % bytes)
                 send_message({
                     "status": self.status,
                     "sequence": self.message_sequence,
@@ -117,13 +146,14 @@ def send_message(msg, status=None):
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
     json_str = json.dumps(merged_dict)
-    logging.info("sending message: %s" % json_str)
+    logging.debug("send_message() Sending message: %s" % json_str)
     this_frame = stomp.send({
         'destination': "/topic/builderevents",
         'body': json_str,
         'persistent': 'true'
     })
-    logging.info("Receipt: %s" % this_frame.headers.get('receipt-id'))
+    logging.info("Message sent in send_message(); receipt-id: %s." %
+                 this_frame.headers.get('receipt-id'))
 
 def send_dcf_info(dcf_file):
     try:
@@ -142,27 +172,29 @@ def is_build_required(manifest):
     global svn_url_global
     svn_url_global = manifest['svn_url']
     package_name = manifest['job_id'].split("_")[0]
-    
+    logging.info("Starting is_build_required() '%s'." % package_name)
+
     if (is_svn_package()):
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-        logging.info(
-            "is_build_required()" +
-            " description_url = " + description_url +
-            " svn_user ="  + os.getenv("SVN_USER") +
-            " svn_pass = " + os.getenv("SVN_PASS"))
+        logging.debug("is_build_required() is_svn_package() == True" +
+            "\n  description_url = " + description_url +
+            "\n  svn_user ="  + ENVIR['svn_user'] +
+            "\n  svn_pass = " + ENVIR['svn_pass'])
         try:
             description = subprocess.Popen([
                 "curl", "-k", "-s", "--user", "%s:%s" %
-                (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+                (ENVIR['svn_user'], ENVIR['svn_pass']),
                 description_url
             ], stdout=subprocess.PIPE).communicate()[0]
             # TODO - handle it if description does not exist
         except:
-            logging.error("Unexpected error in is_build_required(): %s",
+            logging.error("is_build_required() curl exception: %s.",
                           sys.exc_info()[0])
+            raise
 
-        logging.debug("description = %s; length = %d" %
-                      (description, len(description)))
+        logging.debug("is_build_required()" +
+                      "\n  description = %s" % description +
+                      "\n  length = %d" % len(description))
         
         dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
         send_dcf_info(dcf_file)
@@ -179,7 +211,7 @@ def is_build_required(manifest):
         if (manifest['force'] == True):
             return(True)
         
-    r_version = BIOC_R_MAP[os.getenv("BBS_BIOC_VERSION")]
+    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
     
     cran_repo_map = {
@@ -190,11 +222,11 @@ def is_build_required(manifest):
         'mac.binary.mavericks': "bin/macosx/mavericks/contrib/" + r_version
     }
     # todo - put repos url in config file (or get it from user)
+    base_repo_url = HOSTS['bioc']
     if (manifest['repository'] == 'course'):
-        base_repo_url = "http://bioconductor.org/course-packages"
+        base_repo_url += '/course-packages'
     elif (manifest['repository'] == 'scratch'):
-        base_repo_url = "http://bioconductor.org/scratch-repos/%s" % \
-                        manifest['bioc_version']
+        base_repo_url += '/scratch_repos/' + manifest['bioc_version']
     
     repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
     # What if there is no file at this url?
@@ -210,9 +242,10 @@ def is_build_required(manifest):
             break
     if not repository_version:
         return True # package hasn't been pushed to repo before
-    logging.info("[%s] svn version is %s, repository version is %s" %
-                 (package_name, svn_version, repository_version))
-    return(svn_version != repository_version)
+    logging.debug("is_build_required()" +
+                  "\n  [%s] svn version is %s, repository version is %s" %
+                  (package_name, svn_version, repository_version))
+    return svn_version != repository_version
 
 def setup():
     global manifest
@@ -223,58 +256,55 @@ def setup():
         packagebuilder_rsync_rsh_cmd, packagebuilder_scp_cmd
     global callcount
     global builder_id
-    logging.info("setup() Starting.")
+    logging.info("Starting setup().")
     
-    builder_id = os.getenv("BBS_NODE")
-    if builder_id is None:
-        builder_id = os.getenv("BBS_NODE_HOSTNAME")
+    builder_id = ENVIR['bbs_node_hostname']
     callcount = 1
     
     ## BBS-specific imports
-    BBS_home = os.environ['BBS_HOME']
+    BBS_home = ENVIR['bbs_home']
     sys.path.append(BBS_home)
     import BBScorevars
     sys.path.append(os.path.join(BBS_home, "test/python"))
     import dcf
     
     packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(
-        os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
+        ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
     packagebuilder_rsync_cmd = BBScorevars.rsync_cmd.replace(
-        os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
+        ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
     packagebuilder_rsync_rsh_cmd = BBScorevars.rsync_rsh_cmd.replace(
-        os.environ["BBS_RSAKEY"], os.environ["PACKAGEBUILDER_RSAKEY"])
+        ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
     
     if (platform.system() == "Windows"):
         packagebuilder_scp_cmd = \
             "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
-            os.environ["PACKAGEBUILDER_RSAKEY"]
+            ENVIR['packagebuilder_RSA_key']
         packagebuilder_ssh_cmd = \
             "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
-            os.environ["PACKAGEBUILDER_RSAKEY"]
+            ENVIR['packagebuilder_RSA_key']
 
-    logging.debug("\n    argument is %s" % sys.argv[1] + 
-                  "\n    cwd is %s" % os.getcwd() + 
-                  "\n    does %s exist? %s" % (
-                      sys.argv[1], os.path.exists(sys.argv[1])) +
-                  "\n    size of %s: %d" % (
-                      sys.argv[1], os.stat(sys.argv[1]).st_size))
+    logging.debug("setup()" +
+        "\n  argument = %s" % sys.argv[1] + 
+        "\n  cwd = %s" % os.getcwd() + 
+        "\n  does %s exist? %s" % (sys.argv[1], os.path.exists(sys.argv[1])) +
+        "\n  size of %s: %d" % (sys.argv[1], os.stat(sys.argv[1]).st_size))
 
     timeout = 10
     i = 0
     while (os.stat(sys.argv[1]).st_size == 0):
-        logging.debug("manifest file is empty, waiting...")
+        logging.debug("setup() Empty manifest file, waiting.")
         time.sleep(1)
         i += 1
         if i == timeout:
-            logging.warning("setup() timeout -- empty manifest file")
+            logging.warning("Empty manifest file in setup().")
             # todo - send a message and do something with it
             break
     time.sleep(1)
     manifest_fh = open(sys.argv[1], "r")
     manifest_json = manifest_fh.read()
     manifest_fh.close()
-    logging.debug("manifest_json is %s" % manifest_json)
+    logging.debug("setup() manifest_json = %s" % manifest_json)
     manifest = json.loads(manifest_json)
     manifest['svn_url'] = manifest['svn_url'].strip()
     working_dir = os.path.split(sys.argv[1])[0]
@@ -282,20 +312,20 @@ def setup():
     r_libs_dir = os.path.join(working_dir, "R-libs")
     os.environ['R_LIBS_USER'] = r_libs_dir
     os.environ['PATH'] = os.environ['PATH'] + \
-        os.pathsep + os.environ['BBS_R_HOME'] + os.sep + \
+        os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
         "bin"
-    logging.debug("working dir is %s" % working_dir)
-    logging.info("setup() Finished.")
+    logging.debug("setup() Working dir = %s" % working_dir)
+    logging.info("Finished setup().")
 
 def setup_stomp():
     global stomp
     try:
-        stomp = Stomp("broker.bioconductor.org", 61613)
+        stomp = Stomp(BROKER['host'], BROKER['port'])
         # optional connect keyword args "username" and "password" like so:
         # stomp.connect(username="user", password="pass")
         stomp.connect()
     except:
-        logging.error("setup_stomp(): Cannot connect")
+        logging.error("setup_stomp(): Cannot connect.")
         raise
 
 def svn_export():
@@ -304,8 +334,8 @@ def svn_export():
     package_name = manifest['job_id'].split("_")[0]
     export_path = os.path.join(working_dir, package_name)
     svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
-        os.getenv("SVN_USER"), os.getenv("SVN_PASS"), manifest['svn_url'], package_name)
-    clean_svn_cmd = svn_cmd.replace(os.getenv("SVN_USER"),"xxx").replace(os.getenv("SVN_PASS"),"xxx")
+        ENVIR['svn_user'], ENVIR['svn_pass'], manifest['svn_url'], package_name)
+    clean_svn_cmd = svn_cmd.replace(ENVIR['svn_user'],"xxx").replace(ENVIR['svn_pass'],"xxx")
     send_message({"status": "svn_cmd", "body": clean_svn_cmd})
     send_message({"status": "post_processing", "retcode": 0, "body": "starting svn export"})
     retcode = subprocess.call(svn_cmd, shell=True)
@@ -319,16 +349,15 @@ def extract_tarball():
     global package_name
     package_name = manifest['job_id'].split("_")[0]
     # first, log in to the tracker and get a cookie
-    if "tracker.bioconductor.org" in manifest['svn_url'].lower():
-        tracker_url = "https://tracker.bioconductor.org"
-    else:
-        tracker_url = "http://tracker.fhcrc.org/roundup/bioc_submit"
+    tracker_url = HOSTS['tracker']
+    if not "tracker.bioconductor.org" in manifest['svn_url'].lower():
+        tracker_url = tracker_url + '/roundup/bioc_submit'
 
     br = mechanize.Browser()
     br.open(tracker_url)
     br.select_form(nr=2)
-    br["__login_name"] = os.getenv("TRACKER_LOGIN")
-    br["__login_password"] = os.getenv("TRACKER_PASSWORD")
+    br["__login_name"] = ENVIR['tracker_user']
+    br["__login_password"] = ENVIR['tracker_pass']
     res = br.submit()
 
     segs = manifest['svn_url'].split("/")
@@ -338,13 +367,18 @@ def extract_tarball():
         retcode = 0
     except:
         retcode = 255
-        logging.error("Exception downloading file: %s" % ex.message)
+        logging.error("extract_tarball() Failed to download file: %s."
+                      % ex.message)
         # retcode = ex.message
 
-    send_message({"status": "post_processing", "retcode": retcode, "body": \
-        "download of tarball completed with status %d" % retcode})
-    if (not retcode == 0):
-        sys.exit("curl of tarball failed")
+    send_message({
+        "status": "post_processing",
+        "retcode": retcode,
+        "body": "download of tarball completed with status %d" % retcode
+    })
+    if (retcode != 0):
+        logging.error("extract_tarball() Failed to 'curl' tarball.")
+        sys.exit("failed to 'curl' tarball")
     
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
@@ -356,13 +390,16 @@ def extract_tarball():
     extra_flags = ""
     if platform.system() == "Windows":
         extra_flags = " --no-same-owner "
-    retcode = subprocess.call("tar %s -zxf %s.orig" % (extra_flags,
-      tarball), shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": \
-        "untar of tarball completed with status %d" % retcode})
+    retcode = subprocess.call("tar %s -zxf %s.orig" %
+                              (extra_flags, tarball), shell=True)
+    send_message({
+        "status": "post_processing",
+        "retcode": retcode,
+        "body": "untar of tarball completed with status %d" % retcode
+    })
     if (not retcode == 0):
-        sys.exit("untar of tarball failed")
-    
+        logging.error("extract_tarball() Failed to 'untar' tarball.")
+        sys.exit("failed to 'untar' tarball")
     f = open("%s/DESCRIPTION" % package_name)
     description = f.read()
     f.close()
@@ -386,13 +423,14 @@ def install_pkg_deps():
     if args.strip() == "":
         args = "None=1"
     cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore --slave \"--args %s\"\
-      %s %s" % (os.getenv("BBS_R_CMD"), args.strip(), r_script, log)
+      %s %s" % (ENVIR['bbs_R_cmd'], args.strip(), r_script, log)
     send_message({
         "body": "Installing dependencies...",
         "status": "preprocessing",
         "retcode": 0
     })
-    logging.debug("Command to install dependencies:\n    %s" % cmd)
+    logging.debug("install_pkg_deps() Command to install dependencies:" +
+                  "\n  %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({
         "body": "Result of installing dependencies: %d" % retcode,
@@ -463,7 +501,7 @@ def win_multiarch_check():
     if (not os.path.exists(libdir)):
         os.mkdir(libdir)
 
-    r = os.getenv('BBS_R_CMD')
+    r = ENVIR['bbs_R_cmd']
     cmd = (
         "rm -rf %s.buildbin-libdir && mkdir %s.buildbin-libdir"
         " && %s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
@@ -498,14 +536,15 @@ def win_multiarch_buildbin(message_stream):
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
         retcode = _call("rm -rf %s" % libdir, False)
-    logging.debug("Does %s exist? %s" % (libdir, os.path.exists(libdir)))
+    logging.debug("win_multiarch_buildbin() Does %s exist? %s." %
+                  (libdir, os.path.exists(libdir)))
     if not (os.path.exists(libdir)):
         os.mkdir(libdir)
-    logging.debug("after mkdir: does %s exist? %s" %
+    logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
                   (libdir, os.path.exists(libdir)))
     time.sleep(1)
     cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
-      (os.getenv("BBS_R_CMD"), libdir, tarball)
+      (ENVIR['bbs_R_cmd'], libdir, tarball)
     send_message({"status": "r_buildbin_cmd", "body": cmd})
 
     return do_build(cmd, message_stream, False)
@@ -532,8 +571,8 @@ def check_package():
         extra_flags = " --no-multiarch "
     
     cmd = "%s CMD check --no-vignettes --timings %s %s && %s CMD BiocCheck --new-package %s" % (
-        os.getenv('BBS_R_CMD'), extra_flags, tarball,
-        os.getenv('BBS_R_CMD'), tarball)
+        ENVIR['bbs_R_cmd'], extra_flags, tarball,
+        ENVIR['bbs_R_cmd'], tarball)
     
     send_message({"status": "check_cmd", "body": cmd})
     
@@ -565,12 +604,11 @@ def do_build(cmd, message_stream, source):
     background.stop()
     out_fh.close()
     
-    logging.debug("Before joining background thread...")
+    logging.debug("do_build() Before joining background thread.")
     background.join()
-    logging.debug("after joining background thread...")
-    logging.info("Done do_build()")
+    logging.debug("do_build() After joining background thread.")
+    logging.info("Done do_build().")
     return(retcode)
-    
     
 def build_package(source_build):
     global pkg_type
@@ -598,7 +636,7 @@ def build_package(source_build):
     
     if (source_build):
         r_cmd = "%s CMD build %s %s" % \
-                (os.getenv("BBS_R_CMD"), flags, package_name)
+                (ENVIR['bbs_R_cmd'], flags, package_name)
     else:
         if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
             libdir = "libdir"
@@ -614,7 +652,7 @@ def build_package(source_build):
                 pass
             else:
                 r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
-                  (os.getenv("BBS_R_CMD"), libdir, package_name)
+                  (ENVIR['bbs_R_cmd'], libdir, package_name)
             
     status = None
     if (source_build):
@@ -623,7 +661,8 @@ def build_package(source_build):
     else:
         status = "r_buildbin_cmd"
         outfile = "Rbuildbin.out"
-    logging.debug("Before build, working dir is %s" % working_dir)
+    logging.debug("build_package() Before build, working dir is %s." %
+                  working_dir)
     
     if ((not source_build) and win_multiarch and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
@@ -688,7 +727,7 @@ def propagate_package():
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
     build_product = filter(lambda x: x.endswith(ext), files)[0]
-    r_version = BIOC_R_MAP[os.getenv("BBS_BIOC_VERSION")]    
+    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]    
     if (platform.system() == "Darwin"):
         os_seg = "bin/macosx/mavericks/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
@@ -698,15 +737,14 @@ def propagate_package():
     
     if (manifest['repository'] == 'course'):
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
-        url = repos.replace(
-            "/loc/www/bioconductor-test.fhcrc.org/",
-            "http://bioconductor.org/")
+        url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/",
+            HOSTS['bioc'])
     elif (manifest['repository'] == 'scratch'):
         repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (
             manifest['bioc_version'], os_seg)
         url = repos.replace(
             "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/",
-            "http://bioconductor.org/scratch-repos/")
+            HOSTS['bioc'] + '/scratch-repos')
     
     url += "/" + build_product
     
@@ -718,47 +756,48 @@ def propagate_package():
     
     if (platform.system() == "Windows"):
         command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'rm -f %s/%s_*.zip'"
-        command = command % (
-            os.environ["PACKAGEBUILDER_HOME"], repos, package_name)
+        command = command % (ENVIR['packagebuilder_home'], repos, package_name)
         retcode = subprocess.call(command)
     else:
         retcode = ssh("rm -f %s" % files_to_delete)
     
-    logging.debug("Result of deleting files: %d" % retcode)
+    logging.debug("propagate_package() Result of deleting files: %d." % retcode)
     send_message({
         "body": "Pruning older packages from repository",
         "status": "post_processing",
         "retcode": retcode
     })
     if retcode != 0:
+        logging.error("propagate_package() Failed to prune repos.")
         sys.exit("repos prune failed")
     
     if (platform.system() == "Windows"):
-        logging.debug("platform.system() == 'Windows', running chmod")
+        logging.debug("propagate_package() Windows chmod")
         chmod_retcode = subprocess.call(
             "chmod a+r %s" % os.path.join(working_dir, package_name))
-        logging.debug("chmod_retcode = %d" % chmod_retcode)
+        logging.debug("propagate_package() Windows chmod_retcode = %d" %
+                      chmod_retcode)
         send_message({
             "status": "chmod_retcode",
             "body": "chmod_retcode=%d" % chmod_retcode,
             "retcode": chmod_retcode
         })
         command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@staging.bioconductor.org:%s/"
-        command = command % (
-            os.environ["PACKAGEBUILDER_HOME"], build_product, repos)
-        logging.debug("command = %s" % command)
+        command = command % (ENVIR['packagebuilder_home'], build_product, repos)
+        logging.debug("propagate_package() Windows scp command = %s." %
+                      command)
         retcode = subprocess.call(command)
         command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'chmod a+r %s/%s_*.zip'"
-        command = command % (
-            os.environ["PACKAGEBUILDER_HOME"], repos, package_name)
+        command = command % (ENVIR['packagebuilder_home'], repos, package_name)
         remote_chmod_retcode = subprocess.call(command)
-        logging.debug("remote_chmod_retcode = %s" % remote_chmod_retcode)
+        logging.debug("propagate_package() Windows remote_chmod_retcode = %s" %
+                      remote_chmod_retcode)
     else:
-        logging.warning("chmod not run, platform.system() == %s" %
-                        platform.system())
+        logging.debug("propagate_package() %s chmod not run" %
+                      platform.system())
         retcode = scp(build_product, repos)
     
-    logging.debug("Result of copying file: %d" % retcode)
+    logging.debug("propagate_package() Result of copying file: %d" % retcode)
     send_message({
         "body": "Copied build file to repository",
         "status": "post_processing",
@@ -767,7 +806,8 @@ def propagate_package():
         "filesize": filesize
     })
     if retcode != 0:
-        sys.exit("copying file to repository failed")
+        logging.error("propagate_package() Failed to copy file to repository.")
+        sys.exit("failed to copy file to repository")
 
 ## todo - get rid of ugly workarounds
 def _call(command_str, shell):
@@ -781,10 +821,10 @@ def _call(command_str, shell):
         
         callcount += 1
         # ignore shell arg
-        logging.debug("Before _call, command_str is")
         command_str = str(command_str)
-        logging.debug("len(command_str) = %d; %s" %
-                      (len(command_str), command_str))
+        logging.debug("_call()" +
+                      "\n  command_str = %s" % command_str +
+                      "\n  len(command_str) = %d" % len(command_str))
         retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh,
                                   stderr=stderr_fh)
         stdout_fh.close()
@@ -829,7 +869,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
 
 def onexit():
     global svn_url_global
-    logging.info("onexit() autoexit.")
+    logging.info("Ending via onexit().")
     send_message({
         "body": "builder.py exited",
         "status": "autoexit",
@@ -840,7 +880,7 @@ def onexit():
 def update_packages_file():
     global repos
     
-    r_version = BIOC_R_MAP[os.getenv("BBS_BIOC_VERSION")]
+    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
         pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
         if pkg_type == "mac.binary.leopard":
@@ -855,14 +895,14 @@ def update_packages_file():
     if (manifest['repository'] == 'course'):
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/",
-                            "http://bioconductor.org/")
+                            HOSTS['bioc'])
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/course-packages"
     elif (manifest['repository'] == 'scratch'):
         repos = '/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s/%s' % (
             manifest['bioc_version'], os_seg)
         url = repos.replace(
             "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/",
-            "http://bioconductor.org/scratch-repos/")
+            HOSTS['bioc'] + "/scratch-repos")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['bioc_version']
     
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
@@ -886,7 +926,7 @@ def update_packages_file():
             "build_product": build_product,
             "url": url
         })
-        sys.exit("Updating packages failed")
+        sys.exit("updating packages failed")
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
         command = "%s biocadmin@staging.bioconductor.org \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\""
         command = command % packagebuilder_ssh_cmd
@@ -906,7 +946,7 @@ def update_packages_file():
                 "body": "Syncing repository failed",
                 "build_product": build_product,
                 "url": url})
-            sys.exit("Sync to website failed")
+            sys.exit("sync to website failed")
         send_message({
             "status": "post_processing_complete",
             "retcode": retcode,
@@ -915,9 +955,9 @@ def update_packages_file():
             "url": url})
         
 def get_r_version():
-    logging.debug("get_r_version() BBS_R_CMD == %s" % os.getenv("BBS_R_CMD"))
+    logging.debug("get_r_version() BBS_R_CMD == %s" % ENVIR['bbs_R_cmd'])
     r_version_raw, stderr = subprocess.Popen([
-        os.getenv("BBS_R_CMD"),"--version"
+        ENVIR['bbs_R_cmd'],"--version"
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
     lines = r_version_raw.split("\n")
     r_version_line = lines[0]
@@ -935,11 +975,11 @@ def get_node_info():
         "arch": arch,
         "platform": plat,
         "body": "node_info",
-        "bioc_version": os.getenv("BBS_BIOC_VERSION")})
+        "bioc_version": ENVIR['bbs_Bioc_version']})
 
 def is_valid_url():
     # todo bulletproof this; sometimes fails bogusly on windows
-    if (manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
+    if (manifest['svn_url'].lower().startswith(HOSTS['svn'])):
         svn_url = True
     elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1 or
       manifest['svn_url'].lower().find("tracker.bioconductor.org") > -1): # todo, ensure .tar.gz end
@@ -958,10 +998,10 @@ def is_valid_url():
             i += 1
             description = subprocess.Popen([
                 "curl", "-k", "-s", "--user",
-                "%s:%s" % (os.getenv("SVN_USER"), os.getenv("SVN_PASS")),
+                "%s:%s" % (ENVIR['svn_user'], ENVIR['svn_pass']),
                 description_url
             ], stdout=subprocess.PIPE).communicate()[0]
-            logging.warning("is_valid_url() invalid svn output, trying again.")
+            logging.warning("is_valid_url() Invalid svn URL; retrying.")
             time.sleep(0.5)
             if (len(description) > 0):
                 break
@@ -972,26 +1012,22 @@ def is_valid_url():
     return True
 
 def is_svn_package():
-    if (manifest['svn_url'].lower().startswith("https://hedgehog.fhcrc.org")):
-        return True
-    return False
+    return manifest['svn_url'].lower().startswith(HOSTS['svn'])
 
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
     if (len(sys.argv) < 2):
-        logging.error("main() missing manifest and R version arguments")
-        sys.exit(1)
+        logging.error("main() Missing manifest and R version arguments.")
+        sys.exit("missing manifest and R version arguments")
     logging.info("Starting builder.py.")
 
     setup()
     atexit.register(onexit)
 
-    wanted_bioc_version = manifest['bioc_version']
-    bioc_version = os.getenv("BBS_BIOC_VERSION")
-    
-    if (wanted_bioc_version != bioc_version):
-        logging.error("BioC-%s not supported." % manifest['bioc_version'])
-        sys.exit(1)
+    if (manifest['bioc_version'] != ENVIR['bbs_Bioc_version']):
+        logging.error("main() BioC-%s not supported." %
+                      manifest['bioc_version'])
+        sys.exit("BioC version not supported")
 
     setup_stomp()
     
@@ -1002,8 +1038,8 @@ if __name__ == "__main__":
             "status": "invalid_url",
             "body": "Invalid SVN url."
         })
-        logging.error("Invalid SVN url")
-        sys.exit(0)
+        logging.error("main() Invalid svn url.")
+        sys.exit("invalid svn url")
     
     get_node_info()
     if is_svn_package():
@@ -1030,8 +1066,8 @@ if __name__ == "__main__":
     
     result = install_pkg_deps()
     if (result != 0):
-        logging.error("install_pkg_deps() failed: %d" % result)
-        sys.exit(0)
+        logging.error("main() Failed to install dependencies: %d." % result)
+        sys.exit("failed to install dependencies")
     
     result = build_package(True)
     if (result == 0):
@@ -1045,13 +1081,13 @@ if __name__ == "__main__":
         if warnings: # todo separate build / check / build bin warnings
             body = "Build completed with warnings."
         else:
-            body = "Build was successful."
+            body = "Build successful."
 
         send_message({
             "status": "normal_end",
             "body": body
         })
-        logging.info("Normal build completion, %s" % body)
+        logging.info("Normal build completion, %s." % body)
 
         # send_message({
         #     "status": "complete",
