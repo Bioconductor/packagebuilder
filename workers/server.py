@@ -16,6 +16,9 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
+ENVIR = {
+    'packagebuilder_home': ""
+}
 
 BROKER = {
     "host": "broker.bioconductor.org",
@@ -30,9 +33,7 @@ DESTINATION = {
 # FIXME Get this information dynamically.  Consider bioc-cm or
 #       master.bioconductor.org/config.yaml
 
-packagebuilder_home = os.environ["PACKAGEBUILDER_HOME"]
-
-builder_id = platform.node().lower().replace(".fhcrc.org","")
+builder_id = platform.node().lower().replace(".fhcrc.org", "")
 if sys.platform == "win32":
     # bad hardcoding! I don't know why this is necessary:
     if builder_id in ["windows1", "windows2"]:
@@ -91,7 +92,6 @@ class MyListener(stomp.ConnectionListener):
         # The variable is in scope and we're not attempting any read
         # or assignment.
         global shell_ext
-        global packagebuilder_home
 
         logging.info("Message received in on_message(): %r." % (body,))
         try:
@@ -104,7 +104,7 @@ class MyListener(stomp.ConnectionListener):
             bioc_version = received_obj['bioc_version']
             r_version = bioc_r_map[bioc_version]
 
-            job_dir = os.path.join(packagebuilder_home, "jobs")
+            job_dir = os.path.join(ENVIR['packagebuilder_home'], "jobs")
             if not os.path.exists(job_dir):
                 os.mkdir(job_dir)
             job_dir = os.path.join(job_dir, job_id)
@@ -113,7 +113,7 @@ class MyListener(stomp.ConnectionListener):
             r_libs_dir = os.path.join(job_dir, "R-libs")
             if not os.path.exists(r_libs_dir):
                 os.mkdir(r_libs_dir)
-            jobfilename = os.path.join(packagebuilder_home, job_dir,
+            jobfilename = os.path.join(ENVIR['packagebuilder_home'], job_dir,
                                        "manifest.json")
 
             jobfile = open(jobfilename, "w")
@@ -121,7 +121,7 @@ class MyListener(stomp.ConnectionListener):
             jobfile.close
             logging.debug("on_message() jobfilename = %s." % jobfilename)
 
-            shell_cmd = os.path.join(packagebuilder_home,
+            shell_cmd = os.path.join(ENVIR['packagebuilder_home'],
                                      "%s%s" % (builder_id, shell_ext))
             logging.debug("on_message() shell_cmd = %s." % shell_cmd)
 
