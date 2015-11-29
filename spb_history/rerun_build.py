@@ -20,6 +20,12 @@ BROKER = {
     'port': 61613
 }
 
+BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
+    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2", "3.2": "3.2",
+    "3.3": "3.3"}
+
+BIOC_VERSION = "3.3"
+
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
@@ -46,10 +52,8 @@ pkgname = segs[4]
 pkgname_bare = pkgname.split("_")[0]
 
 obj['force']  = True
-#FIXME don't hardcode this
-obj['bioc_version'] = "3.3"
-# FIXME don't hardcode this
-obj['r_version'] = "3.3"
+obj['bioc_version'] = BIOC_VERSION
+obj['r_version'] = BIOC_R_MAP[BIOC_VERSION]
 obj['svn_url'] = url
 obj['repository'] = 'scratch'
 now = pacific.localize(now0)
@@ -78,4 +82,4 @@ except:
 this_frame = stomp.send({'destination': "/topic/buildjobs",
   'body': json,
   'persistent': 'true'})
-logMsg("Receipt: %s" % this_frame.headers.get('receipt-id'))
+logging.info("Receipt: %s" % this_frame.headers.get('receipt-id'))
