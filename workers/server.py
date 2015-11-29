@@ -17,11 +17,11 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     level=logging.DEBUG)
 
 ENVIR = {
-    'packagebuilder_home': ""
+    'packagebuilder_home': "/home/mtmorgan/a/packagebuilder/workers"
 }
 
 BROKER = {
-    "host": "broker.bioconductor.org",
+    "host": "localhost",
     "port": 61613
 }
 
@@ -29,6 +29,10 @@ DESTINATION = {
     "jobs": "/topic/buildjobs",
     "events": "/topic/builderevents"
 }
+
+BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
+    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1",
+    "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"} 
 
 # FIXME Get this information dynamically.  Consider bioc-cm or
 #       master.bioconductor.org/config.yaml
@@ -102,7 +106,7 @@ class MyListener(stomp.ConnectionListener):
         if ('job_id' in received_obj.keys()): # ignore malformed messages
             job_id = received_obj['job_id']
             bioc_version = received_obj['bioc_version']
-            r_version = bioc_r_map[bioc_version]
+            r_version = BIOC_R_MAP[bioc_version]
 
             job_dir = os.path.join(ENVIR['packagebuilder_home'], "jobs")
             if not os.path.exists(job_dir):
@@ -157,7 +161,7 @@ try:
     logging.info("Connected to '%s:%s'." % (BROKER['host'], BROKER['port']))
     stomp.subscribe(destination=DESTINATION['jobs'], id=uuid.uuid4().hex,
                     ack='client')
-    logging.info("Subscribed to destination %s" % DESTINATION['JOBS'])
+    logging.info("Subscribed to destination %s" % DESTINATION['jobs'])
 except Exception as e:
     logging.error("main() Could not connect to ActiveMQ: %s." % e)
     raise
