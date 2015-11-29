@@ -1,12 +1,8 @@
 import sys
 import json
-import time
-import tempfile
 import os
-import subprocess
-import platform
 import logging
-from datetime import datetime, date, time
+from datetime import datetime
 from stompy import Stomp
 from django.db import connection
 
@@ -281,7 +277,7 @@ def callback(body, destination):
     try:
         logging.debug("callback() Parsing JSON.")
         received_obj = json.loads(body)
-    except ValueError as e:
+    except ValueError:
         logging.error("callback() Received invalid JSON: %s." % body)
         return
     if ('job_id' in received_obj.keys()):

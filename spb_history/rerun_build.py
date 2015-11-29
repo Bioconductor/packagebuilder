@@ -10,13 +10,8 @@
 
 import json
 import sys
-import os
-import subprocess
-import base64
 import datetime
 from pytz import timezone
-import time
-import ConfigParser
 from stompy import Stomp
 import logging
 
@@ -24,6 +19,10 @@ BROKER = {
     'host': "localhost",
     'port': 61613
 }
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
 
 from bioconductor.simplelog import logMsg
 
