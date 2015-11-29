@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import time
-import datetime
 import sys
 import json
 import os
@@ -25,7 +24,7 @@ BROKER = {
     "port": 61613
 }
 
-DESTINATION = {
+TOPICS = {
     "jobs": "/topic/buildjobs",
     "events": "/topic/builderevents"
 }
@@ -97,7 +96,7 @@ class MyListener(stomp.ConnectionListener):
         # or assignment.
         global shell_ext
 
-        logging.info("Message received in on_message(): %r." % (body,))
+        logging.info("Message received")
         try:
             received_obj = json.loads(body)
         except ValueError:
@@ -106,7 +105,6 @@ class MyListener(stomp.ConnectionListener):
         if ('job_id' in received_obj.keys()): # ignore malformed messages
             job_id = received_obj['job_id']
             bioc_version = received_obj['bioc_version']
-            r_version = BIOC_R_MAP[bioc_version]
 
             job_dir = os.path.join(ENVIR['packagebuilder_home'], "jobs")
             if not os.path.exists(job_dir):
@@ -123,15 +121,15 @@ class MyListener(stomp.ConnectionListener):
             jobfile = open(jobfilename, "w")
             jobfile.write(body)
             jobfile.close
-            logging.debug("on_message() jobfilename = %s." % jobfilename)
+            logging.debug("on_message() job_dir = %s." % job_dir)
 
             shell_cmd = os.path.join(ENVIR['packagebuilder_home'],
                                      "%s%s" % (builder_id, shell_ext))
             logging.debug("on_message() shell_cmd = %s." % shell_cmd)
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
-            pid = subprocess.Popen([shell_cmd, jobfilename, bioc_version,],
-                stdout=builder_log, stderr=subprocess.STDOUT).pid
+            subprocess.Popen([shell_cmd, jobfilename, bioc_version,],
+                             stdout=builder_log, stderr=subprocess.STDOUT)
             ## TODO - somehow close builder_log filehandle if possible
             msg_obj = {}
             msg_obj['builder_id'] = builder_id
@@ -141,10 +139,9 @@ class MyListener(stomp.ConnectionListener):
             msg_obj['client_id'] = received_obj['client_id']
             msg_obj['bioc_version'] = bioc_version
             json_str = json.dumps(msg_obj)
-            stomp.send(destination=DESTINATION['events'], body=json_str,
+            stomp.send(destination=TOPICS['events'], body=json_str,
                        headers={"persistent": "true"})
-            logging.info("Sent message receipt-id in on_message(): %s" %
-                         this_frame.headers.get('receipt-id'))
+            logging.info("Reply sent")
         else:
             logging.error("on_message() Invalid JSON: missing job_id key.")
 
@@ -159,20 +156,18 @@ try:
     # stomp.connect(username="user", password="pass")
     stomp.connect() # clientid=uuid.uuid4().hex)
     logging.info("Connected to '%s:%s'." % (BROKER['host'], BROKER['port']))
-    stomp.subscribe(destination=DESTINATION['jobs'], id=uuid.uuid4().hex,
+    stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,
                     ack='client')
-    logging.info("Subscribed to destination %s" % DESTINATION['jobs'])
+    logging.info("Subscribed to destination %s" % TOPICS['jobs'])
 except Exception as e:
     logging.error("main() Could not connect to ActiveMQ: %s." % e)
     raise
 
 logging.info('Waiting for messages; CTRL-C to exit.')
 
-waitingCounter = 0
 while True:
-    waitingCounter += 1
-    if (waitingCounter % 20 == 0):
+    if logging.getLogger().isEnabledFor("debug"):
         logging.debug("main() Waiting to do work.")
-    time.sleep(15)
+    time.sleep(60 * 5)
 
 logging.info("Done.")
