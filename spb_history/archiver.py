@@ -11,7 +11,10 @@ from stompy import Stomp
 from django.db import connection
 
 ## this may need to change:
-BROKER = "broker.bioconductor.org"
+BROKER = {
+    "host": "broker.bioconductor.org",
+    "port": 61613
+}
 
 # FIXME use config.yaml to get this info
 BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
@@ -38,13 +41,13 @@ from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 try:
-    logging.info("opening connection to %s", BROKER)
-    stomp = Stomp(BROKER, 61613)
+    logging.info("main() Connecting to %s.", BROKER['host'])
+    stomp = Stomp(BROKER['host'], BROKER['port'])
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
 except:
-    logging.error("cannot connect to %s", BROKER)
+    logging.error("Cannot connect to %s.", BROKER['host'])
     raise
 
 # do we want acks?
@@ -141,7 +144,7 @@ def handle_complete(obj, build_obj):
             result = "OK"
     else:
         result = "ERROR"
-    logging.debug("in handle_complete(), status is %s and result is %s."
+    logging.debug("handle_complete() status: %s; result: %s."
                   % (obj['status'], result))
     if (obj['status'] == 'build_complete'):
         build_obj.buildsrc_result = result
@@ -184,7 +187,7 @@ def handle_builder_event(obj):
         return
     build_obj = None
     if(obj.has_key('first_message') and obj['first_message'] == True):
-        logging.info("handling first message")
+        logging.debug("handle_builder_event() Handling first message.")
         build_obj = handle_first_message(obj, parent_job)
     if (obj.has_key('status')):
         status = obj['status']
@@ -192,7 +195,7 @@ def handle_builder_event(obj):
         try:
             build_obj = get_build_obj(obj)
         except Exception as e:
-            logging.warning("Caught  exception: ", e)
+            logging.warning("handle_builder_event() Exception: %s." % e)
             return
         if (status == 'dcf_info'):
             handle_dcf_info(obj, build_obj)
@@ -251,9 +254,9 @@ def handle_builder_event(obj):
             build_obj.postprocessing_result = 'skipped'
             build_obj.save()
         else:
-            logging.info("ignoring message:%s" % obj)
+            logging.info("handle_builder_event() Ignoring message: %s." % obj)
     else:
-        logging.info("invalid message, no 'status' key: %s" % obj)
+        logging.warning("handle_builder_event() No 'status' key: %s." % obj)
         # svn_result,
         # clear_check_console, starting_check,
         # starting_buildbin, svn_info,
@@ -270,40 +273,42 @@ def is_connection_usable():
     
 
 def callback(body, destination):
-    logging.info("[x] Received %r" % (body,))
+    logging.info("callback() Received %r." % (body,))
     received_obj = None
     if not is_connection_usable():
-        logging.info("Closing connection")
+        logging.debug("callback() Closing connection.")
         connection.close()
     try:
-        logging.info("Parsing JSON")
+        logging.debug("callback() Parsing JSON.")
         received_obj = json.loads(body)
     except ValueError as e:
-        logging.error("Received invalid JSON: %s" % body)
+        logging.error("callback() Received invalid JSON: %s." % body)
         return
-    if('job_id' in received_obj.keys()):
-        logging.info("destination %s...", destination)
+    if ('job_id' in received_obj.keys()):
+        logging.debug("callback() Destination = %s.", destination)
         if (destination == '/topic/buildjobs'):
             handle_job_start(received_obj)
         elif (destination == '/topic/builderevents'):
             handle_builder_event(received_obj)
-        logging.info("...destination handled")
+        logging.debug("callback() Destination handled.")
     else:
-        logging.warning("Invalid json (no job_id key)")
+        logging.warning("callback() Invalid json (no job_id key).")
 
-logging.info("Waiting for messages...")
+logging.info("main() Waiting for messages.")
 
 while True:
     try:
-        logging.debug("Begin while(true) loop.")
+        logging.debug("main() Begin while(True) loop.")
         frame = stomp.receive_frame()
         stomp.ack(frame) # do this?
-        logging.debug("Frame acknowledged")
+        logging.debug("main() Frame acknowledged.")
         callback(frame.body, frame.headers.get('destination'))
-        logging.debug("Callback finished")
+        logging.debug("main() Callback finished.")
     except KeyboardInterrupt:
-        logging.info("KeyboardInterrupt")
+        logging.info("main() KeyboardInterrupt.")
         stomp.disconnect()
         break
+    except:
+        continue
 
-logging.info("Exiting")
+logging.info("Done.")
