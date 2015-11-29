@@ -12,7 +12,7 @@ from django.db import connection
 
 ## this may need to change:
 BROKER = {
-    "host": "broker.bioconductor.org",
+    "host": "localhost",
     "port": 61613
 }
 
