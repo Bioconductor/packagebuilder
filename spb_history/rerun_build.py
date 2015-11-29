@@ -14,13 +14,17 @@ import os
 import subprocess
 import base64
 import datetime
-import pytz
 from pytz import timezone
 import time
 import ConfigParser
 from stompy import Stomp
+import logging
 
-# sys.path.append('../bioc-commons')
+BROKER = {
+    'host': "localhost",
+    'port': 61613
+}
+
 from bioconductor.simplelog import logMsg
 
 if (len(sys.argv) != 3):
@@ -62,24 +66,8 @@ json = json.dumps(obj)
 
 #print(json)
 
-globalConfigParser = ConfigParser.RawConfigParser()
-globalConfigParser.read(os.path.join(os.getcwd(),'spb.properties'))
-environment = globalConfigParser.get('Environment', 'environment');
-
-envSpecificConfigParser = ConfigParser.RawConfigParser()
-if (environment == "production"):
-    logMsg("Working in production")
-    envSpecificConfigParser.read(os.path.join(os.getcwd(),'production.properties'))
-else:
-    logMsg("Working in development")
-    envSpecificConfigParser.read(os.path.join(os.getcwd(),'development.properties'))
-
-stompHost = envSpecificConfigParser.get("Properties","stomp.host")
-stompPort = int(envSpecificConfigParser.get("Properties","stomp.port"))
-logMsg("Will attempt to connect to message queue at '%s:%s'" % (stompHost, stompPort))
-
 try:
-    stomp = Stomp(stompHost, stompPort)
+    stomp = Stomp(BROKER['host'], BROKER['port'])
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
