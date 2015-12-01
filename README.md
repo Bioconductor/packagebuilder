@@ -4,13 +4,10 @@ Bioconductor Single Package Builder (SPB)
 
 The code is stored in [GitHub](https://github.com/Bioconductor/packagebuilder).
 
-Currently, SPB consists of 3 components in this git repo, in top-level directories:
-
+Currently, SPB consists of 2 components in this git repo, in top-level directories:
 * spb_history - A Django web app to track build history.
   Accessible at http://staging.bioconductor.org:4000
 * workers - Python scripts that run on each build machine
-* **DEPRECATED** node - A web app written in NodeJS. Currently disabled, but formerly
-  accessible at http://staging.bioconductor.org:4000
 
 Overview
 ========
@@ -18,13 +15,9 @@ Overview
 ##### Options to start a build:
 1. Submitting tarballs to the tracker
 2. Running the spb_history/rerun_build.py script
-3. **DEPRECATED** Using the NodeJS app described above
 
 These all send messages to an installation of ActiveMQ (a Java-based messaging framework) to listeners on each build machine ([server.py](workers/server.py)). The build machines
 start building the package and send back progress messages.
-
-**DEPRECATED** If using the NodeJS app, these messages are displayed on receipt via WebSockets.
-
 
 There is another listener (called ([archiver.py]) which
 writes build events to a database, where they can
@@ -72,7 +65,6 @@ https://github.com/dtenenba/bioc_submit/blob/master/detectors/builder2_reactor.p
 
 Integration Workflow
 --------------------
-
 When new messages are added to the tracker, the reactor is run.
 It sends a message to the listeners on each build node as described
 at the start of this document.
@@ -115,7 +107,6 @@ Here are the moving parts, first briefly and then in more detail.
   starts a new process (first sourcing some variables
   specific to the build node, then running a python script
   called builder.py).
-* the node.js front end; not currently enabled
 * Three scripts that run on the staging.bioconductor.org machine:
   1) track_build_completion.py: monitors progress
      of builds and when a build is complete (all machines
