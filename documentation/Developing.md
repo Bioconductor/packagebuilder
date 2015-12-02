@@ -4,6 +4,14 @@ Developing
 #### Running a test controller node locally
 _TODO: Determine feasability and document me._
 
+Until a local controller node can be understood, you'll need to make sure your
+IP address is whitelisted on the broker's firewall.  This is controlled by an
+AWS security group named "stomp", accessible
+[here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=sg-fd4edc9a;sort=groupId).
+
+One approach for running the broker locally might be an ActiveMQ docker container:
+https://github.com/disaster37/activemq
+
 #### Running a test build node locally
 
 Developers working on this system should use the following workflow :
@@ -37,3 +45,15 @@ does will be stored in `work`, as defined by the variable `PACKAGEBUILDER_HOME` 
 ```
 export PACKAGEBUILDER_HOME="work" && nohup python workers/server.py >> server.log 2>&1 &
 ```
+  You should see some output by viewing `server.log`:
+  ```
+  nohup: ignoring input
+  [2015-12-01 12:05:39.565315] Attempting to connect to stomp broker 'broker.bioconductor.org:61613'
+  [2015-12-01 12:05:39.624604] on_connecting broker.bioconductor.org 61613
+  [2015-12-01 12:05:39.624690] on_send STOMP {'accept-version': '1.1'}
+  [2015-12-01 12:05:39.624776] Connected to stomp broker 'broker.bioconductor.org:61613'
+  [2015-12-01 12:05:39.624893] on_send SUBSCRIBE {'ack': 'client', 'destination': '/topic/buildjobs', 'id': 'eae21baf7e5042d292f3046a28334b7d'}
+  [2015-12-01 12:05:39.624924] Subscribed to channel /topic/buildjobs
+  [2015-12-01 12:05:39.624977]  [*] Waiting for messages. To exit press CTRL+C
+  [2015-12-01 12:05:39.664368] on_connected {'session': 'ID:broker-46292-1448469945488-2:60', 'version': '1.1', 'server': 'ActiveMQ/5.6.0', 'heart-beat': '0,0'}
+  ```
