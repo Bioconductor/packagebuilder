@@ -10,6 +10,10 @@ import platform
 import uuid
 import stomp
 
+
+# sys.path.append('../bioc-commons')
+from bioconductor.simplelog import logMsg
+
 waitingCounter=0
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
@@ -17,11 +21,6 @@ builder_id = builder_id.replace(".local", "")
 
 builder_id = platform.node().lower().replace(".fhcrc.org","")
 builder_id = builder_id.replace(".local", "")
-
-# TODO: Replace with a logging framework
-def logMsg(msg):
-    print "[%s] %s" % (datetime.datetime.now(), msg)
-    sys.stdout.flush()
 
 # TODO: Name the callback for it's functionality, not usage.  This seems like it's as
 #       useful as 'myFunction' or 'myMethod'.  Why not describe capability provided ?

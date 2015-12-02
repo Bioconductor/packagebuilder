@@ -37,7 +37,8 @@ install the required module.  For example, the
 using the virtual environment.  The result is the module installed at `./env/lib/python2.7/site-packages/stomp` :
 
   ```
-  pip install stomp.py
+  # YES, right now, we need both stomp.py and stompy.  We'll migrate off stompy soon.
+  pip install stomp.py pytz stompy
   ```
 
 4. Next, you'll run the builder service.  Note that the work this service
