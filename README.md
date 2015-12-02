@@ -14,12 +14,12 @@ Overview
 
 ##### Options to start a build:
 1. Submitting tarballs to the tracker
-2. Running the spb_history/rerun_build.py script
+2. Running the [rerun_build.py](spb_history/rerun_build.py) script
 
 These all send messages to an installation of ActiveMQ (a Java-based messaging framework) to listeners on each build machine ([server.py](workers/server.py)). The build machines
 start building the package and send back progress messages.
 
-There is another listener (called ([archiver.py]) which
+There is another listener (called [archiver.py](workers/archiver.py) which
 writes build events to a database, where they can
 then be displayed by the spb_history web application
 (written in Python's Django framework).
@@ -29,9 +29,9 @@ System (BBS). In particular, it uses BBS scripts to set environment variables
 for the build, though these are overridden in a couple of cases.
 
 On the build machines, the listener that is always running is called
-server.py. When it receives a build request, it kicks off a script
+[server.py](workers/server.py). When it receives a build request, it kicks off a script
 particular to that build machine (called e.g. petty.sh or moscato2.bat)
-which sets environment variables, then runs builder.py to do the
+which sets environment variables, then runs [builder.py](workers/builder.py) to do the
 actual building.
 
 
@@ -101,19 +101,19 @@ Here are the moving parts, first briefly and then in more detail.
 * Roundup detector. Part of the issue tracker, it detects
   when a tarball is submitted and sends a message to the
   SPB telling it to start a build.
-* build node server; a python script called server.py should
+* build node server; a python script called [server.py](workers/server.py) should
   be running on each build node at all times. when an
   instruction is received to start a build, this script
   starts a new process (first sourcing some variables
   specific to the build node, then running a python script
-  called builder.py).
+  called [builder.py](workers/builder.py)).
 * Three scripts that run on the staging.bioconductor.org machine:
-  1) track_build_completion.py: monitors progress
+  1) [track_build_completion.py](spb_history/track_build_completion.py): monitors progress
      of builds and when a build is complete (all machines
      have finished) it posts the build report to the web
      and sends a message to the tracker.
-  2) archiver.py: monitors progress of builds, writes all build
+  2) [archiver.py](workers/archiver.py): monitors progress of builds, writes all build
      info to a database to be displayed by a Django web app
      (what you see when you hit [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)).
-  3) rerun_build.py: for manually kicking off an SPB build without
+  3) [rerun_build.py](spb_history/rerun_build.py): for manually kicking off an SPB build without
      having to repost a tarball to the tracker.
