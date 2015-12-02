@@ -73,7 +73,7 @@ The message sent to SPB contains a flag indicating that this build was
 originated by the SPB.
 
 When the build is complete, another script on staging
-(https://github.com/Bioconductor/packagebuilder/blob/master/spb_history/track_build_completion.py)
+[track_build_completion.py](spb_history/track_build_completion.py)
 is listening, and it posts a message to the tracker
 (using an HTTPS request) including a link to the build report.
 
