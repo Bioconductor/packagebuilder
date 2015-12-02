@@ -94,10 +94,7 @@ Here are the moving parts, first briefly and then in more detail.
 * Broker - currently a machine in the cloud called
   broker.bioconductor.org. All it does is run an ActiveMQ
   message broker. Messages are passed using a text protocol
-  called STOMP. We may want to change the SPB to use
-  Amazon Simple Queue Service (SQS) instead of ActiveMQ, then
-  we would not pay for a broker machine to be up all the time,
-  just for the individual messages we send.
+  called STOMP.
 * Roundup detector. Part of the issue tracker, it detects
   when a tarball is submitted and sends a message to the
   SPB telling it to start a build.
