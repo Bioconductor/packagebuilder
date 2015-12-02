@@ -4,14 +4,18 @@ Developing
 #### Running a test controller node locally
 _TODO: Determine feasability and document me._
 
-Until a local controller node can be understood, you'll need to make sure your
-IP address is whitelisted on the broker's firewall.  This is controlled by an
-AWS security group named "stomp", accessible
-[here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=sg-fd4edc9a;sort=groupId).
+You'll need an ActiveMQ instance.  To accomplish that, we'll use [this
+docker image](https://github.com/disaster37/activemq).  
 
-One approach for running the broker locally might be an ActiveMQ docker container:
-https://github.com/disaster37/activemq
+```
+# Get the image
+docker pull webcenter/activemq:5.12.0
 
+# Start ActiveMQ
+docker run --name='activemq' -d -p 8161:8161 -p 61616:61616 -p 61613:61613 \
+-v /data/activemq:/data/activemq -v /var/log/activemq:/var/log/activemq webcenter/activemq:5.12.0
+
+```
 #### Running a test build node locally
 
 Developers working on this system should use the following workflow :
