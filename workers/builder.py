@@ -22,11 +22,11 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     level=logging.DEBUG)
 
 ENVIR = {
-    'bbs_home': "",
+    'bbs_home': "/home/mtmorgan/a/BBS",
     'bbs_R_home': "",
-    'bbs_node_hostname': "",
-    'bbs_R_cmd': "",
-    'bbs_Bioc_version': "",
+    'bbs_node_hostname': "hp-zb",
+    'bbs_R_cmd': "/home/mtmorgan/bin/R-devel/bin/R",
+    'bbs_Bioc_version': "3.3",
 
     'packagebuilder_home': "",
 
@@ -38,6 +38,9 @@ ENVIR = {
     'tracker_pass': os.getenv("TRACKER_PASS")
 }
 
+bad = [k for k, v in ENVIR.iteritems() if v is None]
+if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
+
 HOSTS = {
     'svn': 'https://hedgehog.fhcrc.org',
     'tracker': 'https://tracker.bioconductor.org',
@@ -45,7 +48,7 @@ HOSTS = {
 }
 
 BROKER = {
-    "host": "broker.bioconductor.org",
+    "host": "localhost",
     "port": 61613
 }
 
@@ -173,7 +176,7 @@ def is_build_required(manifest):
 
     if (is_svn_package()):
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-        logging.debug("is_build_required() is_svn_package() == True" +
+        logging.debug("is_build_required() is_svn_package() is True" +
             "\n  description_url = " + description_url +
             "\n  svn_user ="  + ENVIR['svn_user'] +
             "\n  svn_pass = " + ENVIR['svn_pass'])
@@ -205,12 +208,12 @@ def is_build_required(manifest):
         svn_version = pkgname.split("_")[1]
 
     if ("force" in manifest.keys()):
-        if (manifest['force'] == True):
+        if (manifest['force'] is True):
             return(True)
-        
+
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
-    
+
     cran_repo_map = {
         'source': "src/contrib",
         'win.binary': "bin/windows/contrib/" + r_version,
@@ -247,22 +250,23 @@ def is_build_required(manifest):
 def setup():
     global manifest
     global working_dir
-    global BBScorevars
+    global BBScorevars          # in ENVIR['bbs_home'] path
     global dcf
     global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, \
         packagebuilder_rsync_rsh_cmd, packagebuilder_scp_cmd
     global callcount
     global builder_id
+
     logging.info("Starting setup().")
     
     builder_id = ENVIR['bbs_node_hostname']
     callcount = 1
     
     ## BBS-specific imports
-    BBS_home = ENVIR['bbs_home']
-    sys.path.append(BBS_home)
+    sys.path.append(ENVIR['bbs_home'])
+    sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
+    os.environ['BBS_HOME'] = ENVIR['bbs_home']
     import BBScorevars
-    sys.path.append(os.path.join(BBS_home, "test/python"))
     import dcf
     
     packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(
@@ -363,9 +367,9 @@ def extract_tarball():
         retcode = 0
     except:
         retcode = 255
-        logging.error("extract_tarball() Failed to download file: %s."
-                      % ex.message)
-        # retcode = ex.message
+        logging.error("extract_tarball() Failed to download '%s' to '%s'.",
+                      manifest['svn_url'], local_file)
+        raise
 
     send_message({
         "status": "post_processing",
@@ -374,7 +378,7 @@ def extract_tarball():
     })
     if (retcode != 0):
         logging.error("extract_tarball() Failed to 'curl' tarball.")
-        sys.exit("failed to 'curl' tarball")
+        raise
     
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
@@ -395,7 +399,7 @@ def extract_tarball():
     })
     if (not retcode == 0):
         logging.error("extract_tarball() Failed to 'untar' tarball.")
-        sys.exit("failed to 'untar' tarball")
+        raise
     f = open("%s/DESCRIPTION" % package_name)
     description = f.read()
     f.close()
@@ -418,7 +422,7 @@ def install_pkg_deps():
     log = "%s/installDeps.log" % working_dir
     if args.strip() == "":
         args = "None=1"
-    cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore --slave \"--args %s\"\
+    cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore \"--args %s\"\
       %s %s" % (ENVIR['bbs_R_cmd'], args.strip(), r_script, log)
     send_message({
         "body": "Installing dependencies...",
@@ -951,7 +955,7 @@ def update_packages_file():
             "url": url})
         
 def get_r_version():
-    logging.debug("get_r_version() BBS_R_CMD == %s" % ENVIR['bbs_R_cmd'])
+    logging.debug("get_r_version() BBS_R_CMD = %s" % ENVIR['bbs_R_cmd'])
     r_version_raw, stderr = subprocess.Popen([
         ENVIR['bbs_R_cmd'],"--version"
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
@@ -1012,6 +1016,7 @@ def is_svn_package():
 
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
+    logging.info("Starting builder")
     if (len(sys.argv) < 2):
         logging.error("main() Missing manifest and R version arguments.")
         sys.exit("missing manifest and R version arguments")
@@ -1063,7 +1068,7 @@ if __name__ == "__main__":
     result = install_pkg_deps()
     if (result != 0):
         logging.error("main() Failed to install dependencies: %d." % result)
-        sys.exit("failed to install dependencies")
+        raise Exception("failed to install dependencies")
     
     result = build_package(True)
     if (result == 0):
