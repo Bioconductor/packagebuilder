@@ -108,12 +108,12 @@ Here are the moving parts, first briefly and then in more detail.
   specific to the build node, then running a python script
   called [builder.py](workers/builder.py)).
 * Three scripts that run on the staging.bioconductor.org machine:
-  1) [track_build_completion.py](spb_history/track_build_completion.py): monitors progress
+  1. [track_build_completion.py](spb_history/track_build_completion.py): monitors progress
      of builds and when a build is complete (all machines
      have finished) it posts the build report to the web
      and sends a message to the tracker.
-  2) [archiver.py](workers/archiver.py): monitors progress of builds, writes all build
+  2. [archiver.py](workers/archiver.py): monitors progress of builds, writes all build
      info to a database to be displayed by a Django web app
      (what you see when you hit [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)).
-  3) [rerun_build.py](spb_history/rerun_build.py): for manually kicking off an SPB build without
+  3. [rerun_build.py](spb_history/rerun_build.py): for manually kicking off an SPB build without
      having to repost a tarball to the tracker.
