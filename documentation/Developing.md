@@ -78,6 +78,12 @@ builder service, run the following :
   
   ```
 
+#### Running the Django web app
+  To run Django (`archiver.py`):
+  ```
+  python -m spb_history/archiver
+  ```
+
 #### Kick off a job
 To kick off a job, run the command below.  Be sure you're in a terminal with the 
 appropriate virtualenv activated.
