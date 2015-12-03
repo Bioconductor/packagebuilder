@@ -22,23 +22,23 @@ To work on the SPB, you should use a virtual environment.  Eventually, a
 be used in production.
 
 1. Create a virtual environment for your work (this is where you'll install dependencies
-of the SPB).  If `virtualenv` is not installed on your machine,
-[install it](http://virtualenv.readthedocs.org/en/latest/installation.html).  Afterwards,
-create an environment called "env":
-```
-virtualenv env
-```
-This virtual environment is important, as we do not want to pollute the
-global Python package space.  Assume other python services are running
-on this host and require different versions of various modules.
+  of the SPB).  If `virtualenv` is not installed on your machine,
+  [install it](http://virtualenv.readthedocs.org/en/latest/installation.html).  Afterwards,
+  create an environment called "env":
+  ```
+  virtualenv env
+  ```
+  This virtual environment is important, as we do not want to pollute the
+  global Python package space.  Assume other python services are running
+  on this host and require different versions of various modules.
 
 2. Next, activate the environment in **every shell** you'll be working in :
-```
-source env/bin/activate
-```
+  ```
+  source env/bin/activate
+  ```
 3. You should see your shell change with the environment activated.  Next
-install the required modules.  Since the virtualenv is active, the packages 
-are kept in isolation.  For example, the
+  install the required modules.  Since the virtualenv is active, the packages 
+  are kept in isolation.  For example, the
 [stomp.py](https://github.com/jasonrbriggs/stomp.py) module will be installed
 at `./env/lib/python2.7/site-packages/stomp`.  
 
@@ -51,12 +51,13 @@ at `./env/lib/python2.7/site-packages/stomp`.
 
 #### Run a local build node
 
-4. The builder service will store it's data in the `work` directory.  To start the 
+1. The builder service will store it's data in the `work` directory.  To start the 
 builder service, run the following :
   ```
   python -m workers/server >> server.log 2>&1 &
   ```
   You should see some output by viewing `server.log`:
+  
   ```
   nohup: ignoring input
   [2015-12-01 12:05:39.565315] Attempting to connect to stomp broker
@@ -71,6 +72,7 @@ builder service, run the following :
   [2015-12-01 12:05:39.664368] on_connected {'session':
 'ID:broker-46292-1448469945488-2:60', 'version': '1.1', 'server': 'ActiveMQ/5.6.0',
 'heart-beat': '0,0'}
+  
   ```
 
 #### Kick off a job
