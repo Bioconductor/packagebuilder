@@ -83,12 +83,12 @@ try:
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
+    logMsg("Connection established.")
 except:
-    print("Cannot connect")
+    logMsg("Cannot connect")
     raise
 
 this_frame = stomp.send({'destination': "/topic/buildjobs",
   'body': json,
   'persistent': 'true'})
-print("Receipt: %s" % this_frame.headers.get('receipt-id'))
-sys.stdout.flush()
+logMsg("Receipt: %s" % this_frame.headers.get('receipt-id'))
