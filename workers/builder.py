@@ -19,40 +19,17 @@ import logging
 
 # Modules created by Bioconductor
 from bioconductor.config import BROKER
+from bioconductor.config import BIOC_R_MAP
+from bioconductor.config import ENVIR
+from bioconductor.config import HOSTS
+
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
-ENVIR = {
-    'bbs_home': "/home/mtmorgan/a/BBS",
-    'bbs_R_home': "",
-    'bbs_node_hostname': "hp-zb",
-    'bbs_R_cmd': "/home/mtmorgan/bin/R-devel/bin/R",
-    'bbs_Bioc_version': "3.3",
-
-    'packagebuilder_home': "",
-
-    'bbs_RSA_key': os.getenv("BBS_RSAKEY"),
-    'packagebuilder_RSA_key': os.getenv("PACKAGEBUILDER_RSAKEY"),
-    'svn_user': os.getenv("SVN_USER"),
-    'svn_pass': os.getenv("SVN_PASS"),
-    'tracker_user': os.getenv("TRACKER_USER"),
-    'tracker_pass': os.getenv("TRACKER_PASS")
-}
-
 bad = [k for k, v in ENVIR.iteritems() if v is None]
 if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
-
-HOSTS = {
-    'svn': 'https://hedgehog.fhcrc.org',
-    'tracker': 'https://tracker.bioconductor.org',
-    'bioc': 'https://bioconductor.org'
-}
-
-BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
-    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1",
-    "3.1": "3.2", "3.2": "3.2", "3.3": "3.3"} 
 
 class Tailer(threading.Thread):
     def __init__(self, filename, status):

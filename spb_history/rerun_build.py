@@ -16,21 +16,15 @@ from stompy import Stomp
 import logging
 # Modules created by Bioconductor
 from bioconductor.config import BROKER
-
-BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
-    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2", "3.2": "3.2",
-    "3.3": "3.3"}
-
-BIOC_VERSION = "3.3"
+from bioconductor.config import BIOC_R_MAP
+from bioconductor.config import BIOC_VERSION
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
-from bioconductor.simplelog import logMsg
-
 if (len(sys.argv) != 3):
-    logMsg("usage: %s <issue_id> <tracker_tarball_url>" % sys.argv[0])
+    logging.info("usage: %s <issue_id> <tracker_tarball_url>" % sys.argv[0])
     sys.exit(1)
 
 pacific = timezone("US/Pacific")
@@ -65,15 +59,15 @@ json = json.dumps(obj)
 
 
 #print(json)
-
+logging.info("Attempting to connect to Stomp server: '%s:%s'", BROKER['host'], BROKER['port'])
 try:
     stomp = Stomp(BROKER['host'], BROKER['port'])
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
-    logMsg("Connection established.")
+    logging.info("Connection established.")
 except:
-    logMsg("Cannot connect")
+    logging.info("Cannot connect")
     raise
 
 this_frame = stomp.send({'destination': "/topic/buildjobs",
