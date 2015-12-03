@@ -29,7 +29,7 @@ from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 try:
-    logging.info("main() Connecting to %s.", BROKER['host'])
+    logging.info("main() Connecting to ActiveMQ at '%s:%s'.", BROKER['host'],BROKER['port'])
     stomp = Stomp(BROKER['host'], BROKER['port'])
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")

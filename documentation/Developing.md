@@ -39,14 +39,17 @@ be used in production.
 3. You should see your shell change with the environment activated.  Next
   install the required modules.  Since the virtualenv is active, the packages 
   are kept in isolation.  For example, the
-[stomp.py](https://github.com/jasonrbriggs/stomp.py) module will be installed
-at `./env/lib/python2.7/site-packages/stomp`.  
+  [stomp.py](https://github.com/jasonrbriggs/stomp.py) module will be installed
+  at `./env/lib/python2.7/site-packages/stomp`.  There are two **important** 
+  notes about the next command (1), yes right now, we need both `stomp.py`
+  and `stompy`.  We'll migrate off `stompy` soon.  (2) It's very important
+  that you install **version 1.8.4** of Django, as newer versions have caused
+  problems.
 
-  Install the following packages :
+  Install the dependencies :
 
   ```
-  # YES, right now, we need both stomp.py and stompy.  We'll migrate off stompy soon.
-  pip install stomp.py pytz stompy
+  pip install stomp.py pytz stompy django==1.8.4
   ```
 
 #### Run a local build node
