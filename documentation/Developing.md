@@ -53,8 +53,7 @@ be used in production.
   ```
 
 #### Run a local build node
-
-1. The builder service will store it's data in the `work` directory.  To start the 
+The builder service will store it's data in the `work` directory.  To start the 
 builder service, run the following :
   ```
   python -m workers/server >> server.log 2>&1 &
@@ -81,7 +80,7 @@ builder service, run the following :
 #### Running the Django web app
   To run Django (`archiver.py`):
   ```
-  python -m spb_history/archiver
+  python -m spb_history/archiver > archiver.log 2>&1 &
   ```
 
 #### Kick off a job

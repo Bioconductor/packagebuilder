@@ -34,6 +34,7 @@ try:
     # optional connect keyword args "username" and "password" like so:
     # stomp.connect(username="user", password="pass")
     stomp.connect()
+    logging.info("Stomp connection established.")
 except:
     logging.error("Cannot connect to %s.", BROKER['host'])
     raise
