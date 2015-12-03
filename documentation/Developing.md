@@ -1,11 +1,9 @@
 Developing
 ==========
 
-#### Running a test controller node locally
-_TODO: Determine feasability and document me._
-
-You'll need an ActiveMQ instance.  To accomplish that, we'll use [this
-docker image](https://github.com/disaster37/activemq).  
+#### Running the SPB stack locally
+To run the Single Package Builder locally, you'll need an ActiveMQ instance.  The 
+simplest way to accomplish that, is using Docker. We'll use [this docker image](https://github.com/disaster37/activemq).  
 
 ```
 # Get the image
@@ -17,9 +15,11 @@ docker run --name='activemq' -d -p 8161:8161 -p 61616:61616 -p 61613:61613 \
 webcenter/activemq:5.12.0
 
 ```
-#### Running a test build node locally
+#### Setting up the Python environment
 
-Developers working on this system should use the following workflow :
+To work on the SPB, you should use a virtual environment.  Eventually, a 
+[virtualenv] (http://docs.python-guide.org/en/latest/dev/virtualenvs/) should also 
+be used in production.
 
 1. Create a virtual environment for your work (this is where you'll install dependencies
 of the SPB).  If `virtualenv` is not installed on your machine,
@@ -32,26 +32,30 @@ This virtual environment is important, as we do not want to pollute the
 global Python package space.  Assume other python services are running
 on this host and require different versions of various modules.
 
-2. Next, activate the environment :
+2. Next, activate the environment in **every shell** you'll be working in :
 ```
 source env/bin/activate
 ```
 3. You should see your shell change with the environment activated.  Next
-install the required module.  For example, the
+install the required modules.  Since the virtualenv is active, the packages 
+are kept in isolation.  For example, the
 [stomp.py](https://github.com/jasonrbriggs/stomp.py) module will be installed
-using the virtual environment.  The result is the module installed at
-`./env/lib/python2.7/site-packages/stomp` :
+at `./env/lib/python2.7/site-packages/stomp`.  
+
+  Install the following packages :
 
   ```
   # YES, right now, we need both stomp.py and stompy.  We'll migrate off stompy soon.
   pip install stomp.py pytz stompy
   ```
 
-4. Next, you'll run the builder service.  Note that the work this service
-does will be stored in `work`, as defined by the variable `PACKAGEBUILDER_HOME` :
-```
-export PACKAGEBUILDER_HOME="work" && nohup python workers/server.py >> server.log 2>&1 &
-```
+#### Run a local build node
+
+4. The builder service will store it's data in the `work` directory.  To start the 
+builder service, run the following :
+  ```
+  python -m workers/server >> server.log 2>&1 &
+  ```
   You should see some output by viewing `server.log`:
   ```
   nohup: ignoring input
@@ -68,3 +72,11 @@ export PACKAGEBUILDER_HOME="work" && nohup python workers/server.py >> server.lo
 'ID:broker-46292-1448469945488-2:60', 'version': '1.1', 'server': 'ActiveMQ/5.6.0',
 'heart-beat': '0,0'}
   ```
+
+#### Kick off a job
+To kick off a job, run the command below.  Be sure you're in a terminal with the 
+appropriate virtualenv activated.
+```
+python -m spb_history/rerun_build 1343 \
+  https://tracker.bioconductor.org/file6714/spbtest_0.99.1.tar.gz
+```
