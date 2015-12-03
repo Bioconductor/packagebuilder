@@ -2,11 +2,34 @@
 # dynamically next.
 
 import os
+import logging
+import ConfigParser
 
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
+
+logging.info("Loading configuration")
+
+globalConfigParser = ConfigParser.RawConfigParser()
+globalConfigParser.read(os.path.join(os.getcwd(),'spb.properties'))
+environment = globalConfigParser.get('Environment', 'environment');
+
+envSpecificConfigParser = ConfigParser.RawConfigParser()
+if (environment == "production"):
+    logging.info("Working in production")
+    envSpecificConfigParser.read(os.path.join(os.getcwd(),'production.properties'))
+else:
+    logging.info("Working in development")
+    envSpecificConfigParser.read(os.path.join(os.getcwd(),'development.properties'))
+
+BUILD_NODES = envSpecificConfigParser.get('Properties', 'builders').split(",")
 BROKER = {
-    "host": "localhost",
-    "port": 61613
+    "host": envSpecificConfigParser.get('Properties', 'stomp.host'),    
+    "port": int(envSpecificConfigParser.get('Properties', 'stomp.port'))
 }
+logging.info("The builds nodes enabled are: '%s'", BUILD_NODES)
+
 
 BIOC_VERSION = "3.3"
 
@@ -42,3 +65,6 @@ HOSTS = {
     'tracker': 'https://tracker.bioconductor.org',
     'bioc': 'https://bioconductor.org'
 }
+
+
+logging.info("Finished loading configuration.")

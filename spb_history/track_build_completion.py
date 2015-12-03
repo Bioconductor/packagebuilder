@@ -23,8 +23,12 @@ import urllib
 from stompy import Stomp
 import mechanize
 
+# Modules created by Bioconductor
+from bioconductor.config import BROKER
+from bioconductor.config import BUILD_NODES
+
 try:
-    stomp = Stomp("broker.bioconductor.org", 61613)
+    stomp = Stomp(BROKER['host'], BROKER['port'])
     stomp.connect()
 except:
     print("Cannot connect")
@@ -35,8 +39,6 @@ stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
 global tracker_base_url
 global build_counter
 build_counter = {}
-# FIXME - get this from canonical source (config.yaml)
-hosts = ["zin2", "morelia", "moscato2"]
 
 def handle_builder_event(obj):
     global build_counter
@@ -51,7 +53,7 @@ def handle_builder_event(obj):
             build_counter[job_id] = 1
         else:
             build_counter[job_id] += 1
-        if (build_counter[job_id] == len(hosts)):
+        if (build_counter[job_id] == len(BUILD_NODES)):
             print("We have enough finished builds to send a report.")
             handle_completed_build(obj)
 
@@ -245,4 +247,3 @@ def main_loop():
 if __name__ == "__main__":
     main_loop()
 #else:
-

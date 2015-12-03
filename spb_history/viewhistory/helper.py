@@ -1,4 +1,4 @@
-
+from bioconductor.config import BUILD_NODES
 
 def sort_helper(b1, b2):
     os_order = {'Linux': 0, 'Windows': 1, 'Mac': 2}
@@ -41,10 +41,10 @@ def filter_out_wrong_versions(builds, job):
     # FIXME get this info from a central source (config.yaml)
     if (r_ver == "3.3"):
         if bioc_version == "3.3":
-            nodes = ["zin2", "moscato2", "morelia"]
+            nodes = BUILD_NODES
     if (r_ver == "3.2"):
         if bioc_version == "3.1":
-            nodes = ["zin2", "petty", "moscato2", "morelia"]
+            nodes = BUILD_NODES
         if bioc_version == "3.2":
             nodes = ["linux1.bioconductor.org", "perceval", "windows1.bioconductor.org", "oaxaca"]
     if (r_ver == "3.1"):
