@@ -18,7 +18,8 @@ You can go to
 [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)
 and click on the name of the package and then the most recent build.
 (if a build is in progress, you can refresh this page to see progress).
-If you do not see all 3 build machines (Linux, Windows and Mac OS X Mavericks), or if the builds all appear to be stuck, then something is wrong.
+If you do not see all 3 build machines (Linux, Windows and Mac OS X Mavericks), or if the
+builds all appear to be stuck, then something is wrong.
 
 Before you can diagnose the problem further, you need to understand
 the various components of the SPB.
@@ -133,17 +134,20 @@ be determined in the tracker
 Find the issue containing the tarball that you want to
 restart a build of. Let's say for example that the issue number is
 558 (the issue number will appear in the tracker URL, for
-example [https://tracker.bioconductor.org/issue558](https://tracker.bioconductor.org/issue558)).
+example
+[https://tracker.bioconductor.org/issue558](https://tracker.bioconductor.org/issue558)).
 Then get the URL of the tarball that
 you want to restart a build for. You can do this by right-clicking
 on the appropriate link and choosing "Copy Link".
 An example URL is:
+
 [https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz](https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz)
 
 So now with these two pieces of information you
 can restart an SPB build as follows:
 
-    python rerun_build.py 558 https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz
+    python rerun_build.py 558
+https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz
 
 You can then monitor the build by going to
 [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)
@@ -156,5 +160,6 @@ and run the rerun_build.py script on your own machine.
 The reason is that not every machine has access to the
 security group under which the ActiveMQ broker runs.
 You can give your IP (or subnet) access to this
-group [here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=stomp;sort=Name).
+group
+[here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=stomp;sort=Name).
 You need to enable TCP access on port 61613 (the STOMP port).
