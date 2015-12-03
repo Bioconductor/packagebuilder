@@ -9,19 +9,15 @@ import platform
 import uuid
 import stomp
 import logging
+# Modules created by Bioconductor
+from bioconductor.config import BROKER
 
-from bioconductor.simplelog import logMsg
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
 ENVIR = {
     'packagebuilder_home': "/home/mtmorgan/a/packagebuilder/workers"
-}
-
-BROKER = {
-    "host": "localhost",
-    "port": 61613
 }
 
 TOPICS = {

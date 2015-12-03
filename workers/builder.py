@@ -17,6 +17,9 @@ from stompy import Stomp
 import mechanize
 import logging
 
+# Modules created by Bioconductor
+from bioconductor.config import BROKER
+
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
@@ -45,11 +48,6 @@ HOSTS = {
     'svn': 'https://hedgehog.fhcrc.org',
     'tracker': 'https://tracker.bioconductor.org',
     'bioc': 'https://bioconductor.org'
-}
-
-BROKER = {
-    "host": "localhost",
-    "port": 61613
 }
 
 BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",

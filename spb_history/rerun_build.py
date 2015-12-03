@@ -14,11 +14,8 @@ import datetime
 from pytz import timezone
 from stompy import Stomp
 import logging
-
-BROKER = {
-    'host': "localhost",
-    'port': 61613
-}
+# Modules created by Bioconductor
+from bioconductor.config import BROKER
 
 BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
     "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2", "3.2": "3.2",

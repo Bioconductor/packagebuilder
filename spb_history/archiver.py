@@ -5,12 +5,8 @@ import logging
 from datetime import datetime
 from stompy import Stomp
 from django.db import connection
-
-## this may need to change:
-BROKER = {
-    "host": "localhost",
-    "port": 61613
-}
+# Modules created by Bioconductor
+from bioconductor.config import BROKER
 
 # FIXME use config.yaml to get this info
 BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
