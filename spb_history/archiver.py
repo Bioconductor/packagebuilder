@@ -9,7 +9,7 @@ from django.db import connection
 from bioconductor.config import BROKER
 from bioconductor.config import BIOC_R_MAP
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
