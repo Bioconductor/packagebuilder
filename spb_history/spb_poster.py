@@ -11,10 +11,10 @@ import requests
 import cookielib
 import threading
 from stompy import Stomp
-
 # Modules created by Bioconductor
-from bioconductor.config import BROKER
+from bioconductor.config import BIOC_R_MAP
 from bioconductor.config import BUILD_NODES
+from bioconductor.communication import getOldStompConnection
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -38,12 +38,9 @@ from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 
 try:
-    logging.info("Connecting to ActiveMQ at '%s:%s'.", BROKER['host'],BROKER['port'])
-    stomp = Stomp(BROKER['host'], BROKER['port'])
-    stomp.connect()
-    logging.info("Stomp connection established.")
+    stomp = getOldStompConnection()
 except:
-    print("Cannot connect")
+    logging.error("Cannot connect to Stomp")
     raise
 
 # do we want acks?

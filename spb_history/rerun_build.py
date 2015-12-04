@@ -15,9 +15,9 @@ from pytz import timezone
 from stompy import Stomp
 import logging
 # Modules created by Bioconductor
-from bioconductor.config import BROKER
 from bioconductor.config import BIOC_R_MAP
 from bioconductor.config import BIOC_VERSION
+from bioconductor.communication import getOldStompConnection
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -56,16 +56,10 @@ obj['time'] = timestamp2
 obj['client_id'] = "single_package_builder_autobuild:%s:%s" % (issue_id, pkgname)
 
 json = json.dumps(obj)
+logging.debug("Received JSON object: '%s'", json)
 
-
-#print(json)
-logging.info("Attempting to connect to Stomp server: '%s:%s'", BROKER['host'], BROKER['port'])
 try:
-    stomp = Stomp(BROKER['host'], BROKER['port'])
-    # optional connect keyword args "username" and "password" like so:
-    # stomp.connect(username="user", password="pass")
-    stomp.connect()
-    logging.info("Connection established.")
+    stomp = getOldStompConnection()
 except:
     logging.info("Cannot connect")
     raise

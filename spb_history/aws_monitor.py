@@ -11,6 +11,8 @@ import base64
 import time
 import ConfigParser
 from stompy import Stomp
+from bioconductor.config import BROKER
+from bioconductor.communication import getOldStompConnection
 
 print("Starting monitor...\n")
 sys.stdout.flush()
@@ -24,13 +26,10 @@ conn = SQSConnection(access_key, secret_key)
 
 q = conn.get_queue("packagesubmitted")
 try:
-    stomp = Stomp("broker.bioconductor.org", 61613)
-    stomp.connect()
+    stomp = getOldStompConnection()
 except:
     print("Cannot connect")
     raise
-
-
 
 def handle_message(msg):
     body = msg.get_body()
@@ -59,5 +58,3 @@ while (True):
     except KeyboardInterrupt:
         stomp.disconnect()
         break
-
-

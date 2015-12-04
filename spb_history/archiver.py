@@ -6,8 +6,8 @@ from datetime import datetime
 from stompy import Stomp
 from django.db import connection
 # Modules created by Bioconductor
-from bioconductor.config import BROKER
 from bioconductor.config import BIOC_R_MAP
+from bioconductor.communication import getOldStompConnection
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -29,14 +29,9 @@ from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 try:
-    logging.info("main() Connecting to ActiveMQ at '%s:%s'.", BROKER['host'],BROKER['port'])
-    stomp = Stomp(BROKER['host'], BROKER['port'])
-    # optional connect keyword args "username" and "password" like so:
-    # stomp.connect(username="user", password="pass")
-    stomp.connect()
-    logging.info("Stomp connection established.")
+    stomp = getOldStompConnection()
 except:
-    logging.error("Cannot connect to %s.", BROKER['host'])
+    logging.error("Cannot connect to Stomp")
     raise
 
 # do we want acks?
@@ -57,7 +52,7 @@ def handle_job_start(obj):
     except Package.DoesNotExist:
         existing_pkg = Package(name=pkg)
         existing_pkg.save()
-    
+
     j = Job(package=existing_pkg,
       job_id=obj['job_id'],
       time_started=parse_time(obj['time']),
@@ -105,12 +100,12 @@ def handle_phase_message(obj):
         sequence = obj['sequence']
     else:
         sequence = -1
-    
+
     if obj.has_key('retcode'):
         retcode = obj['retcode']
     else:
         retcode = -1
-    
+
     msg = Message(build = get_build_obj(obj),
       build_phase = obj['status'],
       sequence=sequence,
@@ -123,7 +118,7 @@ def get_build_obj(obj):
 
 
 def handle_complete(obj, build_obj):
-    
+
     if obj.has_key("result_code"):
         obj['retcode'] = obj['result_code']
     if obj['retcode'] == 0:
@@ -259,7 +254,7 @@ def is_connection_usable():
         return False
     else:
         return True
-    
+
 
 def callback(body, destination):
     logging.info("callback() Received %r." % (body,))

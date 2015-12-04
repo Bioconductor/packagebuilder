@@ -13,8 +13,11 @@ import logging
 from bioconductor.config import BROKER
 from bioconductor.config import ENVIR
 from bioconductor.config import TOPICS
+from bioconductor.config import BUILDER_ID
+from bioconductor.communication import getNewStompConnection
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
@@ -22,19 +25,18 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
 # FIXME Get this information dynamically.  Consider bioc-cm or
 #       master.bioconductor.org/config.yaml
 
-builder_id = platform.node().lower().replace(".fhcrc.org", "")
 if sys.platform == "win32":
     # bad hardcoding! I don't know why this is necessary:
-    if builder_id in ["windows1", "windows2"]:
+    if BUILDER_ID in ["windows1", "windows2"]:
         os.environ["USERDNSDOMAIN"] = "bioconductor.org"
     if "USERDNSDOMAIN" in os.environ:
-        builder_id += "." + os.environ['USERDNSDOMAIN'].lower()
-builder_id = builder_id.replace(".local", "")
+        BUILDER_ID += "." + os.environ['USERDNSDOMAIN'].lower()
+BUILDER_ID = BUILDER_ID.replace(".local", "")
 ## Temporary hack
-if (builder_id.lower().startswith("dhcp") or \
-  builder_id == 'PHS-ITs-Lion-Test-MacBook.local'):
+if (BUILDER_ID.lower().startswith("dhcp") or \
+  BUILDER_ID == 'PHS-ITs-Lion-Test-MacBook.local'):
     if ("PACKAGEBUILDER_HOST" in os.environ.keys()):
-        builder_id = os.environ["PACKAGEBUILDER_HOST"]
+        BUILDER_ID = os.environ["PACKAGEBUILDER_HOST"]
     else:
         logging.error("main() Cannot determine who I am")
         raise
@@ -110,7 +112,7 @@ class MyListener(stomp.ConnectionListener):
             logging.debug("on_message() job_dir = %s." % job_dir)
 
             shell_cmd = os.path.join(ENVIR['packagebuilder_home'],
-                                     "%s%s" % (builder_id, shell_ext))
+                                     "%s%s" % (BUILDER_ID, shell_ext))
             logging.debug("on_message() shell_cmd = %s." % shell_cmd)
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
@@ -118,7 +120,7 @@ class MyListener(stomp.ConnectionListener):
                              stdout=builder_log, stderr=subprocess.STDOUT)
             ## TODO - somehow close builder_log filehandle if possible
             msg_obj = {}
-            msg_obj['builder_id'] = builder_id
+            msg_obj['builder_id'] = BUILDER_ID
             msg_obj['body'] = "Got build request..."
             msg_obj['first_message'] = True
             msg_obj['job_id'] = job_id
@@ -135,13 +137,7 @@ class MyListener(stomp.ConnectionListener):
         self.message_received = True
 
 try:
-    stomp = stomp.Connection([(BROKER['host'], BROKER['port'])])
-    stomp.set_listener('', MyListener())
-    stomp.start()
-    # optional connect keyword args "username" and "password" like so:
-    # stomp.connect(username="user", password="pass")
-    stomp.connect() # clientid=uuid.uuid4().hex)
-    logging.info("Connected to '%s:%s'." % (BROKER['host'], BROKER['port']))
+    stomp = getNewStompConnection('', MyListener())
     stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,
                     ack='client')
     logging.info("Subscribed to destination %s" % TOPICS['jobs'])

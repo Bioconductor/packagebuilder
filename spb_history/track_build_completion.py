@@ -24,14 +24,17 @@ from stompy import Stomp
 import mechanize
 
 # Modules created by Bioconductor
-from bioconductor.config import BROKER
+from bioconductor.communication import getOldStompConnection
 from bioconductor.config import BUILD_NODES
 
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.INFO)
+
 try:
-    stomp = Stomp(BROKER['host'], BROKER['port'])
-    stomp.connect()
+    stomp = getOldStompConnection()
 except:
-    print("Cannot connect")
+    logging.error("Cannot connect to Stomp")
     raise
 
 stomp.subscribe({'destination': "/topic/builderevents", 'ack': 'client'})
