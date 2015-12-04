@@ -9,7 +9,8 @@ python:
   - "2.7"
 before_install:
   - pip install pyflakes
-  - pyflakes bioconductor/config.py spb_history/archiver.py spb_history/rerun_build.py workers/builder.py workers/server.py
+  - pyflakes workers/builder.py
+  - pyflakes workers/server.py
 script:
   - python -c 'print "Finished static analysis"'
 notifications:
