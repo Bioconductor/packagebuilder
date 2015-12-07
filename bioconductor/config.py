@@ -33,7 +33,7 @@ logging.info("The builds nodes enabled are: '%s'", BUILD_NODES)
 ACTIVEMQ_USER=  envSpecificConfigParser.get('Properties', 'activemq.username') #.rstrip('\n')
 ACTIVEMQ_PASS = envSpecificConfigParser.get('Properties', 'activemq.password') #.rstrip('\n')
 
-BIOC_VERSION = os.getenv("BBS_BIOC_VERSION")
+BIOC_VERSION = globalConfigParser.get('UniversalProperties', 'bbs.bioc.version')
 
 # TODO: Consider a better way to determine this
 BIOC_R_MAP = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",

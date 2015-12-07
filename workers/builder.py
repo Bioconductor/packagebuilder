@@ -13,18 +13,25 @@ import datetime
 import platform
 import unicodedata
 import atexit
-from stompy import Stomp
 import mechanize
 import logging
 
 # Modules created by Bioconductor
-from bioconductor.config import BROKER
+from bioconductor.communication import getOldStompConnection
 from bioconductor.config import BIOC_R_MAP
 from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
+from bioconductor.config import BUILDER_ID
 
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',
+## BBS-specific imports
+sys.path.append(ENVIR['bbs_home'])
+sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
+os.environ['BBS_HOME'] = ENVIR['bbs_home']
+import BBScorevars
+import dcf
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
@@ -98,7 +105,7 @@ class Tailer(threading.Thread):
 
 def send_message(msg, status=None):
     merged_dict = {}
-    merged_dict['builder_id'] = builder_id
+    merged_dict['builder_id'] = BUILDER_ID
     merged_dict['client_id'] = manifest['client_id']
     merged_dict['job_id'] = manifest['job_id']
     now = datetime.datetime.now()
@@ -187,7 +194,7 @@ def is_build_required(manifest):
             return(True)
 
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
-    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
 
     cran_repo_map = {
         'source': "src/contrib",
@@ -225,24 +232,15 @@ def is_build_required(manifest):
 def setup():
     global manifest
     global working_dir
-    global BBScorevars          # in ENVIR['bbs_home'] path
     global dcf
     global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, \
         packagebuilder_rsync_rsh_cmd, packagebuilder_scp_cmd
     global callcount
-    global builder_id
 
     logging.info("Starting setup().")
     
-    builder_id = ENVIR['bbs_node_hostname']
     callcount = 1
     
-    ## BBS-specific imports
-    sys.path.append(ENVIR['bbs_home'])
-    sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
-    os.environ['BBS_HOME'] = ENVIR['bbs_home']
-    import BBScorevars
-    import dcf
     
     packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
@@ -295,10 +293,7 @@ def setup():
 def setup_stomp():
     global stomp
     try:
-        stomp = Stomp(BROKER['host'], BROKER['port'])
-        # optional connect keyword args "username" and "password" like so:
-        # stomp.connect(username="user", password="pass")
-        stomp.connect()
+        stomp = getOldStompConnection()
     except:
         logging.error("setup_stomp(): Cannot connect.")
         raise
@@ -588,7 +583,7 @@ def do_build(cmd, message_stream, source):
 def build_package(source_build):
     global pkg_type
 
-    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
 
     buildmsg = None
     if (source_build):
@@ -698,7 +693,7 @@ def propagate_package():
     global build_product
     global repos
     global url
-    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
     build_product = filter(lambda x: x.endswith(ext), files)[0]
@@ -857,7 +852,7 @@ def update_packages_file():
     
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
-        pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+        pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
         if pkg_type == "mac.binary.leopard":
             os_seg = "bin/macosx/contrib/%s" % r_version
         else:
@@ -880,7 +875,7 @@ def update_packages_file():
             HOSTS['bioc'] + "/scratch-repos")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['bioc_version']
     
-    pkg_type = BBScorevars.getNodeSpec(builder_id, "pkgType")
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
     command = "%s biocadmin@staging.bioconductor.org 'R -f %s/update-repo.R --args %s %s'"
@@ -940,9 +935,9 @@ def get_r_version():
 
 def get_node_info():
     r_version = get_r_version()
-    osys = BBScorevars.getNodeSpec(builder_id, "OS")
-    arch = BBScorevars.getNodeSpec(builder_id, "Arch")
-    plat = BBScorevars.getNodeSpec(builder_id, "Platform")
+    osys = BBScorevars.getNodeSpec(BUILDER_ID, "OS")
+    arch = BBScorevars.getNodeSpec(BUILDER_ID, "Arch")
+    plat = BBScorevars.getNodeSpec(BUILDER_ID, "Platform")
     send_message({
         "status": "node_info",
         "r_version": r_version,

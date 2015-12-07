@@ -10,7 +10,6 @@ import uuid
 import stomp
 import logging
 # Modules created by Bioconductor
-from bioconductor.config import BROKER
 from bioconductor.config import ENVIR
 from bioconductor.config import TOPICS
 from bioconductor.config import BUILDER_ID
@@ -110,14 +109,30 @@ class MyListener(stomp.ConnectionListener):
             jobfile.write(body)
             jobfile.close
             logging.debug("on_message() job_dir = %s." % job_dir)
+            
+            logging.info("\n\n\n************************************")
+            logging.info("Replace this bit...")
 
-            shell_cmd = os.path.join(ENVIR['packagebuilder_home'],
-                                     "%s%s" % (BUILDER_ID, shell_ext))
-            logging.debug("on_message() shell_cmd = %s." % shell_cmd)
+            logging.info("BUILDER_ID: '%s'", BUILDER_ID)
+            logging.info("shell_ext: '%s'", shell_ext)
+            logging.info("job_dir: '%s'", job_dir)
+
+            shell_cmd = os.path.join(ENVIR['packagebuilder_home'], "%s%s" % (BUILDER_ID, shell_ext))
+            shell_cmd = [shell_cmd, jobfilename, bioc_version]
+            # shell_cmd = ["python", "-m", "workers/builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
-            subprocess.Popen([shell_cmd, jobfilename, bioc_version,],
-                             stdout=builder_log, stderr=subprocess.STDOUT)
+                                     
+            logging.info("Attempting to run commands from directory: '%s'", os.getcwd())
+            logging.info("shell_cmd: '%s'", shell_cmd)
+            logging.info("jobfilename: '%s'", jobfilename)
+            logging.info("builder_log: '%s'", builder_log)
+            blderProcess = subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
+            logging.info("blderProcess: '%s'", blderProcess)
+            
+            
+            logging.info("************************************\n\n\n")
+            
             ## TODO - somehow close builder_log filehandle if possible
             msg_obj = {}
             msg_obj['builder_id'] = BUILDER_ID
@@ -137,7 +152,9 @@ class MyListener(stomp.ConnectionListener):
         self.message_received = True
 
 try:
+    logging.info("Attempting to connect using new communication module")
     stomp = getNewStompConnection('', MyListener())
+    logging.info("Connection established using new communication module")
     stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,
                     ack='client')
     logging.info("Subscribed to destination %s" % TOPICS['jobs'])

@@ -7,11 +7,11 @@ simplest way to accomplish that, is using Docker. We'll use [this docker image](
 
 ```
 # Get the image
-docker pull webcenter/activemq:5.12.0
+docker pull rmohr/activemq:5.10.0
 
 # Start ActiveMQ
 docker run --name='activemq' -d -p 8161:8161 -p 61616:61616 -p 61613:61613 \
-   -e 'ACTIVEMQ_REMOVE_DEFAULT_ACCOUNT=false' webcenter/activemq:5.12.0
+    rmohr/activemq:5.10.0
 ```
 If you need to debug ActiveMQ, open a shell.  You may want to inspect the content
 of `/var/log/activemq` and `/data/activemq`: 
@@ -71,7 +71,7 @@ be used in production.
 The builder service will store it's data in the `work` directory.  To start the
 builder service, run the following :
   ```
-  python -m workers/server >> server.log 2>&1 &
+  python -m workers/server > server.log 2>&1 &
   ```
   You should see some output by viewing `server.log`:
 
