@@ -126,8 +126,8 @@ class MyListener(stomp.ConnectionListener):
                     "which is inaccessible.  Can not continue!", host_specific_script)
                 raise
                 
-            shell_cmd = [host_specific_script, jobfilename, bioc_version]
-            # shell_cmd = ["python", "-m", "workers/builder", jobfilename, bioc_version]
+            # shell_cmd = [host_specific_script, jobfilename, bioc_version]
+            shell_cmd = ["python", "-m", "workers/builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
                                      

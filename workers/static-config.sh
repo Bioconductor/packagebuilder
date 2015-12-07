@@ -18,21 +18,13 @@ export BBS_RSYNC_RSH_CMD="$BBS_RSYNC_CMD -e '$BBS_SSH_CMD'"
 
 BBS_R_HOME=/home/blong/bin/R-devel
 export BBS_R_CMD="$BBS_R_HOME/bin/R"
-
-
-# Variables specifying the version and mode of the current builds
-# ---------------------------------------------------------------
-
 export BBS_BIOC_VERSION="3.3"
 export BBS_BIOC_VERSIONED_REPO_PATH="$BBS_BIOC_VERSION/$BBS_MODE"
 export BBS_STAGE2_R_SCRIPT="$BBS_HOME/$BBS_BIOC_VERSIONED_REPO_PATH/STAGE2.R"
 export BBS_NON_TARGET_REPOS_FILE="$BBS_HOME/$BBS_BIOC_VERSIONED_REPO_PATH/non_target_repos.txt"
 
-# export BBS_CENTRAL_RHOST="zin2"
-# export BBS_CENTRAL_RUSER="biocbuild"
-# export BBS_CENTRAL_RDIR="/home/biocbuild/public_html/BBS/$BBS_BIOC_VERSIONED_REPO_PATH"
-
-# FIXME: The Single Package Builder (SPB) is failing without this.  Why is it needed?
+# FIXME: The Single Package Builder (SPB) is failing without these.  
+#         Why are each of these needed?
 export BBS_CENTRAL_BASEURL="http://zin2/BBS/$BBS_BIOC_VERSIONED_REPO_PATH"
 
 
