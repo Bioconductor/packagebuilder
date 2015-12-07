@@ -1,18 +1,24 @@
 import datetime
 import logging
-import stomp
-from stompy import Stomp
+import mechanize
 import sys
+
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)   
+                    
+logging.info("The module search path is: \n%s", sys.path)
+
+from stompy import Stomp as oldStompConstructor
+import stomp
 
 # Modules created by Bioconductor
 from bioconductor.config import ACTIVEMQ_USER
 from bioconductor.config import ACTIVEMQ_PASS
 from bioconductor.config import BROKER
 from bioconductor.config import SPB_ENVIRONMENT
-
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.DEBUG)            
+         
 
 stompHost = BROKER['host']
 stompPort = BROKER['port']
@@ -22,7 +28,7 @@ def getOldStompConnection():
         logging.info("Attempting to open connection to ActiveMQ at '%s:%s'.",
             stompHost,stompPort)
         # Connect using the old model
-        stompClient = Stomp(stompHost, stompPort)
+        stompClient = oldStompConstructor(stompHost, stompPort)
         if (SPB_ENVIRONMENT == "production"):
             logging.info("Not attempting authentication")
             stompClient.connect()

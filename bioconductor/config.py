@@ -50,7 +50,7 @@ ENVIR = {
     'bbs_R_cmd': envSpecificConfigParser.get('Properties', 'bbs.r.cmd'),
     'bbs_Bioc_version': BIOC_VERSION,
 
-    'packagebuilder_home': envSpecificConfigParser.get('Properties', 'packagebuilder.workers.directory'),
+    'packagebuilder_home': envSpecificConfigParser.get('Properties', 'packagebuilder.home'),
 
     'bbs_RSA_key': envSpecificConfigParser.get('Properties', 'bbs.rsa.key'),
     'packagebuilder_RSA_key': envSpecificConfigParser.get('Properties', 'spb.rsa.key'),
