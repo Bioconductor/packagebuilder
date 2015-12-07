@@ -116,9 +116,17 @@ class MyListener(stomp.ConnectionListener):
             logging.info("BUILDER_ID: '%s'", BUILDER_ID)
             logging.info("shell_ext: '%s'", shell_ext)
             logging.info("job_dir: '%s'", job_dir)
-
-            shell_cmd = os.path.join(ENVIR['packagebuilder_home'], "%s%s" % (BUILDER_ID, shell_ext))
-            shell_cmd = [shell_cmd, jobfilename, bioc_version]
+            
+            # FIXME: Host specific scripts are bad!
+            host_specific_script = os.path.join(ENVIR['packagebuilder_home'], "%s%s" % (BUILDER_ID, shell_ext))
+            if os.path.isfile(host_specific_script) and os.access(host_specific_script, os.R_OK):
+                logging.info("The SPB will depend on host-specific script '%s'", host_specific_script)
+            else :
+                logging.error("The SPB relies on host-specific script '%s',"
+                    "which is inaccessible.  Can not continue!", host_specific_script)
+                raise
+                
+            shell_cmd = [host_specific_script, jobfilename, bioc_version]
             # shell_cmd = ["python", "-m", "workers/builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
