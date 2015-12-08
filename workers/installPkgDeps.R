@@ -60,7 +60,8 @@ bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
     "devtools", "codetools", "httr", "curl")
 
 ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
-ip <- installed.packages(lib.loc = bootstrap_libdir, fields="Version")
+ip <- installed.packages(lib.loc = bootstrap_libdir,
+    fields=c("Version","Priority"))
 
 need <- bootstrap_pkgs[!bootstrap_pkgs %in% rownames(ip)]
 have <- setdiff(bootstrap_pkgs, need)
@@ -89,10 +90,23 @@ update.packages(repos=biocinstallRepos(), lib.loc=bootstrap_libdir,
 ##
 
 deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
+dp <- as.data.frame(ip)
 blacklist <- c(bootstrap_pkgs,
-               rownames(ip)[ip$Priority %in% "base"],
+               rownames(ip)[dp$Priority %in% "base"],
                if (.Platform$OS.type == "windows") "multicore")
 deps <- deps[!deps %in% blacklist]
+
+withWarnings <- function(expr) {
+    myWarnings <- NULL
+    wHandler <- function(w) {
+        myWarnings <<- c(myWarnings, list(w))
+        invokeRestart("muffleWarning")
+    }
+    val <- withCallingHandlers(expr, warning = wHandler)
+    list(value = val, warnings = myWarnings)
+} 
+
+
 installPkg <- function(pkg)
 {
     if (pkg == "multicore" && .Platform$OS.type == "windows")
@@ -102,7 +116,8 @@ installPkg <- function(pkg)
 
     if (!getOption("pkgType") == "source")
     {
-        res <- getWarnings(install.packages(pkg, repos=repos))
+        vnw <- withWarnings(install.packages(pkg, repos=repos))$warnings
+        res <- unlist(lapply(vnw$warnings, function(x) x$message))
         if (!pkg %in% rownames(installed.packages()))
             install.packages(pkg, type="source", repos=repos)
         if(!is.null(res))
@@ -129,14 +144,14 @@ installDeps <- function(depStr)
     
     pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
     for (pkg in pkgs) {
-        pkg <- trim(pkg)
+        pkg <- trimws(pkg)
         if (length(grep("(", pkg, fixed=TRUE))) { ## is there a version spec?
             versionSpec <- gsub(".*\\((.*?)\\).*","\\1", pkg)
             segs <- strsplit(versionSpec, " ", fixed=TRUE)
             operator <- segs[[1]][1]
             requiredVersion <- segs[[1]][2]
             segs <- strsplit(pkg, "(", fixed=TRUE)
-            pkgName <- trim(segs[[1]][1])
+            pkgName <- trimws(segs[[1]][1])
             if (builtIn(pkgName)) next
             ip <- installed.packages()
             if (pkgName %in% rownames(ip)) {
