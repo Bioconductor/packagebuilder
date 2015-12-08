@@ -694,7 +694,16 @@ def svn_info():
     svn_hash['body'] = "svn info"
     send_message(svn_hash)
 
-## todo - get rid of ugly windows workarounds now that we know how
+# This function does the following, acting on behalf of biocadmin on staging.bioconductor.org:
+#   1. First prune old copies of the package in a path like :
+#      /loc/www/bioconductor-test.fhcrc.org/scratch-repos/3.3/src/contrib/PKG_*.tar.gz
+#
+#       Where "PKG" is the name of the package.
+#
+#   2. Second, packages are copied to this location, so that later packages (submitted
+#       to the tracker) can depend upon a package already submitted for inclusion.
+#
+#   TODO: Get rid of ugly windows workarounds now that we know how
 def propagate_package():
     global build_product
     global repos
