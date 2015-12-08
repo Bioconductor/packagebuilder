@@ -8,9 +8,9 @@ import ConfigParser
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
-logging.info("Loading configuration")
+logging.debug("Loading configuration")
 
 globalConfigParser = ConfigParser.RawConfigParser()
 globalConfigParser.read(os.path.join(os.getcwd(),'spb.properties'))
@@ -18,10 +18,10 @@ SPB_ENVIRONMENT = globalConfigParser.get('Environment', 'environment');
 
 envSpecificConfigParser = ConfigParser.RawConfigParser()
 if (SPB_ENVIRONMENT == "production"):
-    logging.info("Working in production")
+    logging.debug("Working in production")
     envSpecificConfigParser.read(os.path.join(os.getcwd(),'production.properties'))
 else:
-    logging.info("Working in development")
+    logging.debug("Working in development")
     envSpecificConfigParser.read(os.path.join(os.getcwd(),'development.properties'))
 
 BUILD_NODES = envSpecificConfigParser.get('Properties', 'builders').split(",")
@@ -29,7 +29,7 @@ BROKER = {
     "host": envSpecificConfigParser.get('Properties', 'stomp.host'),
     "port": int(envSpecificConfigParser.get('Properties', 'stomp.port'))
 }
-logging.info("The builds nodes enabled are: '%s'", BUILD_NODES)
+logging.info("The following build nodes are enabled: %s.", BUILD_NODES)
 ACTIVEMQ_USER=  envSpecificConfigParser.get('Properties', 'activemq.username') #.rstrip('\n')
 ACTIVEMQ_PASS = envSpecificConfigParser.get('Properties', 'activemq.password') #.rstrip('\n')
 
@@ -72,4 +72,4 @@ HOSTS = {
 }
 
 
-logging.info("Finished loading configuration.")
+logging.debug("Finished loading configuration.")

@@ -18,7 +18,7 @@ from bioconductor.communication import getNewStompConnection
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 
 # FIXME Get this information dynamically.  Consider bioc-cm or
@@ -110,16 +110,16 @@ class MyListener(stomp.ConnectionListener):
             jobfile.close
             logging.debug("on_message() job_dir = %s." % job_dir)
             
-            logging.info("\n\n\n************************************")
-            logging.info("Replace this bit...")
-
-            logging.info("BUILDER_ID: '%s'", BUILDER_ID)
-            logging.info("shell_ext: '%s'", shell_ext)
             logging.info("job_dir: '%s'", job_dir)
             
             # FIXME: Host specific scripts are bad!
             use_host_specific_script = False
             if use_host_specific_script:
+                log_highlighter = "************************************"
+                logging.info(log_highlighter)
+                logging.info("Executing deprecated builder.py invocation (via shell script abstraction).")
+                logging.info("BUILDER_ID: '%s'", BUILDER_ID)
+                logging.info("shell_ext: '%s'", shell_ext)
                 host_specific_script = os.path.join(ENVIR['packagebuilder_home'], "%s%s" % (BUILDER_ID, shell_ext))
                 if os.path.isfile(host_specific_script) and os.access(host_specific_script, os.R_OK):
                     logging.info("The SPB will depend on host-specific script '%s'", host_specific_script)
@@ -128,6 +128,7 @@ class MyListener(stomp.ConnectionListener):
                         "which is inaccessible.  Can not continue!", host_specific_script)
                     raise
                 shell_cmd = [host_specific_script, jobfilename, bioc_version]
+                logging.info(log_highlighter)
             else:
                 shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
@@ -139,9 +140,6 @@ class MyListener(stomp.ConnectionListener):
             logging.info("builder_log: '%s'", builder_log)
             blderProcess = subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
             logging.info("blderProcess: '%s'", blderProcess)
-            
-            
-            logging.info("************************************\n\n\n")
             
             ## TODO - somehow close builder_log filehandle if possible
             msg_obj = {}
@@ -162,7 +160,7 @@ class MyListener(stomp.ConnectionListener):
         self.message_received = True
 
 try:
-    logging.info("Attempting to connect using new communication module")
+    logging.debug("Attempting to connect using new communication module")
     stomp = getNewStompConnection('', MyListener())
     logging.info("Connection established using new communication module")
     stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,

@@ -379,6 +379,7 @@ def extract_tarball():
 def install_pkg_deps():
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
+    logging.debug("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
     fields = ("Depends", "Imports", "Suggests", "Enhances", "LinkingTo")
