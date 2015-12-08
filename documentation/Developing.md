@@ -66,6 +66,17 @@ be used in production.
   ```
   pip install stomp.py pytz stompy django==1.8.4
   ```
+  
+#### Configuration
+Right now, you'll need to modify two configuration files (we plan to fix this).
+
+1. Set all "changeme" properties in the file `development.properties`.  Real values are 
+not needed for every property.
+
+2. Secondly, change and uncomment the value of `BBS_R_HOME` and `BBS_HOME` in the
+file `workers/static-config.sh`.  `BBS_R_HOME` should be set to the directory that
+contains R's `bin/`, `tools/`, `doc/`, etc.  `BBS_HOME` contains your local copy
+of the BBS git repository.
 
 #### Run a local build node
 The builder service will store it's data in the `work` directory.  To start the

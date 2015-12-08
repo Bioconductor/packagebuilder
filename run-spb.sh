@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 
-set -e
+# TODO: Switch to common error handler
+err_handler() {
+    echo "Error on line $1"
+}
+
+trap 'err_handler $LINENO' ERR
+
+# Fail fast (err_handler above will be invoked)
+# Exit immediately if a command exits with a non-zero status.
+set -o errexit
+# Treat unset variables as an error when substituting.
+set -o nounset
 
 # TODO: Load variables in a more modular way
 echo "Sourcing unified environment variables"
