@@ -127,7 +127,7 @@ class MyListener(stomp.ConnectionListener):
                 raise
                 
             # shell_cmd = [host_specific_script, jobfilename, bioc_version]
-            shell_cmd = ["python", "-m", "workers/builder", jobfilename, bioc_version]
+            shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
                                      
