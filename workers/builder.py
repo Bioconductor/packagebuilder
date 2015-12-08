@@ -38,6 +38,11 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)
 bad = [k for k, v in ENVIR.iteritems() if v is None]
 if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 
+# This class is meant to behave like Linux/Unix `tail -f <file>`.
+#
+#    Usage example :
+# Run a command that continuously emits output, capture the output as soon as possible 
+# and sent it in a stomp message.  We inspect the output every .2 seconds and handle it.
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
         threading.Thread.__init__(self)
