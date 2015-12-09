@@ -3,6 +3,7 @@ import json
 import time
 import tempfile
 import os
+import logging
 import subprocess
 import platform
 import ConfigParser
@@ -10,9 +11,14 @@ import requests
 import cookielib
 import threading
 from stompy import Stomp
+# Modules created by Bioconductor
+from bioconductor.config import BIOC_R_MAP
+from bioconductor.config import BUILD_NODES
+from bioconductor.communication import getOldStompConnection
 
-## this may need to change:
-num_builders = 3
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
 
 # set up django environment
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -32,12 +38,9 @@ from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 
 try:
-    stomp = Stomp("broker.bioconductor.org", 61613)
-    # optional connect keyword args "username" and "password" like so:
-    # stomp.connect(username="user", password="pass")
-    stomp.connect()
+    stomp = getOldStompConnection()
 except:
-    print("Cannot connect")
+    logging.error("Cannot connect to Stomp")
     raise
 
 # do we want acks?
@@ -138,7 +141,7 @@ def handle_completed_builds(obj, build_obj):
         for item in buildlist:
           if (item.buildbin_result != ""):
             ok += 1
-        if ok == num_builders:
+        if ok == len(BUILD_NODES):
             print("we have enough nodes, sending a message")
             job_id = build_obj.job.id
             obj['job_id'] = job_id
@@ -337,4 +340,3 @@ if __name__ == "__main__":
     main_loop()
 #else:
 #    main_loop()
-

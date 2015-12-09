@@ -1,21 +1,17 @@
 import sys
 import json
-import time
-import tempfile
 import os
-import subprocess
-import platform
-from datetime import datetime, date, time
+import logging
+from datetime import datetime
 from stompy import Stomp
 from django.db import connection
+# Modules created by Bioconductor
+from bioconductor.config import BIOC_R_MAP
+from bioconductor.communication import getOldStompConnection
 
-## this may need to change:
-num_builders = 4
-
-# FIXME use config.yaml to get this info
-bioc_r_map = {"2.7": "2.12", "2.8": "2.13", "2.9": "2.14",
-    "2.10": "2.15", "2.14": "3.1", "3.0": "3.1", "3.1": "3.2", "3.2": "3.2",
-    "3.3": "3.3"} 
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.DEBUG)
 
 # set up django environment
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -33,13 +29,9 @@ from spb_history.viewhistory.models import Package
 from spb_history.viewhistory.models import Build
 from spb_history.viewhistory.models import Message
 try:
-    stomp = Stomp("broker.bioconductor.org", 61613)
-    # optional connect keyword args "username" and "password" like so:
-    # stomp.connect(username="user", password="pass")
-    stomp.connect()
+    stomp = getOldStompConnection()
 except:
-    print("Cannot connect")
-    sys.stdout.flush()
+    logging.error("Cannot connect to Stomp")
     raise
 
 # do we want acks?
@@ -60,7 +52,7 @@ def handle_job_start(obj):
     except Package.DoesNotExist:
         existing_pkg = Package(name=pkg)
         existing_pkg.save()
-    
+
     j = Job(package=existing_pkg,
       job_id=obj['job_id'],
       time_started=parse_time(obj['time']),
@@ -68,7 +60,7 @@ def handle_job_start(obj):
       force=obj['force'],
       client_id=obj['client_id'],
       bioc_version=obj['bioc_version'],
-      r_version=bioc_r_map[obj['bioc_version']])
+      r_version=BIOC_R_MAP[obj['bioc_version']])
     j.save()
 
 def handle_dcf_info(obj, build):
@@ -108,12 +100,12 @@ def handle_phase_message(obj):
         sequence = obj['sequence']
     else:
         sequence = -1
-    
+
     if obj.has_key('retcode'):
         retcode = obj['retcode']
     else:
         retcode = -1
-    
+
     msg = Message(build = get_build_obj(obj),
       build_phase = obj['status'],
       sequence=sequence,
@@ -126,7 +118,7 @@ def get_build_obj(obj):
 
 
 def handle_complete(obj, build_obj):
-    
+
     if obj.has_key("result_code"):
         obj['retcode'] = obj['result_code']
     if obj['retcode'] == 0:
@@ -136,8 +128,8 @@ def handle_complete(obj, build_obj):
             result = "OK"
     else:
         result = "ERROR"
-    print("in handle_complete(), status is %s and result is %s." % (obj['status'], result))
-    sys.stdout.flush()
+    logging.debug("handle_complete() status: %s; result: %s."
+                  % (obj['status'], result))
     if (obj['status'] == 'build_complete'):
         build_obj.buildsrc_result = result
         if result == "ERROR":
@@ -169,21 +161,17 @@ def handle_builder_event(obj):
         try:
             parent_job = Job.objects.get(job_id=job_id)
         except Job.DoesNotExist:
-            print("No parent job for %s; ignoring message." % job_id)
-            sys.stdout.flush()
+            logging.warning("No parent job for %s; ignoring message." % job_id)
             return()
         except Job.MultipleObjectsReturned:
-            print("Multiple objects returned!")
-            sys.stdout.flush()
+            logging.warning("Multiple objects returned!")
             return()
     else:
-        print("Malformed message, ignoring it.")
-        sys.stdout.flush()
+        logging.warning("Malformed message, ignoring it.")
         return
     build_obj = None
     if(obj.has_key('first_message') and obj['first_message'] == True):
-        print("handling first message")
-        sys.stdout.flush()
+        logging.debug("handle_builder_event() Handling first message.")
         build_obj = handle_first_message(obj, parent_job)
     if (obj.has_key('status')):
         status = obj['status']
@@ -191,12 +179,9 @@ def handle_builder_event(obj):
         try:
             build_obj = get_build_obj(obj)
         except Exception as e:
-            print "Caught  exception: ", e
-            sys.stdout.flush()
+            logging.warning("handle_builder_event() Exception: %s." % e)
             return
         if (status == 'dcf_info'):
-            print("handling dcf info")
-            sys.stdout.flush()
             handle_dcf_info(obj, build_obj)
         elif (status in phases):
             if obj['status'] == 'post_processing':
@@ -227,7 +212,7 @@ def handle_builder_event(obj):
             handle_complete(obj, build_obj)
         elif (status == 'node_info'):
             bioc_version = obj['bioc_version']
-            build_obj.r_version = bioc_r_map[bioc_version]
+            build_obj.r_version = BIOC_R_MAP[bioc_version]
             build_obj.os = obj['os']
             build_obj.arch = obj['arch']
             build_obj.platform = obj['platform']
@@ -253,11 +238,9 @@ def handle_builder_event(obj):
             build_obj.postprocessing_result = 'skipped'
             build_obj.save()
         else:
-            print("ignoring message:%s" % obj)
-            sys.stdout.flush()
+            logging.info("handle_builder_event() Ignoring message: %s." % obj)
     else:
-        print("invalid message, no 'status' key: %s" % obj)
-        sys.stdout.flush()
+        logging.warning("handle_builder_event() No 'status' key: %s." % obj)
         # svn_result,
         # clear_check_console, starting_check,
         # starting_buildbin, svn_info,
@@ -271,63 +254,45 @@ def is_connection_usable():
         return False
     else:
         return True
-    
+
 
 def callback(body, destination):
-    print " [x] Received %r" % (body,)
-    sys.stdout.flush() ## make sure we see everything
+    logging.info("callback() Received %r." % (body,))
     received_obj = None
     if not is_connection_usable():
-        print("Closing connection")
-        sys.stdout.flush()
+        logging.debug("callback() Closing connection.")
         connection.close()
     try:
-        print("Parsing JSON")
-        sys.stdout.flush()
+        logging.debug("callback() Parsing JSON.")
         received_obj = json.loads(body)
-    except ValueError as e:
-        print("!!!Received invalid JSON!!!")
-        sys.stdout.flush()
-        print("Invalid json was: %s" % body)
-        sys.stdout.flush()
+    except ValueError:
+        logging.error("callback() Received invalid JSON: %s." % body)
         return
-    if('job_id' in received_obj.keys()): 
-        print("Checking destination")
-        sys.stdout.flush()
+    if ('job_id' in received_obj.keys()):
+        logging.debug("callback() Destination = %s.", destination)
         if (destination == '/topic/buildjobs'):
-            print("Invoking handle_job_start")
-            sys.stdout.flush()
             handle_job_start(received_obj)
         elif (destination == '/topic/builderevents'):
-            print("Invoking handle_builder_event")
-            sys.stdout.flush()
             handle_builder_event(received_obj)
-        print("Destination: %s" % destination)
-        sys.stdout.flush()
+        logging.debug("callback() Destination handled.")
     else:
-        print("Invalid json (no job_id key)")
-        sys.stdout.flush()
+        logging.warning("callback() Invalid json (no job_id key).")
 
-print("Waiting for messages...")
-sys.stdout.flush()
+logging.info("main() Waiting for messages.")
+
 while True:
     try:
-        print("Begin while(true) loop.")
-        sys.stdout.flush()
+        logging.debug("main() Begin while(True) loop.")
         frame = stomp.receive_frame()
-        print("Got frame")
-        sys.stdout.flush()
         stomp.ack(frame) # do this?
-        print("Frame acknowledged")
-        sys.stdout.flush()
+        logging.debug("main() Frame acknowledged.")
         callback(frame.body, frame.headers.get('destination'))
-        print("Callback finished")
-        sys.stdout.flush()
+        logging.debug("main() Callback finished.")
     except KeyboardInterrupt:
-        print("KeyboardInterrupt")
-        sys.stdout.flush()
+        logging.info("main() KeyboardInterrupt.")
         stomp.disconnect()
         break
+    except:
+        continue
 
-print("Exiting")
-sys.stdout.flush()
+logging.info("Done.")

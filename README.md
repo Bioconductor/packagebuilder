@@ -1,6 +1,7 @@
 Bioconductor Single Package Builder (SPB)
 =========================================
-[![Build Status](https://travis-ci.org/Bioconductor/packagebuilder.svg)](https://travis-ci.org/Bioconductor/packagebuilder)
+[![Build
+Status](https://travis-ci.org/Bioconductor/packagebuilder.svg)](https://travis-ci.org/Bioconductor/packagebuilder)
 
 The code is stored in [GitHub](https://github.com/Bioconductor/packagebuilder).
 
@@ -16,7 +17,8 @@ Overview
 1. Submitting tarballs to the tracker
 2. Running the [rerun_build.py](spb_history/rerun_build.py) script
 
-These all send messages to an installation of ActiveMQ (a Java-based messaging framework) to listeners on each build machine ([server.py](workers/server.py)). The build machines
+These all send messages to an installation of ActiveMQ (a Java-based messaging framework)
+to listeners on each build machine ([server.py](workers/server.py)). The build machines
 start building the package and send back progress messages.
 
 There is another listener (called [archiver.py](workers/archiver.py) which
@@ -111,6 +113,8 @@ Here are the moving parts, first briefly and then in more detail.
      and sends a message to the tracker.
   2. [archiver.py](workers/archiver.py): monitors progress of builds, writes all build
      info to a database to be displayed by a Django web app
-     (what you see when you hit [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)).
-  3. [rerun_build.py](spb_history/rerun_build.py): for manually kicking off an SPB build without
+     (what you see when you hit
+[http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)).
+  3. [rerun_build.py](spb_history/rerun_build.py): for manually kicking off an SPB build
+without
      having to repost a tarball to the tracker.
