@@ -82,7 +82,7 @@ of the BBS git repository.
 The builder service will store it's data in the `work` directory.  To start the
 builder service, run the following :
   ```
-  python -m workers/server > server.log 2>&1 &
+  python -m workers.server > server.log 2>&1 &
   ```
   You should see some output by viewing `server.log`:
 
@@ -106,13 +106,13 @@ builder service, run the following :
 #### Running the Django web app
   To run Django (`archiver.py`):
   ```
-  python -m spb_history/archiver > archiver.log 2>&1 &
+  python -m spb_history.archiver > archiver.log 2>&1 &
   ```
 
 #### Kick off a job
 To kick off a job, run the command below.  Be sure you're in a terminal with the
 appropriate virtualenv activated.
 ```
-python -m spb_history/rerun_build 1343 \
+python -m spb_history.rerun_build 1343 \
   https://tracker.bioconductor.org/file6714/spbtest_0.99.1.tar.gz
 ```
