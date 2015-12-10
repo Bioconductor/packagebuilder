@@ -3,7 +3,7 @@ Deployment
 
 
 
-Install : 
+## Linux Install : 
 ```
 git clone https://github.com/Bioconductor/packagebuilder.git
 cd packagebuilder
@@ -26,7 +26,25 @@ Crontab for biocadmin on `staging.bioconductor.org` :
 @reboot /home/biocadmin/spb_history/run-django.sh
 @reboot /home/biocadmin/spb_history/run-track_build_completion.sh
 ```
+## Windows Install : 
+RDP to moscato2 as Administrator (needed to change services)
+Open cygwin
+**Determine if service has been previously installed**
+If it's already been installed, you'll see some output like this: 
+```
+$ cygrunsrv -Q "BioC Single Package Builder"
+Service             : BioC Single Package Builder
+Current State       : Stopped
+Command             : /cygdrive/c/Python27/python e:/packagebuilder/server.py
+```
 
+Next, RDP to moscato2 as pkgbuild
+cd /cygdrive/e/
+git clone https://github.com/Bioconductor/packagebuilder.git
+cd packagebuilder
+
+You'll now see the service listed in Windows Services UI, when logged in
+as the Administrator
 
 
 The node and spb_history web applications are deployed on

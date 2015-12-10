@@ -16,7 +16,3 @@ set SVN_PASS=buildpkg
 
 set BBS_R_HOME=E:\packagebuilder\R
 set BBS_R_CMD=%BBS_R_HOME%\bin\R.exe
-
-
-
-%BBS_PYTHON_CMD% builder.py %1
