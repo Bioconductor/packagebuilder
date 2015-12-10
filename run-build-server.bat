@@ -1,3 +1,6 @@
+echo "Activating virtual environment"
+call env\Scripts\activate.bat
+
 echo "Sourcing environment variables"
 pushd workers
 call moscato2.bat
