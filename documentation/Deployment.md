@@ -27,6 +27,16 @@ Crontab for biocadmin on `staging.bioconductor.org` :
 @reboot /home/biocadmin/spb_history/run-track_build_completion.sh
 ```
 ## Windows Install : 
+RDP to moscato2 as pkgbuild
+Open a Windows command prompt (cmd.exe)
+#### If upgrading a previous installation
+cd E:\packagebuilder
+#### If upgrading a previous installation
+cd E:\
+git clone https://github.com/Bioconductor/packagebuilder.git
+#### Once you have a copy
+cd packagebuilder
+
 RDP to moscato2 as Administrator (needed to change services)
 Open cygwin
 **Determine if service has been previously installed**
@@ -37,11 +47,6 @@ Service             : BioC Single Package Builder
 Current State       : Stopped
 Command             : /cygdrive/c/Python27/python e:/packagebuilder/server.py
 ```
-
-Next, RDP to moscato2 as pkgbuild
-cd /cygdrive/e/
-git clone https://github.com/Bioconductor/packagebuilder.git
-cd packagebuilder
 
 You'll now see the service listed in Windows Services UI, when logged in
 as the Administrator
