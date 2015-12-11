@@ -3,7 +3,7 @@ call env\Scripts\activate.bat
 
 echo "Sourcing environment variables"
 pushd workers
-call moscato2.bat
+call moscato2.bat 3.3
 popd
 
 echo "Now starting server.py ..."
