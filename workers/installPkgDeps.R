@@ -73,7 +73,7 @@ if (length(need))
 if (!"BiocCheck" %in% rownames(ip))
 {
     library(BiocInstaller)
-    biocLite("Bioconductor/BiocCheck")
+    biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 }
 
 ## FIXME: validate post-condition
