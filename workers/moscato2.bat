@@ -4,7 +4,7 @@ set PACKAGEBUILDER_RSAKEY=e:/packagebuilder/.packagebuilder.private_key.rsa
 
 
 E:
-cd e:\biocbld\bbs\%2\bioc\moscato2
+cd e:\biocbld\bbs\%1\bioc\moscato2
 call config.bat
 
 E:
