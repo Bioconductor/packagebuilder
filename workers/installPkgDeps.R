@@ -20,7 +20,13 @@ dependenciesFromArgs <- function(args) {
     unlist(strsplit(gsub("@@ *", "", segs), ", *"))
 }
 args <- commandArgs(TRUE)
+print("args are:")
+print(args)
+
 deps <- dependenciesFromArgs(args)
+print("deps are:")
+print(deps)
+
 
 ##
 ## R version and repository setup
