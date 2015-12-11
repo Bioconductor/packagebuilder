@@ -16,6 +16,9 @@ set -o nounset
 # cd to the scripts current directory
 cd -P -- "$(dirname -- "$0")"
 
+echo "Enabling virtual environment"
+source env/bin/activate
+
 # TODO: Load variables in a more modular way
 echo "Sourcing environment variables"
 . workers/static-config.sh
