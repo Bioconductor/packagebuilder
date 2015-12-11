@@ -45,6 +45,7 @@ if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 # and sent it in a stomp message.  We inspect the output every .2 seconds and handle it.
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
+        logging.info("Attempting to tail file {fname}".format(fname = filename))
         threading.Thread.__init__(self)
         self.filename = filename
         self.status = status
@@ -80,7 +81,7 @@ class Tailer(threading.Thread):
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                logging.debug("Tailer.run() stopped; read %d bytes." % bytes)
+                logging.debug("Tailer.run() stopped; read %d bytes." % len(bytes))
                 send_message({
                     "status": self.status,
                     "sequence": self.message_sequence,
@@ -99,7 +100,7 @@ class Tailer(threading.Thread):
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                logging.debug("Tailer.run() read %d bytes" % bytes)
+                logging.debug("Tailer.run() read %d bytes" % len(bytes))
                 send_message({
                     "status": self.status,
                     "sequence": self.message_sequence,
