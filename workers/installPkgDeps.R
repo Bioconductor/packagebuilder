@@ -76,11 +76,8 @@ idx <-
 need <- c(have[idx], need)
 if (length(need))
     install.packages(need, bootstrap_libdir, repos=biocinstallRepos())
-if (!"BiocCheck" %in% rownames(ip))
-{
-    library(BiocInstaller)
-    biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir)
-}
+library(BiocInstaller)
+biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 
 ## FIXME: validate post-condition
 
