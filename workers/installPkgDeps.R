@@ -145,7 +145,7 @@ installPkg <- function(pkg)
     }
 }
 
-installDeps <- function(depStr)
+installDeps <- function(pkgs)
 {
     
     builtIn <- function(pkg)
@@ -153,7 +153,7 @@ installDeps <- function(depStr)
         pkg %in% c("R", "tools", "utils", "methods", "base", "graphics")
     }
     
-    pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
+    #pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
     for (pkg in pkgs) {
         pkg <- trimws(pkg)
         if (length(grep("(", pkg, fixed=TRUE))) { ## is there a version spec?
