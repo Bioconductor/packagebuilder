@@ -138,7 +138,7 @@ installPkg <- function(pkg)
             install.packages(pkgs, type="source", repos=repos)
         }
     } else {
-        install.packages(pkg, repos=repos, lib=lib)
+        install.packages(pkg, repos=repos)
     }
 }
 
