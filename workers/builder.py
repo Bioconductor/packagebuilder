@@ -406,7 +406,7 @@ def install_pkg_deps():
         "status": "preprocessing",
         "retcode": 0
     })
-    logging.debug("install_pkg_deps() Command to install dependencies:" +
+    logging.info("install_pkg_deps() Command to install dependencies:" +
                   "\n  %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({
