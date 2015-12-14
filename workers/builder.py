@@ -297,7 +297,10 @@ def setup():
     os.chdir(working_dir)
     logging.info("New working direcotry: {wd}".format(wd = os.getcwd()))
 
-    logging.info("Initial R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
+    if 'R_LIBS_USER' in os.environ:
+        logging.info("Initial R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
+    else:
+        logging.info("Initial R_LIBS_USER variable is empty.")
     expectedRLibsUser = os.path.join(working_dir, "R-libs")
     logging.info("Attempting change R_LIBS_USER to: {expectedRLibsUser}".format(expectedRLibsUser = expectedRLibsUser))
     os.environ['R_LIBS_USER'] = expectedRLibsUser
