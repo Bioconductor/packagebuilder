@@ -529,8 +529,7 @@ def win_multiarch_buildbin(message_stream):
 def check_package():
     send_message({"status": "starting_check", "body": ""}) # apparently ignored
 
-    win_multiarch = True # todo - make this a checkbox
-    if (platform.system() == "Windows" and win_multiarch):
+    if (platform.system() == "Windows"):
         return(win_multiarch_check())
 
     outfile = "Rcheck.out"
@@ -609,7 +608,6 @@ def build_package(source_build):
     global warnings
     message_sequence = 1
     flags = "--keep-empty-dirs --no-resave-data"
-    win_multiarch = True # todo make this a checkbox
     
     if (source_build):
         r_cmd = "%s CMD build %s %s" % \
@@ -623,13 +621,6 @@ def build_package(source_build):
                 os.mkdir(libdir)
             r_cmd = "../../build-universal.sh %s %s" % (
                 get_source_tarball_name(), libdir)
-
-        elif pkg_type == "win.binary":
-            if (win_multiarch):
-                pass
-            else:
-                r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
-                  (ENVIR['bbs_R_cmd'], libdir, package_name)
             
     status = None
     if (source_build):
@@ -641,7 +632,7 @@ def build_package(source_build):
     logging.debug("build_package() Before build, working dir is %s." %
                   working_dir)
     
-    if ((not source_build) and win_multiarch and pkg_type == "win.binary"):
+    if ((not source_build) and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
     else:
         send_message({"status": status, "body": r_cmd})
