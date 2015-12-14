@@ -51,6 +51,7 @@ options(repos=newrepos, install.packages.compile.from.source="always")
 
 home <- path.expand("~")
 
+## Location used to install packgebuilder dependencies
 bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
     sprintf("~/Library/R/%s/library", r_ver)
 } else if (.Platform$OS.type == "windows") {
@@ -61,7 +62,7 @@ bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
     file.path(home, 'R', sprintf("%s-library", R.version$platform), r_ver)
 }
 
-## bootstrap dependencies
+## Dependencies for the packagebuilder itself
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
     "devtools", "codetools", "httr", "curl")
 
@@ -185,3 +186,6 @@ installDeps(deps)
 
 if (.Platform$OS.type == "windows")
     biocLite("lattice", type="source")
+
+print("*** Final sessionInfo() ***")
+sessionInfo()

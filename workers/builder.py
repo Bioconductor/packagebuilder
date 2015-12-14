@@ -23,7 +23,6 @@ from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
 from bioconductor.config import BUILDER_ID
 
-
 ## BBS-specific imports
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
@@ -34,6 +33,14 @@ import dcf
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
+
+log_highlighter = "***************"
+
+def print_extra_debug_info(rCmd):
+    logging.info("\n\n" + log_highlighter)
+    sessionInfo = subprocess.Popen([rCmd, "-e", "'sessionInfo()'"], stdout=subprocess.PIPE).communicate()[0]
+    logging.info("sessionInfo() is:\n{sessionInfo}".format(sessionInfo=sessionInfo))
+    logging.info(log_highlighter + "\n\n")
 
 bad = [k for k, v in ENVIR.iteritems() if v is None]
 if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
@@ -287,8 +294,7 @@ def setup():
     logging.debug("setup() manifest_json = %s" % manifest_json)
     manifest = json.loads(manifest_json)
     manifest['svn_url'] = manifest['svn_url'].strip()
-    log_highlighter = "***************"
-    logging.info("\n\n"+log_highlighter)
+    logging.info(log_highlighter + "\n\n")
     logging.info("Attempting to determine `working_dir` based on sys.argv.")
     logging.info("Contents of `sys.argv`: {content}.".format(content = sys.argv))
     working_dir = os.path.split(sys.argv[1])[0]
@@ -536,8 +542,10 @@ def win_multiarch_buildbin(message_stream):
     logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
                   (libdir, os.path.exists(libdir)))
     time.sleep(1)
-    cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
-      (ENVIR['bbs_R_cmd'], libdir, tarball)
+    cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
+        R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
+    print_extra_debug_info(ENVIR['bbs_R_cmd'])
+
     send_message({"status": "r_buildbin_cmd", "body": cmd})
 
     return do_build(cmd, message_stream, False)
@@ -628,6 +636,7 @@ def build_package(source_build):
     if (source_build):
         r_cmd = "%s CMD build %s %s" % \
                 (ENVIR['bbs_R_cmd'], flags, package_name)
+        print_extra_debug_info(ENVIR['bbs_R_cmd'])
     else:
         if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
             libdir = "libdir"
