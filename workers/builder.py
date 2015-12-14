@@ -287,13 +287,26 @@ def setup():
     logging.debug("setup() manifest_json = %s" % manifest_json)
     manifest = json.loads(manifest_json)
     manifest['svn_url'] = manifest['svn_url'].strip()
+    log_highlighter = "***************"
+    logging.info("\n\n"+log_highlighter)
+    logging.info("Attempting to determine `working_dir` based on sys.argv.")
+    logging.info("Contents of `sys.argv`: {content}.".format(content = sys.argv))
     working_dir = os.path.split(sys.argv[1])[0]
+    logging.info("Initial working direcotry: {wd}".format(wd = os.getcwd()))
+    logging.info("Attempting change to working direcotry: {dir}".format(dir = working_dir))
     os.chdir(working_dir)
-    os.environ['R_LIBS_USER'] = os.path.join(working_dir, "R-libs")
+    logging.info("New working direcotry: {wd}".format(wd = os.getcwd()))
+
+    logging.info("Initial R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
+    expectedRLibsUser = os.path.join(working_dir, "R-libs")
+    logging.info("Attempting change R_LIBS_USER to: {expectedRLibsUser}".format(expectedRLibsUser = expectedRLibsUser))
+    os.environ['R_LIBS_USER'] = expectedRLibsUser
+    logging.info("New R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
         "bin"
     logging.debug("setup() Working dir = %s" % working_dir)
+    logging.info(log_highlighter + "\n\n")
     logging.info("Finished setup().")
 
 def setup_stomp():
