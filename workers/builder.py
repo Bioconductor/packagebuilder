@@ -38,7 +38,7 @@ log_highlighter = "***************"
 
 def print_extra_debug_info(rCmd):
     logging.info("\n\n" + log_highlighter)
-    sessionInfo = subprocess.Popen([rCmd, "-e", "'sessionInfo()'"], stdout=subprocess.PIPE).communicate()[0]
+    sessionInfo = subprocess.Popen([rCmd, "-e", "'sessionInfo()'"], stdout=subprocess.PIPE, shell=True).communicate()[0]
     logging.info("sessionInfo() is:\n{sessionInfo}".format(sessionInfo=sessionInfo))
     logging.info(log_highlighter + "\n\n")
 
