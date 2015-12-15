@@ -589,7 +589,8 @@ def do_build(cmd, message_stream, source):
         os.remove(outfile)
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    logging.info("Starting do_build(); message %s." % message_stream)
+    logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
+    logging.info("Build command: '{cmd}'.".format(cmd= cmd))
     background = Tailer(outfile, message_stream)
     background.start()
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
