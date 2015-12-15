@@ -590,6 +590,7 @@ def do_build(cmd, message_stream, source):
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
     logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
+    logging.info("The working directory: {wd}".format(wd=os.getcwd()))
     logging.info("Build command: '{cmd}'.".format(cmd= cmd))
     background = Tailer(outfile, message_stream)
     background.start()
