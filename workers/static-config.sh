@@ -29,8 +29,22 @@ BBS_RSYNC_CMD="rsync"
 export BBS_RSYNC_CMD="$BBS_RSYNC_CMD -rl --delete --exclude='.svn'"
 export BBS_RSYNC_RSH_CMD="$BBS_RSYNC_CMD -e '$BBS_SSH_CMD'"
 
+
+
+###
+###  zin2 values:
+###	BBS_HOME: 
+###		Config location: /home/biocbuild/BBS/nodes/zin2/local-settings.sh
+###		Value: /home/biocbuild/BBS
+###	BBS_R_HOME: 
+###		Config location: /home/biocbuild/BBS/3.3/bioc/zin2/config.sh
+###		Value: /home/biocbuild/bbs-3.3-bioc/R
+###
+
 #export BBS_HOME=changeme
 #export BBS_R_HOME=changeme
+
+
 export BBS_R_CMD="$BBS_R_HOME/bin/R"
 export BBS_BIOC_VERSION="3.3"
 export BBS_MODE="bioc"

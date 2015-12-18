@@ -1,4 +1,4 @@
-Django==1.8.4
+git+https://git@github.com/bioconductor/bioc-common-python.git
 argparse==1.2.1
 mechanize==0.2.5
 pytz==2015.7

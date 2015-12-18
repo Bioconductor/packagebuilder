@@ -23,7 +23,6 @@ from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
 from bioconductor.config import BUILDER_ID
 
-
 ## BBS-specific imports
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
@@ -35,6 +34,8 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
+log_highlighter = "***************"
+
 bad = [k for k, v in ENVIR.iteritems() if v is None]
 if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 
@@ -45,6 +46,7 @@ if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 # and sent it in a stomp message.  We inspect the output every .2 seconds and handle it.
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
+        logging.info("Attempting to tail file {fname}".format(fname = filename))
         threading.Thread.__init__(self)
         self.filename = filename
         self.status = status
@@ -80,7 +82,7 @@ class Tailer(threading.Thread):
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                logging.debug("Tailer.run() stopped; read %d bytes." % bytes)
+                logging.debug("Tailer.run() stopped; read %d bytes." % len(bytes))
                 send_message({
                     "status": self.status,
                     "sequence": self.message_sequence,
@@ -99,7 +101,7 @@ class Tailer(threading.Thread):
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
                 f.close()
-                logging.debug("Tailer.run() read %d bytes" % bytes)
+                logging.debug("Tailer.run() read %d bytes" % len(bytes))
                 send_message({
                     "status": self.status,
                     "sequence": self.message_sequence,
@@ -286,13 +288,28 @@ def setup():
     logging.debug("setup() manifest_json = %s" % manifest_json)
     manifest = json.loads(manifest_json)
     manifest['svn_url'] = manifest['svn_url'].strip()
+    logging.info(log_highlighter + "\n\n")
+    logging.info("Attempting to determine `working_dir` based on sys.argv.")
+    logging.info("Contents of `sys.argv`: {content}.".format(content = sys.argv))
     working_dir = os.path.split(sys.argv[1])[0]
+    logging.info("Initial working direcotry: {wd}".format(wd = os.getcwd()))
+    logging.info("Attempting change to working direcotry: {dir}".format(dir = working_dir))
     os.chdir(working_dir)
-    os.environ['R_LIBS_USER'] = os.path.join(working_dir, "R-libs")
+    logging.info("New working direcotry: {wd}".format(wd = os.getcwd()))
+
+    if 'R_LIBS_USER' in os.environ:
+        logging.info("Initial R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
+    else:
+        logging.info("Initial R_LIBS_USER variable is empty.")
+    expectedRLibsUser = os.path.join(working_dir, "R-libs")
+    logging.info("Attempting change R_LIBS_USER to: {expectedRLibsUser}".format(expectedRLibsUser = expectedRLibsUser))
+    os.environ['R_LIBS_USER'] = expectedRLibsUser
+    logging.info("New R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
         "bin"
     logging.debug("setup() Working dir = %s" % working_dir)
+    logging.info(log_highlighter + "\n\n")
     logging.info("Finished setup().")
 
 def setup_stomp():
@@ -405,7 +422,7 @@ def install_pkg_deps():
         "status": "preprocessing",
         "retcode": 0
     })
-    logging.debug("install_pkg_deps() Command to install dependencies:" +
+    logging.info("install_pkg_deps() Command to install dependencies:" +
                   "\n  %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({
@@ -519,8 +536,9 @@ def win_multiarch_buildbin(message_stream):
     logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
                   (libdir, os.path.exists(libdir)))
     time.sleep(1)
-    cmd = "%s CMD INSTALL --build --merge-multiarch --library=%s %s" %\
-      (ENVIR['bbs_R_cmd'], libdir, tarball)
+    cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
+        R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
+
     send_message({"status": "r_buildbin_cmd", "body": cmd})
 
     return do_build(cmd, message_stream, False)
@@ -528,8 +546,7 @@ def win_multiarch_buildbin(message_stream):
 def check_package():
     send_message({"status": "starting_check", "body": ""}) # apparently ignored
 
-    win_multiarch = True # todo - make this a checkbox
-    if (platform.system() == "Windows" and win_multiarch):
+    if (platform.system() == "Windows"):
         return(win_multiarch_check())
 
     outfile = "Rcheck.out"
@@ -565,7 +582,10 @@ def do_build(cmd, message_stream, source):
         os.remove(outfile)
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    logging.info("Starting do_build(); message %s." % message_stream)
+    logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
+    logging.info("The working directory: {wd}".format(wd=os.getcwd()))
+    logging.info("The current environment variables: \n {envVars}".format(envVars=os.environ))
+    logging.info("Build command: '{cmd}'.".format(cmd= cmd))
     background = Tailer(outfile, message_stream)
     background.start()
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
@@ -608,7 +628,6 @@ def build_package(source_build):
     global warnings
     message_sequence = 1
     flags = "--keep-empty-dirs --no-resave-data"
-    win_multiarch = True # todo make this a checkbox
     
     if (source_build):
         r_cmd = "%s CMD build %s %s" % \
@@ -622,13 +641,6 @@ def build_package(source_build):
                 os.mkdir(libdir)
             r_cmd = "../../build-universal.sh %s %s" % (
                 get_source_tarball_name(), libdir)
-
-        elif pkg_type == "win.binary":
-            if (win_multiarch):
-                pass
-            else:
-                r_cmd = "%s CMD INSTALL --build --library=%s %s" % \
-                  (ENVIR['bbs_R_cmd'], libdir, package_name)
             
     status = None
     if (source_build):
@@ -640,7 +652,7 @@ def build_package(source_build):
     logging.debug("build_package() Before build, working dir is %s." %
                   working_dir)
     
-    if ((not source_build) and win_multiarch and pkg_type == "win.binary"):
+    if ((not source_build) and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
     else:
         send_message({"status": status, "body": r_cmd})
@@ -1055,7 +1067,9 @@ if __name__ == "__main__":
         logging.error("main() Failed to install dependencies: %d." % result)
         raise Exception("failed to install dependencies")
     
+    logging.info("Attempting to build package")
     result = build_package(True)
+    logging.info("build_package() finished with result {res}".format(res=result))
     if (result == 0):
         check_result = check_package()
         buildbin_result = build_package(False)
@@ -1075,9 +1089,4 @@ if __name__ == "__main__":
         })
         logging.info("Normal build completion, %s." % body)
 
-        # send_message({
-        #     "status": "complete",
-        #     "result": result,
-        #     "body": body,
-        #     "warnings": warnings
-        # })
+    logging.info("End of main function, onexit() should run next.")

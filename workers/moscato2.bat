@@ -4,7 +4,7 @@ set PACKAGEBUILDER_RSAKEY=e:/packagebuilder/.packagebuilder.private_key.rsa
 
 
 E:
-cd e:\biocbld\bbs\%2\bioc\moscato2
+cd e:\biocbld\bbs\%1\bioc\moscato2
 call config.bat
 
 E:
@@ -16,7 +16,3 @@ set SVN_PASS=buildpkg
 
 set BBS_R_HOME=E:\packagebuilder\R
 set BBS_R_CMD=%BBS_R_HOME%\bin\R.exe
-
-
-
-%BBS_PYTHON_CMD% builder.py %1

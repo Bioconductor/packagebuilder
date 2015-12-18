@@ -20,7 +20,13 @@ dependenciesFromArgs <- function(args) {
     unlist(strsplit(gsub("@@ *", "", segs), ", *"))
 }
 args <- commandArgs(TRUE)
+print("args are:")
+print(args)
+
 deps <- dependenciesFromArgs(args)
+print("deps are:")
+print(deps)
+
 
 ##
 ## R version and repository setup
@@ -45,6 +51,7 @@ options(repos=newrepos, install.packages.compile.from.source="always")
 
 home <- path.expand("~")
 
+## Location used to install packgebuilder dependencies
 bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
     sprintf("~/Library/R/%s/library", r_ver)
 } else if (.Platform$OS.type == "windows") {
@@ -55,7 +62,7 @@ bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
     file.path(home, 'R', sprintf("%s-library", R.version$platform), r_ver)
 }
 
-## bootstrap dependencies
+## Dependencies for the packagebuilder itself
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
     "devtools", "codetools", "httr", "curl")
 
@@ -70,6 +77,8 @@ idx <-
 need <- c(have[idx], need)
 if (length(need))
     install.packages(need, bootstrap_libdir, repos=biocinstallRepos())
+library(BiocInstaller)
+biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 
 ## FIXME: validate post-condition
 
@@ -130,11 +139,11 @@ installPkg <- function(pkg)
             install.packages(pkgs, type="source", repos=repos)
         }
     } else {
-        install.packages(pkg, repos=repos, lib=lib)
+        install.packages(pkg, repos=repos)
     }
 }
 
-installDeps <- function(depStr)
+installDeps <- function(pkgs)
 {
     
     builtIn <- function(pkg)
@@ -142,7 +151,7 @@ installDeps <- function(depStr)
         pkg %in% c("R", "tools", "utils", "methods", "base", "graphics")
     }
     
-    pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
+    #pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
     for (pkg in pkgs) {
         pkg <- trimws(pkg)
         if (length(grep("(", pkg, fixed=TRUE))) { ## is there a version spec?
@@ -177,3 +186,6 @@ installDeps(deps)
 
 if (.Platform$OS.type == "windows")
     biocLite("lattice", type="source")
+
+print("*** Final sessionInfo() ***")
+sessionInfo()

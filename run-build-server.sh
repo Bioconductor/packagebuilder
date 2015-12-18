@@ -7,6 +7,14 @@ err_handler() {
 
 trap 'err_handler $LINENO' ERR
 
+# cd to the scripts current directory
+cd -P -- "$(dirname -- "$0")"
+
+# As a workaround to https://github.com/pypa/virtualenv/issues/150 , we should 
+# enable the virtual environment before setting "nounset"
+echo "Enabling virtual environment"
+source env/bin/activate
+
 # Fail fast (err_handler above will be invoked)
 # Exit immediately if a command exits with a non-zero status.
 set -o errexit
@@ -14,13 +22,9 @@ set -o errexit
 set -o nounset
 
 # TODO: Load variables in a more modular way
-echo "Sourcing unified environment variables"
+echo "Sourcing environment variables"
 . workers/static-config.sh
 
 echo "Now starting server.py ..."
-python -m workers.server > server.log 2>&1 &
+nohup python -m workers.server > server.log 2>&1 &
 echo "Server is started."
-
-echo "Now starting archiver.py ..."
-python -m spb_history.archiver > archiver.log 2>&1 &
-echo "Archiver is started."
