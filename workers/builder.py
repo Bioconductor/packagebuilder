@@ -36,12 +36,6 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)
 
 log_highlighter = "***************"
 
-def print_extra_debug_info(rCmd):
-    logging.info("\n\n" + log_highlighter)
-    sessionInfo = subprocess.Popen([rCmd, "-e", "'sessionInfo()'"], stdout=subprocess.PIPE, shell=True).communicate()[0]
-    logging.info("sessionInfo() is:\n{sessionInfo}".format(sessionInfo=sessionInfo))
-    logging.info(log_highlighter + "\n\n")
-
 bad = [k for k, v in ENVIR.iteritems() if v is None]
 if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 
@@ -544,7 +538,6 @@ def win_multiarch_buildbin(message_stream):
     time.sleep(1)
     cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
         R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
-    print_extra_debug_info(ENVIR['bbs_R_cmd'])
 
     send_message({"status": "r_buildbin_cmd", "body": cmd})
 
@@ -639,7 +632,6 @@ def build_package(source_build):
     if (source_build):
         r_cmd = "%s CMD build %s %s" % \
                 (ENVIR['bbs_R_cmd'], flags, package_name)
-        print_extra_debug_info(ENVIR['bbs_R_cmd'])
     else:
         if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
             libdir = "libdir"
@@ -1075,7 +1067,9 @@ if __name__ == "__main__":
         logging.error("main() Failed to install dependencies: %d." % result)
         raise Exception("failed to install dependencies")
     
+    logging.info("Attempting to build package")
     result = build_package(True)
+    logging.info("build_package() finished with result {res}".format(res=result))
     if (result == 0):
         check_result = check_package()
         buildbin_result = build_package(False)
@@ -1095,9 +1089,4 @@ if __name__ == "__main__":
         })
         logging.info("Normal build completion, %s." % body)
 
-        # send_message({
-        #     "status": "complete",
-        #     "result": result,
-        #     "body": body,
-        #     "warnings": warnings
-        # })
+    logging.info("End of main function, onexit() should run next.")
