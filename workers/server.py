@@ -5,7 +5,6 @@ import sys
 import json
 import os
 import subprocess
-import platform
 import uuid
 import stomp
 import logging
@@ -39,9 +38,6 @@ if (BUILDER_ID.lower().startswith("dhcp") or \
     else:
         logging.error("main() Cannot determine who I am")
         raise
-shell_ext = ".bat"
-if (platform.system() == "Darwin" or platform.system() == "Linux"):
-    shell_ext = ".sh"
 
 # TODO: Name the callback for it's functionality, not usage.  This
 # seems like it's as useful as 'myFunction' or 'myMethod'.  Why not
@@ -77,12 +73,6 @@ class MyListener(stomp.ConnectionListener):
         logging.debug('on_error(): "%s".' % message)
 
     def on_message(self, headers, body):
-        # FIXME : The maps defined above seem to be an anti-pattern.
-        # Also, it's very odd IMHO that we're invoking 'global' here.
-        # The variable is in scope and we're not attempting any read
-        # or assignment.
-        global shell_ext
-
         logging.info("Message received")
         try:
             received_obj = json.loads(body)
@@ -112,25 +102,7 @@ class MyListener(stomp.ConnectionListener):
             
             logging.info("job_dir: '%s'", job_dir)
             
-            # FIXME: Host specific scripts are bad!
-            use_host_specific_script = False
-            if use_host_specific_script:
-                log_highlighter = "************************************"
-                logging.info(log_highlighter)
-                logging.info("Executing deprecated builder.py invocation (via shell script abstraction).")
-                logging.info("BUILDER_ID: '%s'", BUILDER_ID)
-                logging.info("shell_ext: '%s'", shell_ext)
-                host_specific_script = os.path.join(ENVIR['packagebuilder_home'], "%s%s" % (BUILDER_ID, shell_ext))
-                if os.path.isfile(host_specific_script) and os.access(host_specific_script, os.R_OK):
-                    logging.info("The SPB will depend on host-specific script '%s'", host_specific_script)
-                else :
-                    logging.error("The SPB relies on host-specific script '%s',"
-                        "which is inaccessible.  Can not continue!", host_specific_script)
-                    raise
-                shell_cmd = [host_specific_script, jobfilename, bioc_version]
-                logging.info(log_highlighter)
-            else:
-                shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
+            shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
                                      
