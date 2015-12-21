@@ -1,0 +1,11 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{SPBTestLatex vignette}
+%\VignettePackage{SPBTestLatex}
+
+\documentclass{article}
+
+\begin{document}
+
+Hello world.
+
+\end{document}
