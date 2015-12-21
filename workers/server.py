@@ -74,6 +74,10 @@ class MyListener(stomp.ConnectionListener):
 
     def on_message(self, headers, body):
         logging.info("Message received")
+
+        # Acknowledge that the message has been received
+        self.message_received = True
+        logging.info("Message acknowledged")
         try:
             received_obj = json.loads(body)
         except ValueError:
@@ -127,9 +131,6 @@ class MyListener(stomp.ConnectionListener):
             logging.info("Reply sent")
         else:
             logging.error("on_message() Invalid JSON: missing job_id key.")
-
-        # Acknowledge that the message has been processed
-        self.message_received = True
 
 try:
     logging.debug("Attempting to connect using new communication module")
