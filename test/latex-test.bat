@@ -10,5 +10,5 @@ call env\Scripts\activate.bat
 set BBS_R_CMD=E:\packagebuilder\R\bin\R.exe
 
 echo "Now building SPBTestLatex..."
-%BBS_R_CMD% CMD build SPBTestLatex > latex_test.log 2>&1
+%BBS_R_CMD% CMD build SPBTestLatex
 echo "SPBTestLatex is built."
