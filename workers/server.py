@@ -114,8 +114,7 @@ class MyListener(stomp.ConnectionListener):
                 logging.info("on_message() shell_cmd: '%s'", shell_cmd)
                 logging.info("on_message() jobfilename: '%s'", jobfilename)
                 logging.info("on_message() builder_log: '%s'", builder_log)
-                blderProcess = subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
-                logging.info("on_message() blderProcess: '%s'", blderProcess)
+                subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
 
                 ## TODO - somehow close builder_log filehandle if possible
                 msg_obj = {}
