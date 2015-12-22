@@ -15,7 +15,7 @@ from bioconductor.config import BUILDER_ID
 from bioconductor.communication import getNewStompConnection
 
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s:%(lineno)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
 
