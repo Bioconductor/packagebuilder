@@ -73,11 +73,11 @@ class MyListener(stomp.ConnectionListener):
         logging.debug('on_error(): "%s".' % message)
 
     def on_message(self, headers, body):
-        logging.info("Message received")
+        logging.info("on_message() Message received")
 
         # Acknowledge that the message has been received
         self.message_received = True
-        logging.info("Message acknowledged")
+        logging.info("on_message() Message acknowledged")
         try:
             received_obj = json.loads(body)
         except ValueError:
@@ -103,20 +103,19 @@ class MyListener(stomp.ConnectionListener):
                 jobfile = open(jobfilename, "w")
                 jobfile.write(body)
                 jobfile.close
-                logging.debug("on_message() job_dir = %s." % job_dir)
 
-                logging.info("job_dir: '%s'", job_dir)
+                logging.info("on_message() job_dir: '%s'.", job_dir)
 
                 shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
                 builder_log = open(os.path.join(job_dir, "builder.log"), "w")
 
-                logging.info("Attempting to run commands from directory: '%s'", os.getcwd())
-                logging.info("shell_cmd: '%s'", shell_cmd)
-                logging.info("jobfilename: '%s'", jobfilename)
-                logging.info("builder_log: '%s'", builder_log)
+                logging.info("on_message() Attempting to run commands from directory: '%s'", os.getcwd())
+                logging.info("on_message() shell_cmd: '%s'", shell_cmd)
+                logging.info("on_message() jobfilename: '%s'", jobfilename)
+                logging.info("on_message() builder_log: '%s'", builder_log)
                 blderProcess = subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
-                logging.info("blderProcess: '%s'", blderProcess)
+                logging.info("on_message() blderProcess: '%s'", blderProcess)
 
                 ## TODO - somehow close builder_log filehandle if possible
                 msg_obj = {}
