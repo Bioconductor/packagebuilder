@@ -114,7 +114,7 @@ class MyListener(stomp.ConnectionListener):
                 logging.info("on_message() shell_cmd: '%s'", shell_cmd)
                 logging.info("on_message() jobfilename: '%s'", jobfilename)
                 logging.info("on_message() builder_log: '%s'", builder_log)
-                subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
+                blderProcess = subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
 
                 ## TODO - somehow close builder_log filehandle if possible
                 msg_obj = {}
@@ -127,7 +127,13 @@ class MyListener(stomp.ConnectionListener):
                 json_str = json.dumps(msg_obj)
                 stomp.send(destination=TOPICS['events'], body=json_str,
                            headers={"persistent": "true"})
-                logging.info("Reply sent")
+                logging.info("on_message() Reply sent")
+                blderProcess.wait()
+                logging.info("on_message() blderProcess finished with status {s}.".format(s=blderProcess.returncode))
+                blderProcess.terminate()
+                logging.info("on_message() blderProcess terminated.")
+                builder_log.close()
+                logging.info("on_message() builder_log closed.")
             except Exception as e:
                 logging.error("on_message() Caught exception: {e}".format(e=e))
                 return()
