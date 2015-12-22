@@ -15,13 +15,15 @@ import unicodedata
 import atexit
 import mechanize
 import logging
+from stomp.listener import PrintingListener
 
 # Modules created by Bioconductor
-from bioconductor.communication import getOldStompConnection
+from bioconductor.communication import getNewStompConnection
 from bioconductor.config import BIOC_R_MAP
+from bioconductor.config import BUILDER_ID
 from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
-from bioconductor.config import BUILDER_ID
+from bioconductor.config import TOPICS
 
 ## BBS-specific imports
 sys.path.append(ENVIR['bbs_home'])
@@ -136,13 +138,9 @@ def send_message(msg, status=None):
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
     json_str = json.dumps(merged_dict)
     logging.debug("send_message() Sending message: %s" % json_str)
-    this_frame = stomp.send({
-        'destination': "/topic/builderevents",
-        'body': json_str,
-        'persistent': 'true'
-    })
-    logging.info("Message sent in send_message(); receipt-id: %s." %
-                 this_frame.headers.get('receipt-id'))
+    stomp.send(destination=TOPICS['events'], body=json_str,
+               headers={"persistent": "true"})
+    logging.info("send_message(): Message sent.")
 
 def send_dcf_info(dcf_file):
     try:
@@ -315,7 +313,7 @@ def setup():
 def setup_stomp():
     global stomp
     try:
-        stomp = getOldStompConnection()
+        stomp = getNewStompConnection('', PrintingListener())
     except:
         logging.error("setup_stomp(): Cannot connect.")
         raise
