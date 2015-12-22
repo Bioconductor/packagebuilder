@@ -130,8 +130,6 @@ class MyListener(stomp.ConnectionListener):
                 logging.info("on_message() Reply sent")
                 blderProcess.wait()
                 logging.info("on_message() blderProcess finished with status {s}.".format(s=blderProcess.returncode))
-                blderProcess.terminate()
-                logging.info("on_message() blderProcess terminated.")
                 builder_log.close()
                 logging.info("on_message() builder_log closed.")
             except Exception as e:
