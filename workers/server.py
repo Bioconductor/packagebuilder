@@ -102,7 +102,7 @@ class MyListener(stomp.ConnectionListener):
 
                 jobfile = open(jobfilename, "w")
                 jobfile.write(body)
-                jobfile.close
+                jobfile.close()
 
                 logging.info("on_message() job_dir: '%s'.", job_dir)
 
