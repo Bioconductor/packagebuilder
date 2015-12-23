@@ -143,7 +143,7 @@ try:
     stomp = getNewStompConnection('', MyListener())
     logging.info("Connection established using new communication module")
     stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,
-                    ack='client')
+                    ack='auto')
     logging.info("Subscribed to destination %s" % TOPICS['jobs'])
 except Exception as e:
     logging.error("main() Could not connect to ActiveMQ: %s." % e)
