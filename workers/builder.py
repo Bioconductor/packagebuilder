@@ -882,6 +882,8 @@ def onexit():
         "retcode": -1,
         "svn_url": svn_url_global
     })
+    print("Sleeping for a few seconds.")
+    time.sleep(15)
 
 def update_packages_file():
     global repos
