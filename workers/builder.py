@@ -15,13 +15,15 @@ import unicodedata
 import atexit
 import mechanize
 import logging
+from stomp.listener import PrintingListener
 
 # Modules created by Bioconductor
-from bioconductor.communication import getOldStompConnection
+from bioconductor.communication import getNewStompConnection
 from bioconductor.config import BIOC_R_MAP
+from bioconductor.config import BUILDER_ID
 from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
-from bioconductor.config import BUILDER_ID
+from bioconductor.config import TOPICS
 
 ## BBS-specific imports
 sys.path.append(ENVIR['bbs_home'])
@@ -110,7 +112,10 @@ class Tailer(threading.Thread):
                 self.message_sequence += 1
                 prevsize = st.st_size
 
+# Since we're modifying encoding in this function, it's important that we're consistent
+# (as unicode) when attempting to write to the log file.
 def send_message(msg, status=None):
+    logging.info(u"Attempting to send message: '{msg}'".format(msg=msg))
     merged_dict = {}
     merged_dict['builder_id'] = BUILDER_ID
     merged_dict['client_id'] = manifest['client_id']
@@ -118,31 +123,37 @@ def send_message(msg, status=None):
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
+        logging.info(u"msg is dict")
         merged_dict.update(msg)
         if not ('status' in merged_dict.keys()):
             if not (status == None):
                 merged_dict['status'] = status
     else:
+        logging.info(u"msg is NOT dict")
         merged_dict['body'] = msg
         if not (status == None):
             merged_dict['status'] = status
+    logging.info(u"merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
+    
     if("body" in merged_dict):
         body = None
         try:
             body = unicode(merged_dict['body'], errors='replace')
         except TypeError:
             body = merged_dict['body']
+        logging.info(u"Final modified body: '{body}'".format(body=body))
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
+        logging.info(u"Ascii encoded body: '{body}'".format(body=merged_dict['body']))
+        
+    logging.info(u"Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
     json_str = json.dumps(merged_dict)
-    logging.debug("send_message() Sending message: %s" % json_str)
-    this_frame = stomp.send({
-        'destination': "/topic/builderevents",
-        'body': json_str,
-        'persistent': 'true'
-    })
-    logging.info("Message sent in send_message(); receipt-id: %s." %
-                 this_frame.headers.get('receipt-id'))
+    logging.info(u"JSON json_str: '{json_str}'".format(json_str=json_str))
+    
+    logging.debug(u"send_message() Sending message: %s" % json_str)
+    stomp.send(destination=TOPICS['events'], body=json_str,
+               headers={"persistent": "true"})
+    logging.info(u"send_message(): Message sent.")
 
 def send_dcf_info(dcf_file):
     try:
@@ -315,7 +326,7 @@ def setup():
 def setup_stomp():
     global stomp
     try:
-        stomp = getOldStompConnection()
+        stomp = getNewStompConnection('', PrintingListener())
     except:
         logging.error("setup_stomp(): Cannot connect.")
         raise
@@ -873,6 +884,8 @@ def onexit():
         "retcode": -1,
         "svn_url": svn_url_global
     })
+    print("Sleeping for a few seconds.")
+    time.sleep(15)
 
 def update_packages_file():
     global repos

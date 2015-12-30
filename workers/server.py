@@ -15,7 +15,7 @@ from bioconductor.config import BUILDER_ID
 from bioconductor.communication import getNewStompConnection
 
 
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s:%(lineno)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
 
@@ -73,11 +73,11 @@ class MyListener(stomp.ConnectionListener):
         logging.debug('on_error(): "%s".' % message)
 
     def on_message(self, headers, body):
-        logging.info("Message received")
+        logging.info("on_message() Message received")
 
         # Acknowledge that the message has been received
         self.message_received = True
-        logging.info("Message acknowledged")
+        logging.info("on_message() Message acknowledged")
         try:
             received_obj = json.loads(body)
         except ValueError:
@@ -102,21 +102,19 @@ class MyListener(stomp.ConnectionListener):
 
                 jobfile = open(jobfilename, "w")
                 jobfile.write(body)
-                jobfile.close
-                logging.debug("on_message() job_dir = %s." % job_dir)
+                jobfile.close()
 
-                logging.info("job_dir: '%s'", job_dir)
+                logging.info("on_message() job_dir: '%s'.", job_dir)
 
                 shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
                 builder_log = open(os.path.join(job_dir, "builder.log"), "w")
 
-                logging.info("Attempting to run commands from directory: '%s'", os.getcwd())
-                logging.info("shell_cmd: '%s'", shell_cmd)
-                logging.info("jobfilename: '%s'", jobfilename)
-                logging.info("builder_log: '%s'", builder_log)
+                logging.info("on_message() Attempting to run commands from directory: '%s'", os.getcwd())
+                logging.info("on_message() shell_cmd: '%s'", shell_cmd)
+                logging.info("on_message() jobfilename: '%s'", jobfilename)
+                logging.info("on_message() builder_log: '%s'", builder_log)
                 blderProcess = subprocess.Popen(shell_cmd, stdout=builder_log, stderr=builder_log)
-                logging.info("blderProcess: '%s'", blderProcess)
 
                 ## TODO - somehow close builder_log filehandle if possible
                 msg_obj = {}
@@ -129,7 +127,11 @@ class MyListener(stomp.ConnectionListener):
                 json_str = json.dumps(msg_obj)
                 stomp.send(destination=TOPICS['events'], body=json_str,
                            headers={"persistent": "true"})
-                logging.info("Reply sent")
+                logging.info("on_message() Reply sent")
+                blderProcess.wait()
+                logging.info("on_message() blderProcess finished with status {s}.".format(s=blderProcess.returncode))
+                builder_log.close()
+                logging.info("on_message() builder_log closed.")
             except Exception as e:
                 logging.error("on_message() Caught exception: {e}".format(e=e))
                 return()
@@ -141,7 +143,7 @@ try:
     stomp = getNewStompConnection('', MyListener())
     logging.info("Connection established using new communication module")
     stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,
-                    ack='client')
+                    ack='auto')
     logging.info("Subscribed to destination %s" % TOPICS['jobs'])
 except Exception as e:
     logging.error("main() Could not connect to ActiveMQ: %s." % e)
