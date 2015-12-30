@@ -112,8 +112,10 @@ class Tailer(threading.Thread):
                 self.message_sequence += 1
                 prevsize = st.st_size
 
+# Since we're modifying encoding in this function, it's important that we're consistent
+# (as unicode) when attempting to write to the log file.
 def send_message(msg, status=None):
-    logging.info("Attempting to send message: '{msg}'".format(msg=msg))
+    logging.info(u"Attempting to send message: '{msg}'".format(msg=msg))
     merged_dict = {}
     merged_dict['builder_id'] = BUILDER_ID
     merged_dict['client_id'] = manifest['client_id']
@@ -121,17 +123,17 @@ def send_message(msg, status=None):
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
-        logging.info("msg is dict")
+        logging.info(u"msg is dict")
         merged_dict.update(msg)
         if not ('status' in merged_dict.keys()):
             if not (status == None):
                 merged_dict['status'] = status
     else:
-        logging.info("msg is NOT dict")
+        logging.info(u"msg is NOT dict")
         merged_dict['body'] = msg
         if not (status == None):
             merged_dict['status'] = status
-    logging.info("merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
+    logging.info(u"merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
     
     if("body" in merged_dict):
         body = None
@@ -139,19 +141,19 @@ def send_message(msg, status=None):
             body = unicode(merged_dict['body'], errors='replace')
         except TypeError:
             body = merged_dict['body']
-        logging.info("Final modified body: '{body}'".format(body=body))
+        logging.info(u"Final modified body: '{body}'".format(body=body))
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
-        logging.info("Ascii encoded body: '{body}'".format(body=merged_dict['body']))
+        logging.info(u"Ascii encoded body: '{body}'".format(body=merged_dict['body']))
         
-    logging.info("Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
+    logging.info(u"Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
     json_str = json.dumps(merged_dict)
-    logging.info("JSON json_str: '{json_str}'".format(json_str=json_str))
+    logging.info(u"JSON json_str: '{json_str}'".format(json_str=json_str))
     
-    logging.debug("send_message() Sending message: %s" % json_str)
+    logging.debug(u"send_message() Sending message: %s" % json_str)
     stomp.send(destination=TOPICS['events'], body=json_str,
                headers={"persistent": "true"})
-    logging.info("send_message(): Message sent.")
+    logging.info(u"send_message(): Message sent.")
 
 def send_dcf_info(dcf_file):
     try:
