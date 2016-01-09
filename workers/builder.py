@@ -15,10 +15,9 @@ import unicodedata
 import atexit
 import mechanize
 import logging
-from stomp.listener import PrintingListener
 
 # Modules created by Bioconductor
-from bioconductor.communication import getNewStompConnection
+from bioconductor.communication import MessageSender
 from bioconductor.config import BIOC_R_MAP
 from bioconductor.config import BUILDER_ID
 from bioconductor.config import ENVIR
@@ -32,6 +31,7 @@ os.environ['BBS_HOME'] = ENVIR['bbs_home']
 import BBScorevars
 import dcf
 
+sender = MessageSender(TOPICS['events'])
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
@@ -45,7 +45,7 @@ if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 #
 #    Usage example :
 # Run a command that continuously emits output, capture the output as soon as possible 
-# and sent it in a stomp message.  We inspect the output every .2 seconds and handle it.
+# and sent it in an sqs message.  We inspect the output every .2 seconds and handle it.
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
         logging.info("Attempting to tail file {fname}".format(fname = filename))
@@ -151,8 +151,7 @@ def send_message(msg, status=None):
     logging.info(u"JSON json_str: '{json_str}'".format(json_str=json_str))
     
     logging.debug(u"send_message() Sending message: %s" % json_str)
-    stomp.send(destination=TOPICS['events'], body=json_str,
-               headers={"persistent": "true"})
+    sender.send(body=json_str)
     logging.info(u"send_message(): Message sent.")
 
 def send_dcf_info(dcf_file):
@@ -323,13 +322,6 @@ def setup():
     logging.info(log_highlighter + "\n\n")
     logging.info("Finished setup().")
 
-def setup_stomp():
-    global stomp
-    try:
-        stomp = getNewStompConnection('', PrintingListener())
-    except:
-        logging.error("setup_stomp(): Cannot connect.")
-        raise
 
 def svn_export():
     # Don't use BBS_SVN_CMD because it may not be defined on all nodes
@@ -884,7 +876,6 @@ def onexit():
         "retcode": -1,
         "svn_url": svn_url_global
     })
-    stomp.disconnect(receipt=None)
 
 def update_packages_file():
     global repos
@@ -1039,7 +1030,6 @@ if __name__ == "__main__":
                       manifest['bioc_version'])
         sys.exit("BioC version not supported")
 
-    setup_stomp()
     
     send_message("Builder has been started")
     
