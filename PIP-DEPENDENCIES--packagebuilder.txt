@@ -2,6 +2,6 @@ git+https://git@github.com/bioconductor/bioc-common-python.git
 argparse==1.2.1
 mechanize==0.2.5
 pytz==2015.7
-stomp.py==4.1.8
+stomp.py==4.1.9
 stompy==0.2.9
 wsgiref==0.1.2
