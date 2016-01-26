@@ -20,6 +20,7 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s:%(lineno)s -
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
 
+logging.getLogger("stomp.py").setLevel(logging.WARNING)
 
 # FIXME Get this information dynamically.  Consider bioc-cm or
 #       master.bioconductor.org/config.yaml
@@ -76,6 +77,13 @@ class MyListener(stomp.ConnectionListener):
 
 
     def on_message(self, headers, body):
+        # FIXME, don't hardcode keepalive topic name:
+        if headers['destination'] == '/topic/keepalive':
+            # by default this log message will not
+            # be visible (logging level is INFO)
+            # but can be made visible if necessary:
+            logging.debug('got keepalive message')
+            return()
 
         logging.info("on_message() Message received")
 
@@ -155,6 +163,9 @@ try:
     stomp.subscribe(destination=TOPICS['jobs'], id=uuid.uuid4().hex,
                     ack='auto')
     logging.info("Subscribed to destination %s" % TOPICS['jobs'])
+    stomp.subscribe(destination="/topic/keepalive", id=uuid.uuid4().hex,
+                    ack='auto')
+    logging.info("Subscribed to  %s" % "/topic/keepalive")
 except Exception as e:
     logging.error("main() Could not connect to ActiveMQ: %s." % e)
     raise
