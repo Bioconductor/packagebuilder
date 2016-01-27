@@ -15,4 +15,4 @@ script:
   - python -c 'print "Finished static analysis"'
 notifications:
   email:
-    - brian@bioconductor.org
+    - dtenenba@fredhutch.org
