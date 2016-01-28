@@ -9,6 +9,8 @@ import uuid
 import stomp
 import logging
 import threading
+import socket
+from datetime import datetime
 # Modules created by Bioconductor
 from bioconductor.config import ENVIR
 from bioconductor.config import TOPICS
@@ -83,6 +85,11 @@ class MyListener(stomp.ConnectionListener):
             # be visible (logging level is INFO)
             # but can be made visible if necessary:
             logging.debug('got keepalive message')
+            response = {"host": socket.gethostname(),
+            "script": os.path.basename(__file__),
+            "timestamp": datetime.now().isoformat()}
+            stomp.send(body=json.dumps(response),
+                destination="/topic/keepalive_response")
             return()
 
         logging.info("on_message() Message received")
