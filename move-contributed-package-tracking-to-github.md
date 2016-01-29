@@ -27,7 +27,7 @@ This plan will imply the following changes:
 ## Work that needs to be done to get there
 
 * Document what contributor needs to do
-* Write a small web app that listens for push hook messages and notifies the SPB
+* Write a small web app that listens for push hook messages and notifies the SPB.
   This app should also maybe provide a user-facing page that lists all repos
   that have the web hook (all repos that have communicated with it). This
   gives us a UI to packages that are being or have been tracked, a bit like
