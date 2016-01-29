@@ -48,7 +48,7 @@ This plan will imply the following changes:
   how that transition will happen. It does sound like Bioc will have its own git server
   (or use a robust hosted one; AWS CodeCommit?) but that repos will be mirrored on GitHub.
   Getting a bit off topic, but we need to figure out how to link the contributor's
-  github repos with bioc's non-github-hosted repos.
+  github repos with bioc's non-github-hosted repos after their package is accepted.
   
 
 
