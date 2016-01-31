@@ -70,6 +70,33 @@ This plan will imply the following changes:
   let visitors know that they should be using the new sytem.
 
 
+## Web App Functionality
 
+* Respond to GitHub web hooks when there is a push to a repository of a new package.
+* Display a list of all repos we know about
+* Associate the repos with a reviewer 
+* Provide reviewer with shields/shield code to udpate package status; display status
+* Ignore hook payloads when package is closed/accepted (the first time we can post to 
+  the issue telling author they can remove push webhook)
 
+The app should have a page analagous to the 'main' page of the current tracker which displays 
+a table containing the following columns:
 
+* Package, containing a link to the issue which contains the review 'conversation'
+* Status
+* Reviewer / widget to assign reviewer
+* Widget for reviewer to update status
+
+### Implementation ideas
+
+* Ruby web app (rails or sinatra) using Octokit to communicate with github api
+* Should have extensive unit tests (involves mocking github api)
+
+Database has one table with the following columns:
+
+* Repos URL
+* Package name
+* Issue # which contains review conversation
+* Reviewer
+* Package status? Not sure if this should be in db as the info is available in 
+  the github issue, storing it in DB as well is not DRY.
