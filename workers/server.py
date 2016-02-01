@@ -92,6 +92,14 @@ class MyListener(stomp.ConnectionListener):
                 destination="/topic/keepalive_response")
             return()
 
+        debug_msg = {"script": os.path.basename(__file__),
+            "host": socket.gethostname(), "timestamp":
+            datetime.now().isoformat(), "message":
+            "received message from %s before thread" % headers['destination']}
+        stomp.send(body=json.dumps(debug_msg),
+            destination="/topic/keepalive_response")
+
+
         logging.info("on_message() Message received")
 
         # Acknowledge that the message has been received
@@ -101,6 +109,14 @@ class MyListener(stomp.ConnectionListener):
 
 
 def do_work(body):
+    debug_msg = {"script": os.path.basename(__file__),
+        "host": socket.gethostname(), "timestamp":
+        datetime.now().isoformat(), "message":
+        "received message from %s in thread" % headers['destination']}
+    stomp.send(body=json.dumps(debug_msg),
+        destination="/topic/keepalive_response")
+
+
     logging.info("on_message() Message acknowledged")
     try:
         received_obj = json.loads(body)
