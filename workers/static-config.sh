@@ -43,6 +43,8 @@ export BBS_RSYNC_RSH_CMD="$BBS_RSYNC_CMD -e '$BBS_SSH_CMD'"
 
 export BBS_HOME=/Users/dtenenba/dev/github/BBS-gitsvn
 export BBS_R_HOME=/Library/Frameworks/R.framework/Versions/Current/Resources
+export BBS_HOME=changeme
+export BBS_R_HOME=changeme
 
 
 export BBS_R_CMD="$BBS_R_HOME/bin/R"

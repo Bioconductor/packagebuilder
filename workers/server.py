@@ -112,7 +112,7 @@ def do_work(body):
     debug_msg = {"script": os.path.basename(__file__),
         "host": socket.gethostname(), "timestamp":
         datetime.now().isoformat(), "message":
-        "received message from %s in thread" % headers['destination']}
+        "received message in thread"}
     stomp.send(body=json.dumps(debug_msg),
         destination="/topic/keepalive_response")
 
