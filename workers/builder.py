@@ -421,7 +421,7 @@ def install_pkg_deps():
         try:
             tmp = desc.getNextDcfVal(field, True)
             if tmp is not None:
-                args += '%s=@@%s@@; ' % (field, desc.getNextDcfVal(field, True))
+                args += '%s=@@%s@@; ' % (field, tmp)
         except KeyError:
             pass
     r_script = "%s/../../installPkgDeps.R" % working_dir
