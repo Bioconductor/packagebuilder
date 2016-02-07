@@ -414,12 +414,14 @@ def install_pkg_deps():
     description = f.read()
     logging.debug("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
-    desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    desc = dcf.DcfRecordsParser(description.rstrip().split("\n"))
     fields = ("Depends", "Imports", "Suggests", "Enhances", "LinkingTo")
     args = ""
     for field in fields:
         try:
-            args += '%s=@@%s@@; ' % (field, desc.getValue(field))
+            tmp = desc.getNextDcfVal(field, True)
+            if tmp is not None:
+                args += '%s=@@%s@@; ' % (field, desc.getNextDcfVal(field, True))
         except KeyError:
             pass
     r_script = "%s/../../installPkgDeps.R" % working_dir
