@@ -4,6 +4,7 @@
 ## BBS variables and also changed to the correct directory.
 
 import os
+import os.path
 import sys
 import json
 import subprocess
@@ -415,7 +416,7 @@ def install_pkg_deps():
     logging.debug("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
-    fields = ("Depends", "Imports", "Suggests", "Enhances", "LinkingTo")
+    fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
     args = ""
     for field in fields:
         try:
@@ -426,8 +427,11 @@ def install_pkg_deps():
     log = "%s/installDeps.log" % working_dir
     if args.strip() == "":
         args = "None=1"
-    cmd = "%s CMD BATCH -q --vanilla --no-save --no-restore \"--args %s\"\
-      %s %s" % (ENVIR['bbs_R_cmd'], args.strip(), r_script, log)
+    rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
+    rscript_binary = os.path.join(rscript_dir, "Rscript")
+    cmd = "%s --vanilla --no-save --no-restore %s  --args \"%s\"" % \
+      (rscript_binary, r_script, args.strip())
+
     send_message({
         "body": "Installing dependencies...",
         "status": "preprocessing",
@@ -435,7 +439,9 @@ def install_pkg_deps():
     })
     logging.info("install_pkg_deps() Command to install dependencies:" +
                   "\n  %s" % cmd)
-    retcode = subprocess.call(cmd, shell=True)
+    logf = open(log, "w")
+    retcode = subprocess.call(cmd, shell=True, stdout=logf)
+    logf.close()
     send_message({
         "body": "Result of installing dependencies: %d" % retcode,
         "status": "post_processing",
