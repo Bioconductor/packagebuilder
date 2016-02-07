@@ -307,6 +307,7 @@ def setup():
     logging.info("Initial working direcotry: {wd}".format(wd = os.getcwd()))
     logging.info("Attempting change to working direcotry: {dir}".format(dir = working_dir))
     os.chdir(working_dir)
+    working_dir = os.getcwd()
     logging.info("New working direcotry: {wd}".format(wd = os.getcwd()))
 
     if 'R_LIBS_USER' in os.environ:
@@ -429,8 +430,8 @@ def install_pkg_deps():
         args = "None=1"
     rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
     rscript_binary = os.path.join(rscript_dir, "Rscript")
-    cmd = "%s --vanilla --no-save --no-restore %s  --args \"%s\"" % \
-      (rscript_binary, r_script, args.strip())
+    cmd = "%s --vanilla --no-save --no-restore %s  --args \"%s\" > %s 2>&1" % \
+      (rscript_binary, r_script, args.strip(), log)
 
     send_message({
         "body": "Installing dependencies...",
@@ -439,9 +440,7 @@ def install_pkg_deps():
     })
     logging.info("install_pkg_deps() Command to install dependencies:" +
                   "\n  %s" % cmd)
-    logf = open(log, "w")
-    retcode = subprocess.call(cmd, shell=True, stdout=logf)
-    logf.close()
+    retcode = subprocess.call(cmd, shell=True)
     send_message({
         "body": "Result of installing dependencies: %d" % retcode,
         "status": "post_processing",
@@ -639,6 +638,14 @@ def build_package(source_build):
         return(0)
         
     if (not source_build):
+        if platform.system() == "Darwin":
+            pkg_type = "mac.binary.mavericks"
+        elif platform.system() == "Linux":
+            pkg_type = "source"
+        elif platform.system() == "Windows":
+            pkg_type = "win.binary"
+        else:
+            pkg_type = "source"
         send_message({"status": "starting_buildbin", "body": ""})
         
     global message_sequence
