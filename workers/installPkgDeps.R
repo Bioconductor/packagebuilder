@@ -64,7 +64,7 @@ bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
 
 ## Dependencies for the packagebuilder itself
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
-    "devtools", "codetools", "httr", "curl")
+    "devtools", "codetools", "httr", "curl", "optparse")
 
 ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
 ip <- installed.packages(lib.loc = bootstrap_libdir,
@@ -78,7 +78,7 @@ need <- c(have[idx], need)
 if (length(need))
     install.packages(need, bootstrap_libdir, repos=biocinstallRepos())
 library(BiocInstaller)
-biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir)
+biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir, type="source")
 
 ## FIXME: validate post-condition
 
