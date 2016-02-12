@@ -23,7 +23,12 @@ This plan will imply the following changes:
   I **don't** think we should have them fill out a [template](https://github.com/ropensci/onboarding/blob/master/CONTRIBUTING.md)
   like on ROpenSci, since that seems very old school, plus most of the questions asked
   in the template can be answered by SPB/BiocCheck.
-* The creation of this issue will trigger the SPB to run on the github repos they have specified
+* The creation of this issue will notify us and we can manually 'approve' the issue
+  to be built by the SPB. Maybe later we will decide this step is not necessary but
+  I want to guard against 1) malicious packages, 2) inappropriate use of SPB
+  (people using it to test non-bioc pkgs) and 3) overloading our build resources.
+  Once we have approved the issue, then our approval:
+* ...will trigger the SPB to run on the github repos they have specified
   (or if the SPB can't determine that, it will post an issue saying so). The SPB will
   post to the issue with a link to the build report. It will also include instructions for
   setting up a webhook on the contributor's github repos which will notify us of new pushes.
