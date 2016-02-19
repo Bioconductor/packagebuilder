@@ -4,15 +4,17 @@
 
 options(useFancyQuotes=FALSE)
 
-## 
+##
 ## extract package dependencies of any sort from command-line arguments
-## 
+##
 
 dependenciesFromArgs <- function(args) {
     if (length(args) == 0) {
         print("No arguments supplied.")
         quit("no")
     }
+    if (args[1] == "--args")
+        args <- args[2:length(args)]
     pattern <- "^(Depends|Imports|Suggests|Enhances|LinkingTo) *= *"
     s <- paste(args, collapse=" ")
     segs <- strsplit(s, "; *")[[1]]
@@ -30,7 +32,7 @@ print(deps)
 
 ##
 ## R version and repository setup
-## 
+##
 
 if (!require(BiocInstaller))
     source("https://bioconductor.org/biocLite.R")
@@ -47,7 +49,7 @@ options(repos=newrepos, install.packages.compile.from.source="always")
 
 ##
 ## bootstrap installation
-## 
+##
 
 home <- path.expand("~")
 
@@ -58,13 +60,13 @@ bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
     pkgbuilderHome <- Sys.getenv("PACKAGEBUILDER_HOME")
     pkgbuilderHome <- gsub("\\", "/", pkgbuilderHome, fixed=TRUE)
     file.path(pkgbuilderHome, "R", "library")
-} else {                                # linux 
+} else {                                # linux
     file.path(home, 'R', sprintf("%s-library", R.version$platform), r_ver)
 }
 
 ## Dependencies for the packagebuilder itself
 bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
-    "devtools", "codetools", "httr", "curl")
+    "devtools", "codetools", "httr", "curl", "optparse")
 
 ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
 ip <- installed.packages(lib.loc = bootstrap_libdir,
@@ -78,13 +80,13 @@ need <- c(have[idx], need)
 if (length(need))
     install.packages(need, bootstrap_libdir, repos=biocinstallRepos())
 library(BiocInstaller)
-biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir)
+biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir, type="source")
 
 ## FIXME: validate post-condition
 
-## 
+##
 ## update installed packages
-## 
+##
 
 old.libPaths <- .libPaths()
 .libPaths(c(.libPaths(), bootstrap_libdir))
@@ -113,7 +115,7 @@ withWarnings <- function(expr) {
     }
     val <- withCallingHandlers(expr, warning = wHandler)
     list(value = val, warnings = myWarnings)
-} 
+}
 
 
 installPkg <- function(pkg)
@@ -125,10 +127,11 @@ installPkg <- function(pkg)
 
     if (!getOption("pkgType") == "source")
     {
-        vnw <- withWarnings(install.packages(pkg, repos=repos))$warnings
+        vnw <- withWarnings(install.packages(pkg, repos=repos,
+            dependencies=TRUE))$warnings
         res <- unlist(lapply(vnw$warnings, function(x) x$message))
         if (!pkg %in% rownames(installed.packages()))
-            install.packages(pkg, type="source", repos=repos)
+            install.packages(pkg, type="source", repos=repos, dependencies=TRUE)
         if(!is.null(res))
         {
             res <- res[grep("not available", res)]
@@ -136,21 +139,21 @@ installPkg <- function(pkg)
                 return()
             pkgs <- strsplit(res, "'")[[1]]
             pkgs <- pkgs[grep(" ", pkgs, invert=TRUE)]
-            install.packages(pkgs, type="source", repos=repos)
+            install.packages(pkgs, type="source", repos=repos, dependencies=TRUE)
         }
     } else {
-        install.packages(pkg, repos=repos)
+        install.packages(pkg, repos=repos, dependencies=TRUE)
     }
 }
 
 installDeps <- function(pkgs)
 {
-    
+
     builtIn <- function(pkg)
     {
         pkg %in% c("R", "tools", "utils", "methods", "base", "graphics")
     }
-    
+
     #pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
     for (pkg in pkgs) {
         pkg <- trimws(pkg)
@@ -165,7 +168,7 @@ installDeps <- function(pkgs)
             ip <- installed.packages()
             if (pkgName %in% rownames(ip)) {
                 installedVersion <- ip[pkgName, "Version"]
-                if (numeric_version(requiredVersion) > 
+                if (numeric_version(requiredVersion) >
                   numeric_version(installedVersion)) {
                     message(paste(pkgName, "version", installedVersion,
                       "is too old, updating..."))
