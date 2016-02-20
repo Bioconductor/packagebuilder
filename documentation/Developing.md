@@ -7,14 +7,14 @@ simplest way to accomplish that, is using Docker. We'll use [this docker image](
 
 ```
 # Get the image
-docker pull rmohr/activemq:5.10.0
+docker pull robinvdvleuten/rabbitmq-stomp
 
 # Start ActiveMQ
-docker run --name='activemq' -d -p 8161:8161 -p 61616:61616 -p 61613:61613 \
-    rmohr/activemq:5.10.0
+docker run -d --hostname --my-rabbit --name some-rabbit -p 61613:61613 \
+robinvdvleuten/rabbitmq-stomp
 ```
 If you need to debug ActiveMQ, open a shell.  You may want to inspect the content
-of `/var/log/activemq` and `/data/activemq`: 
+of `/var/log/activemq` and `/data/activemq`:
 ```
 # Debugging ActiveMQ
 developer@laptop:~/$ docker exec -it activemq /bin/bash
@@ -66,11 +66,11 @@ be used in production.
   ```
   pip install stomp.py pytz stompy django==1.8.4
   ```
-  
+
 #### Configuration
 Right now, you'll need to modify two configuration files (we plan to fix this).
 
-1. Set all "changeme" properties in the file `development.properties`.  Real values are 
+1. Set all "changeme" properties in the file `development.properties`.  Real values are
 not needed for every property.
 
 2. Secondly, change and uncomment the value of `BBS_R_HOME` and `BBS_HOME` in the
