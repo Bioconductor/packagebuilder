@@ -16,6 +16,7 @@ import unicodedata
 import atexit
 import mechanize
 import logging
+import re
 from stomp.listener import PrintingListener
 
 # Modules created by Bioconductor
@@ -45,7 +46,7 @@ if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 # This class is meant to behave like Linux/Unix `tail -f <file>`.
 #
 #    Usage example :
-# Run a command that continuously emits output, capture the output as soon as possible 
+# Run a command that continuously emits output, capture the output as soon as possible
 # and sent it in a stomp message.  We inspect the output every .2 seconds and handle it.
 class Tailer(threading.Thread):
     def __init__(self, filename, status):
@@ -68,7 +69,7 @@ class Tailer(threading.Thread):
             st = os.stat(self.filename)
             if st.st_size == 0:
                 continue
-            
+
             if self.stopped():
                 logging.debug("Tailer.run() stopped: %s." % self.status)
                 if (st.st_size == 0):
@@ -80,7 +81,7 @@ class Tailer(threading.Thread):
                 if (num_bytes_to_read == 0):
                     logging.debug("Tailer.run() 0 bytes to read; exiting.")
                     return()
-                
+
                 f = open(self.filename, 'r')
                 f.seek(prevsize)
                 bytes = f.read(num_bytes_to_read)
@@ -97,7 +98,7 @@ class Tailer(threading.Thread):
                 # not needed here but might be needed if program was
                 # to continue doing other stuff and we wanted the
                 # thread to exit
-            
+
             if (st.st_size > 0) and (st.st_size > prevsize):
                 num_bytes_to_read = st.st_size - prevsize
                 f = open(self.filename, 'r')
@@ -135,7 +136,7 @@ def send_message(msg, status=None):
         if not (status == None):
             merged_dict['status'] = status
     logging.info(u"merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
-    
+
     if("body" in merged_dict):
         body = None
         try:
@@ -146,11 +147,11 @@ def send_message(msg, status=None):
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
         logging.info(u"Ascii encoded body: '{body}'".format(body=merged_dict['body']))
-        
+
     logging.info(u"Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
     json_str = json.dumps(merged_dict)
     logging.info(u"JSON json_str: '{json_str}'".format(json_str=json_str))
-    
+
     logging.debug(u"send_message() Sending message: %s" % json_str)
     stomp.send(destination=TOPICS['events'], body=json_str,
                headers={"persistent": "true"})
@@ -175,9 +176,9 @@ def is_build_required(manifest):
     package_name = manifest['job_id'].split("_")[0]
     logging.info("Starting is_build_required() '%s'." % package_name)
 
-    if (is_svn_package()):
+    if (get_package_source() == "svn"):
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-        logging.debug("is_build_required() is_svn_package() is True" +
+        logging.debug("is_build_required() package source is svn" +
             "\n  description_url = " + description_url +
             "\n  svn_user ="  + ENVIR['svn_user'] +
             "\n  svn_pass = " + ENVIR['svn_pass'])
@@ -196,12 +197,14 @@ def is_build_required(manifest):
         logging.debug("is_build_required()" +
                       "\n  description = %s" % description +
                       "\n  length = %d" % len(description))
-        
+
         dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
         send_dcf_info(dcf_file)
-        
+
         svn_version = dcf_file.getValue("Version")
-    else:
+    elif get_package_source() == "github":
+        pass
+    elif get_package_source() == "tracker":
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
         if (pkgname.find("_") == -1): # package name doesn't have version in it
@@ -228,7 +231,7 @@ def is_build_required(manifest):
         base_repo_url += '/course-packages'
     elif (manifest['repository'] == 'scratch'):
         base_repo_url += '/scratch_repos/' + manifest['bioc_version']
-    
+
     repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
     # What if there is no file at this url?
     packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
@@ -257,10 +260,10 @@ def setup():
     global callcount
 
     logging.info("Starting setup().")
-    
+
     callcount = 1
-    
-    
+
+
     packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
     packagebuilder_rsync_cmd = BBScorevars.rsync_cmd.replace(
@@ -268,7 +271,7 @@ def setup():
     packagebuilder_rsync_rsh_cmd = BBScorevars.rsync_rsh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
-    
+
     if (platform.system() == "Windows"):
         packagebuilder_scp_cmd = \
             "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
@@ -278,8 +281,8 @@ def setup():
             ENVIR['packagebuilder_RSA_key']
 
     logging.debug("setup()" +
-        "\n  argument = %s" % sys.argv[1] + 
-        "\n  cwd = %s" % os.getcwd() + 
+        "\n  argument = %s" % sys.argv[1] +
+        "\n  cwd = %s" % os.getcwd() +
         "\n  does %s exist? %s" % (sys.argv[1], os.path.exists(sys.argv[1])) +
         "\n  size of %s: %d" % (sys.argv[1], os.stat(sys.argv[1]).st_size))
 
@@ -304,11 +307,11 @@ def setup():
     logging.info("Attempting to determine `working_dir` based on sys.argv.")
     logging.info("Contents of `sys.argv`: {content}.".format(content = sys.argv))
     working_dir = os.path.split(sys.argv[1])[0]
-    logging.info("Initial working direcotry: {wd}".format(wd = os.getcwd()))
-    logging.info("Attempting change to working direcotry: {dir}".format(dir = working_dir))
+    logging.info("Initial working directory: {wd}".format(wd = os.getcwd()))
+    logging.info("Attempting change to working directory: {dir}".format(dir = working_dir))
     os.chdir(working_dir)
     working_dir = os.getcwd()
-    logging.info("New working direcotry: {wd}".format(wd = os.getcwd()))
+    logging.info("New working directory: {wd}".format(wd = os.getcwd()))
 
     if 'R_LIBS_USER' in os.environ:
         logging.info("Initial R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
@@ -332,6 +335,24 @@ def setup_stomp():
     except:
         logging.error("setup_stomp(): Cannot connect.")
         raise
+
+
+def git_clone():
+    global package_name
+    package_name = manifest['job_id'].split("_")[0]
+    git_url = re.sub(r'\/$', '', manifest['svn_url'])
+    if not git_url.endswith(".git"):
+        git_url += ".git"
+    git_cmd = "git clone %s" % git_url
+    send_message({"status": "git_cmd", "body": git_cmd})
+    retcode = subprocess.call(git_cmd, shell=True)
+    send_message({"status": "post_processing", "retcode": retcode, "body": "finished git clone"})
+    send_message({"status": "git_result", "result": retcode, "body": \
+        "git clone completed with status %d" % retcode})
+    if (not retcode == 0):
+        sys.exit("git clone failed")
+
+
 
 def svn_export():
     # Don't use BBS_SVN_CMD because it may not be defined on all nodes
@@ -384,13 +405,13 @@ def extract_tarball():
     if (retcode != 0):
         logging.error("extract_tarball() Failed to 'curl' tarball.")
         raise
-    
+
     tmp = manifest['svn_url'].split("/")
     tarball = tmp[len(tmp)-1]
     package_name = tarball.split("_")[0]
     # what if package name does not have version in it? do this:
     package_name = package_name.replace(".tar.gz", "")
-    
+
     os.rename(tarball, "%s.orig" % tarball)
     extra_flags = ""
     if platform.system() == "Windows":
@@ -459,23 +480,23 @@ def get_source_tarball_name():
             tarball = file
             break
     return(tarball)
-    
+
 def do_check(cmd):
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
-    
+
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
-    
+
     background = Tailer(outfile, "checking")
     background.start()
     pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
                             shell=True)
     pid = pope.pid
-    
+
     retcode = pope.wait()
-    
+
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     out_fh.close()
@@ -491,7 +512,7 @@ def do_check(cmd):
             warnings = True
             break
     out_fh.close()
-    
+
     send_message({
         "status": "check_complete",
         "result_code": retcode,
@@ -519,7 +540,7 @@ def win_multiarch_check():
         " --timings %s && %s CMD BiocCheck --new-package %s" % (
             pkg, pkg, r, pkg, tarball, pkg, r, pkg, pkg, tarball, r, tarball))
     send_message({"status": "check_cmd", "body": cmd})
-    
+
     send_message({
         "status": "checking",
         "sequence": 0,
@@ -538,7 +559,7 @@ def win_multiarch_check():
             "elapsed_time": 999
         })
     return (retcode)
-    
+
 def win_multiarch_buildbin(message_stream):
     tarball = get_source_tarball_name()
     pkg = tarball.split("_")[0]
@@ -568,7 +589,7 @@ def check_package():
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
-    
+
     out_fh = open(outfile, "w")
     start_time = datetime.datetime.now()
     message_sequence = 1
@@ -578,13 +599,13 @@ def check_package():
     extra_flags = ""
     if (platform.system() == "Darwin"):
         extra_flags = " --no-multiarch "
-    
+
     cmd = "%s CMD check --no-vignettes --timings %s %s && %s CMD BiocCheck --new-package %s" % (
         ENVIR['bbs_R_cmd'], extra_flags, tarball,
         ENVIR['bbs_R_cmd'], tarball)
-    
+
     send_message({"status": "check_cmd", "body": cmd})
-    
+
     retcode = do_check(cmd)
 
     return (retcode)
@@ -606,22 +627,22 @@ def do_build(cmd, message_stream, source):
     background.start()
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
                              shell=True)
-    
+
     pid = pope.pid
-    
+
     retcode = pope.wait()
 
     stop_time = datetime.datetime.now()
     elapsed_time = str(stop_time - start_time)
     background.stop()
     out_fh.close()
-    
+
     logging.debug("do_build() Before joining background thread.")
     background.join()
     logging.debug("do_build() After joining background thread.")
     logging.info("Done do_build().")
     return(retcode)
-    
+
 def build_package(source_build):
     global pkg_type
 
@@ -632,11 +653,11 @@ def build_package(source_build):
         buildmsg = "building"
     else:
         buildmsg = "buildingbin"
-    
+
     if ((not source_build) and (pkg_type == "source")):
         send_message({"status": "skip_buildbin", "body": "skipped"})
         return(0)
-        
+
     if (not source_build):
         if platform.system() == "Darwin":
             pkg_type = "mac.binary.mavericks"
@@ -647,12 +668,12 @@ def build_package(source_build):
         else:
             pkg_type = "source"
         send_message({"status": "starting_buildbin", "body": ""})
-        
+
     global message_sequence
     global warnings
     message_sequence = 1
     flags = "--keep-empty-dirs --no-resave-data"
-    
+
     if (source_build):
         r_cmd = "%s CMD build %s %s" % \
                 (ENVIR['bbs_R_cmd'], flags, package_name)
@@ -665,7 +686,7 @@ def build_package(source_build):
                 os.mkdir(libdir)
             r_cmd = "../../build-universal.sh %s %s" % (
                 get_source_tarball_name(), libdir)
-            
+
     status = None
     if (source_build):
         status = "r_cmd"
@@ -675,13 +696,13 @@ def build_package(source_build):
         outfile = "Rbuildbin.out"
     logging.debug("build_package() Before build, working dir is %s." %
                   working_dir)
-    
+
     if ((not source_build) and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
     else:
         send_message({"status": status, "body": r_cmd})
         retcode = do_build(r_cmd, buildmsg, source_build)
-    
+
     # check for warnings
     out_fh = open(outfile)
     warnings = False
@@ -691,13 +712,13 @@ def build_package(source_build):
         if line.lower().startswith("error:"):
             retcode = 1
     out_fh.close()
-    
+
     complete_status = None
     if (source_build):
         complete_status = "build_complete"
     else:
         complete_status = "buildbin_complete"
-    
+
     # todo - fix elapsed time throughout
     send_message({
         "status": complete_status,
@@ -706,14 +727,14 @@ def build_package(source_build):
         "body": "Build completed with status %d" % retcode,
         "elapsed_time": -1
     })
-        
-    
+
+
     return (retcode)
 
 def svn_info():
     #global manifest
-    
-    # todo - make more bulletproof 
+
+    # todo - make more bulletproof
     logging.debug("svn_info() svn_url is %s" % manifest['svn_url'])
     svn_info = subprocess.Popen([
         "svn", "info", manifest['svn_url']
@@ -748,14 +769,14 @@ def propagate_package():
     ext = BBScorevars.pkgType2FileExt[pkg_type]
     files = os.listdir(working_dir)
     build_product = filter(lambda x: x.endswith(ext), files)[0]
-    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]    
+    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
         os_seg = "bin/macosx/mavericks/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
         os_seg = "bin/windows/contrib/%s" % r_version
-    
+
     if (manifest['repository'] == 'course'):
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/",
@@ -766,22 +787,22 @@ def propagate_package():
         url = repos.replace(
             "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/",
             HOSTS['bioc'] + '/scratch-repos')
-    
+
     url += "/" + build_product
-    
+
     rawsize = os.path.getsize(build_product)
     kib = rawsize / float(1024)
     filesize = "%.2f" % kib
-    
+
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
-    
+
     if (platform.system() == "Windows"):
         command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'rm -f %s/%s_*.zip'"
         command = command % (ENVIR['packagebuilder_home'], repos, package_name)
         retcode = subprocess.call(command)
     else:
         retcode = ssh("rm -f %s" % files_to_delete)
-    
+
     logging.debug("propagate_package() Result of deleting files: %d." % retcode)
     send_message({
         "body": "Pruning older packages from repository",
@@ -791,7 +812,7 @@ def propagate_package():
     if retcode != 0:
         logging.error("propagate_package() Failed to prune repos.")
         sys.exit("repos prune failed")
-    
+
     if (platform.system() == "Windows"):
         logging.debug("propagate_package() Windows chmod")
         chmod_retcode = subprocess.call(
@@ -817,7 +838,7 @@ def propagate_package():
         logging.debug("propagate_package() %s chmod not run" %
                       platform.system())
         retcode = scp(build_product, repos)
-    
+
     logging.debug("propagate_package() Result of copying file: %d" % retcode)
     send_message({
         "body": "Copied build file to repository",
@@ -836,10 +857,10 @@ def _call(command_str, shell):
     if (platform.system() == "Windows"):
         stdout_fn = os.path.join(working_dir, "%dout.txt" % callcount)
         stderr_fn = os.path.join(working_dir, "%derr.txt" % callcount)
-        
+
         stdout_fh = open(stdout_fn, "w")
         stderr_fh = open(stderr_fn, "w")
-        
+
         callcount += 1
         # ignore shell arg
         command_str = str(command_str)
@@ -885,7 +906,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
             packagebuilder_scp_cmd, user, host, src, dest)
     logging.debug("scp() command: %s" % command)
     retcode = _call([command], shell=True)
-    
+
     return(retcode)
 
 def onexit():
@@ -901,7 +922,7 @@ def onexit():
 
 def update_packages_file():
     global repos
-    
+
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
         pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
@@ -913,7 +934,7 @@ def update_packages_file():
         os_seg = "src/contrib"
     else:
         os_seg = "bin/windows/contrib/%s" % r_version
-    
+
     if (manifest['repository'] == 'course'):
         repos = "/loc/www/bioconductor-test.fhcrc.org/course-packages/%s" % os_seg
         url = repos.replace("/loc/www/bioconductor-test.fhcrc.org/",
@@ -926,7 +947,7 @@ def update_packages_file():
             "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/",
             HOSTS['bioc'] + "/scratch-repos")
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['bioc_version']
-    
+
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
@@ -975,7 +996,7 @@ def update_packages_file():
             "body": "Post-processing complete.",
             "build_product": build_product,
             "url": url})
-        
+
 def get_r_version():
     logging.debug("get_r_version() BBS_R_CMD = %s" % ENVIR['bbs_R_cmd'])
     r_version_raw, stderr = subprocess.Popen([
@@ -1006,11 +1027,13 @@ def is_valid_url():
     elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1 or
       manifest['svn_url'].lower().find("tracker.bioconductor.org") > -1): # todo, ensure .tar.gz end
         svn_url = False
+    elif "https://github.com" in manifest['svn_url'].lower():
+        svn_url = False
     else:
         return False
-    
+
     if svn_url:
-            
+
         description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
 
         timeout = 10
@@ -1033,8 +1056,15 @@ def is_valid_url():
         return True
     return True
 
-def is_svn_package():
-    return manifest['svn_url'].lower().startswith(HOSTS['svn'])
+def get_package_source():
+    if manifest['svn_url'].lower().startswith(HOSTS['svn']):
+        return("svn")
+    if "https://github.com" in manifest['svn_url'].lower():
+        return("github")
+    if "tracker.bioconductor.org" in manifest['svn_url'].lower():
+        return("tracker")
+    raise
+
 
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
@@ -1053,9 +1083,9 @@ if __name__ == "__main__":
         sys.exit("BioC version not supported")
 
     setup_stomp()
-    
+
     send_message("Builder has been started")
-    
+
     if not is_valid_url():
         send_message({
             "status": "invalid_url",
@@ -1063,17 +1093,18 @@ if __name__ == "__main__":
         })
         logging.error("main() Invalid svn url.")
         sys.exit("invalid svn url")
-    
+
     get_node_info()
-    if is_svn_package():
+    # FIXME need to do something similar for git repos? (git_info())???:
+    if get_package_source() == "svn":
         svn_info()
-    
+
+
     is_build_required = is_build_required(manifest)
     if not (is_build_required):
-        pkg_type = 'svn' if (is_svn_package()) else 'tarball'
         send_message({
             "status": "build_not_required",
-            "body": "Identical versions for %s." % pkg_type
+            "body": "Identical versions for %s." % get_package_source()
         })
         send_message({
             "status": "normal_end",
@@ -1081,17 +1112,19 @@ if __name__ == "__main__":
         })
         logging.info("Normal build completion; build not required.")
         sys.exit(0)
-    
-    if (is_svn_package()):
+
+    if get_package_source() == "svn":
         svn_export()
-    else:
+    elif get_package_source() == "tracker":
         extract_tarball()
-    
+    elif get_package_source() == "github":
+        git_clone()
+
     result = install_pkg_deps()
     if (result != 0):
         logging.error("main() Failed to install dependencies: %d." % result)
         raise Exception("failed to install dependencies")
-    
+
     logging.info("Attempting to build package")
     result = build_package(True)
     logging.info("build_package() finished with result {res}".format(res=result))
