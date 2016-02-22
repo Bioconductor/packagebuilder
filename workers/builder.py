@@ -358,7 +358,6 @@ def svn_export():
     # Don't use BBS_SVN_CMD because it may not be defined on all nodes
     global package_name
     package_name = manifest['job_id'].split("_")[0]
-    export_path = os.path.join(working_dir, package_name)
     svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
         ENVIR['svn_user'], ENVIR['svn_pass'], manifest['svn_url'], package_name)
     clean_svn_cmd = svn_cmd.replace(ENVIR['svn_user'],"xxx").replace(ENVIR['svn_pass'],"xxx")
@@ -384,7 +383,7 @@ def extract_tarball():
     br.select_form(nr=2)
     br["__login_name"] = ENVIR['tracker_user']
     br["__login_password"] = ENVIR['tracker_pass']
-    res = br.submit()
+    br.submit()
 
     segs = manifest['svn_url'].split("/")
     local_file = segs[len(segs)-1]
@@ -493,7 +492,6 @@ def do_check(cmd):
     background.start()
     pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
                             shell=True)
-    pid = pope.pid
 
     retcode = pope.wait()
 
@@ -565,7 +563,7 @@ def win_multiarch_buildbin(message_stream):
     pkg = tarball.split("_")[0]
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
-        retcode = _call("rm -rf %s" % libdir, False)
+        _call("rm -rf %s" % libdir, False)
     logging.debug("win_multiarch_buildbin() Does %s exist? %s." %
                   (libdir, os.path.exists(libdir)))
     if not (os.path.exists(libdir)):
@@ -589,10 +587,6 @@ def check_package():
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
-
-    out_fh = open(outfile, "w")
-    start_time = datetime.datetime.now()
-    message_sequence = 1
 
     tarball = get_source_tarball_name()
 
@@ -618,7 +612,6 @@ def do_build(cmd, message_stream, source):
     if (os.path.exists(outfile)):
         os.remove(outfile)
     out_fh = open(outfile, "w")
-    start_time = datetime.datetime.now()
     logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
     logging.info("The working directory: {wd}".format(wd=os.getcwd()))
     logging.info("The current environment variables: \n {envVars}".format(envVars=os.environ))
@@ -628,12 +621,8 @@ def do_build(cmd, message_stream, source):
     pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
                              shell=True)
 
-    pid = pope.pid
-
     retcode = pope.wait()
 
-    stop_time = datetime.datetime.now()
-    elapsed_time = str(stop_time - start_time)
     background.stop()
     out_fh.close()
 
