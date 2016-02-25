@@ -9,7 +9,7 @@ simplest way to accomplish that, is using Docker. We'll use [this docker image](
 # Get the image
 docker pull robinvdvleuten/rabbitmq-stomp
 
-# Start ActiveMQ
+# Start stomp broker
 docker run -d --hostname --my-rabbit --name some-rabbit -p 61613:61613 \
 robinvdvleuten/rabbitmq-stomp
 ```
