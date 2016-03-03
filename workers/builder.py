@@ -17,6 +17,7 @@ import atexit
 import mechanize
 import logging
 import re
+import urllib2
 from stomp.listener import PrintingListener
 
 # Modules created by Bioconductor
@@ -203,7 +204,21 @@ def is_build_required(manifest):
 
         svn_version = dcf_file.getValue("Version")
     elif get_package_source() == "github":
-        pass
+        github_url = re.sub(r'\.git$', '', manifest['svn_url'])
+        if not github_url.endswith("/"):
+            github_url += "/"
+        # We only build the master branch. There had better be one.
+        # (technically we build whatever the default branch is, but
+        # this step looks at master because to find out what the
+        # default branch is at this point we would need octokit here).
+        github_url += "master/DESCRIPTION"
+        github_url = github_url.replace("https://github.com",
+          "https://raw.githubusercontent.com")
+        f = urllib2.urlopen(github_url)
+        dcf_text = f.read()
+        dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
+        send_dcf_info(dcf_file)
+        svn_version = dcf_file.getValue("Version")
     elif get_package_source() == "tracker":
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
