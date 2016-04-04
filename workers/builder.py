@@ -550,7 +550,7 @@ def win_multiarch_check():
         " && %s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
         " %s >%s-install.out 2>&1 && %s CMD check --library=%s.buildbin-libdir"
         " --install='check:%s-install.out' --force-multiarch --no-vignettes"
-        " --timings %s && %s CMD BiocCheck --new-package %s" % (
+        " --timings %s && %s CMD BiocCheck --build-output-file=R.out --new-package %s" % (
             pkg, pkg, r, pkg, tarball, pkg, r, pkg, pkg, tarball, r, tarball))
     send_message({"status": "check_cmd", "body": cmd})
 
@@ -609,7 +609,7 @@ def check_package():
     if (platform.system() == "Darwin"):
         extra_flags = " --no-multiarch "
 
-    cmd = "%s CMD check --no-vignettes --timings %s %s && %s CMD BiocCheck --new-package %s" % (
+    cmd = "%s CMD check --no-vignettes --timings %s %s && %s CMD BiocCheck --build-output-file=R.out --new-package %s" % (
         ENVIR['bbs_R_cmd'], extra_flags, tarball,
         ENVIR['bbs_R_cmd'], tarball)
 
