@@ -128,10 +128,11 @@ installPkg <- function(pkg)
     if (!getOption("pkgType") == "source")
     {
         vnw <- withWarnings(install.packages(pkg, repos=repos,
-            dependencies=TRUE))$warnings
+            dependencies=TRUE, INSTALL_opts="--merge-multiarch"))$warnings
         res <- unlist(lapply(vnw$warnings, function(x) x$message))
         if (!pkg %in% rownames(installed.packages()))
-            install.packages(pkg, type="source", repos=repos, dependencies=TRUE)
+            install.packages(pkg, type="source", repos=repos, dependencies=TRUE,
+              INSTALL_opts="--merge-multiarch")
         if(!is.null(res))
         {
             res <- res[grep("not available", res)]
@@ -139,10 +140,12 @@ installPkg <- function(pkg)
                 return()
             pkgs <- strsplit(res, "'")[[1]]
             pkgs <- pkgs[grep(" ", pkgs, invert=TRUE)]
-            install.packages(pkgs, type="source", repos=repos, dependencies=TRUE)
+            install.packages(pkgs, type="source", repos=repos, dependencies=TRUE,
+              INSTALL_opts="--merge-multiarch")
         }
     } else {
-        install.packages(pkg, repos=repos, dependencies=TRUE)
+        install.packages(pkg, repos=repos, dependencies=TRUE,
+            INSTALL_opts="--merge-multiarch")
     }
 }
 
