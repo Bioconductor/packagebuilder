@@ -446,14 +446,14 @@ TABLE.mainrep .even .oaxaca {
     background: #BBC;
 }
 
-/* morelia */
-DIV.morelia,
-TR.morelia TD,
-TABLE.mainrep .morelia,
-TABLE.mainrep .odd .morelia {
+/* oaxaca */
+DIV.oaxaca,
+TR.oaxaca TD,
+TABLE.mainrep .oaxaca,
+TABLE.mainrep .odd .oaxaca {
     background: #DDE;
 }
-TABLE.mainrep .even .morelia {
+TABLE.mainrep .even .oaxaca {
     background: #BBC;
 }
 
