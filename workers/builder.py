@@ -915,6 +915,10 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
 
 def onexit():
     global svn_url_global
+    try:
+        svn_url_global
+    except NameError:
+        svn_url_global = "undefined"
     logging.info("Ending via onexit().")
     send_message({
         "body": "builder.py exited",
