@@ -85,9 +85,10 @@ class MyListener(stomp.ConnectionListener):
             # be visible (logging level is INFO)
             # but can be made visible if necessary:
             logging.debug('got keepalive message')
-            response = {"host": socket.gethostname(),
-            "script": os.path.basename(__file__),
-            "timestamp": datetime.now().isoformat()}
+            response = {
+                "host": socket.gethostname(),
+                "script": os.path.basename(__file__)
+            }
             stomp.send(body=json.dumps(response),
                 destination="/topic/keepalive_response")
             return()
