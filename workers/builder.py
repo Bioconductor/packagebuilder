@@ -32,17 +32,20 @@ from bioconductor.config import TOPICS
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 os.environ['BBS_HOME'] = ENVIR['bbs_home']
+os.environ['BBS_SSH_CMD'] = ENVIR['bbs_ssh_cmd'] + " -qi " + ENVIR['bbs_RSA_key'] + " -o StrictHostKeyChecking=no"
 import BBScorevars
 import dcf
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
+
+logging.getLogger("stomp.py").setLevel(logging.WARNING)
 
 log_highlighter = "***************"
 
-bad = [k for k, v in ENVIR.iteritems() if v is None]
-if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
+#bad = [k for k, v in ENVIR.iteritems() if v is None]
+#if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 
 # This class is meant to behave like Linux/Unix `tail -f <file>`.
 #
@@ -118,6 +121,7 @@ class Tailer(threading.Thread):
 # Since we're modifying encoding in this function, it's important that we're consistent
 # (as unicode) when attempting to write to the log file.
 def send_message(msg, status=None):
+    global stomp
     logging.info(u"Attempting to send message: '{msg}'".format(msg=msg))
     merged_dict = {}
     merged_dict['builder_id'] = BUILDER_ID
@@ -276,24 +280,33 @@ def setup():
 
     logging.info("Starting setup().")
 
+    # set variables
+    os.environ['BBS_R_HOME'] = ENVIR['bbs_R_home']
+    os.environ['BBS_R_CMD'] = ENVIR['bbs_R_cmd']
+    os.environ['BBS_BIOC_VERSION'] = ENVIR['bbs_Bioc_version']
+    os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd'] + " -rl --delete --exclude='.svn'"
+    os.environ['BBS_RSYNC_RSH_CMD'] = os.environ.get('BBS_RSYNC_CMD') + " -e " + os.environ.get('BBS_SSH_CMD')
+    os.environ['_R_CHECK_TIMINGS_']="0"
+    os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
+    os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
+
     callcount = 1
 
-
     packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(
-        ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
+        ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
     packagebuilder_rsync_cmd = BBScorevars.rsync_cmd.replace(
-        ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
+        ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
     packagebuilder_rsync_rsh_cmd = BBScorevars.rsync_rsh_cmd.replace(
-        ENVIR['bbs_RSA_key'], ENVIR['packagebuilder_RSA_key'])
+        ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
 
     if (platform.system() == "Windows"):
         packagebuilder_scp_cmd = \
             "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no" % \
-            ENVIR['packagebuilder_RSA_key']
+            ENVIR['spb_RSA_key']
         packagebuilder_ssh_cmd = \
             "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no" % \
-            ENVIR['packagebuilder_RSA_key']
+            ENVIR['spb_RSA_key']
 
     logging.debug("setup()" +
         "\n  argument = %s" % sys.argv[1] +
@@ -805,6 +818,8 @@ def propagate_package():
         command = command % (ENVIR['packagebuilder_home'], repos, package_name)
         retcode = subprocess.call(command)
     else:
+        logging.debug("propagate_package() files_to_delete: %s" %
+                      files_to_delete)
         retcode = ssh("rm -f %s" % files_to_delete)
 
     logging.debug("propagate_package() Result of deleting files: %d." % retcode)
@@ -1085,12 +1100,12 @@ if __name__ == "__main__":
     setup()
     atexit.register(onexit)
 
+    setup_stomp()
+
     if (manifest['bioc_version'] != ENVIR['bbs_Bioc_version']):
         logging.error("main() BioC-%s not supported." %
                       manifest['bioc_version'])
         sys.exit("BioC version not supported")
-
-    setup_stomp()
 
     send_message("Builder has been started")
 
