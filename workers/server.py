@@ -129,7 +129,7 @@ def do_work(body):
             job_id = received_obj['job_id']
             bioc_version = received_obj['bioc_version']
 
-            job_dir = os.path.join(ENVIR['packagebuilder_home'], "jobs")
+            job_dir = os.path.join(ENVIR['spb_home'], "jobs")
             if not os.path.exists(job_dir):
                 os.mkdir(job_dir)
             job_dir = os.path.join(job_dir, job_id)
@@ -138,7 +138,7 @@ def do_work(body):
             r_libs_dir = os.path.join(job_dir, "R-libs")
             if not os.path.exists(r_libs_dir):
                 os.mkdir(r_libs_dir)
-            jobfilename = os.path.join(ENVIR['packagebuilder_home'], job_dir,
+            jobfilename = os.path.join(ENVIR['spb_home'], job_dir,
                                        "manifest.json")
 
             jobfile = open(jobfilename, "w")

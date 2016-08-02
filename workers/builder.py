@@ -32,7 +32,8 @@ from bioconductor.config import TOPICS
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 os.environ['BBS_HOME'] = ENVIR['bbs_home']
-os.environ['BBS_SSH_CMD'] = ENVIR['bbs_ssh_cmd'] + " -qi " + ENVIR['bbs_RSA_key'] + " -o StrictHostKeyChecking=no"
+os.environ['BBS_SSH_CMD'] = ENVIR['bbs_ssh_cmd'] + " -qi " +
+    ENVIR['bbs_RSA_key'] + " -o StrictHostKeyChecking=no"
 import BBScorevars
 import dcf
 
@@ -43,9 +44,6 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)
 logging.getLogger("stomp.py").setLevel(logging.WARNING)
 
 log_highlighter = "***************"
-
-#bad = [k for k, v in ENVIR.iteritems() if v is None]
-#if (len(bad)): raise Exception("ENVIR keys cannot be 'None': %s" % bad)
 
 # This class is meant to behave like Linux/Unix `tail -f <file>`.
 #
@@ -284,8 +282,10 @@ def setup():
     os.environ['BBS_R_HOME'] = ENVIR['bbs_R_home']
     os.environ['BBS_R_CMD'] = ENVIR['bbs_R_cmd']
     os.environ['BBS_BIOC_VERSION'] = ENVIR['bbs_Bioc_version']
-    os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd'] + " -rl --delete --exclude='.svn'"
-    os.environ['BBS_RSYNC_RSH_CMD'] = os.environ.get('BBS_RSYNC_CMD') + " -e " + os.environ.get('BBS_SSH_CMD')
+    os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd'] +
+        " -rl --delete --exclude='.svn'"
+    os.environ['BBS_RSYNC_RSH_CMD'] = os.environ.get('BBS_RSYNC_CMD') + " -e " +
+        os.environ.get('BBS_SSH_CMD')
     os.environ['_R_CHECK_TIMINGS_']="0"
     os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
     os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
@@ -815,7 +815,7 @@ def propagate_package():
 
     if (platform.system() == "Windows"):
         command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'rm -f %s/%s_*.zip'"
-        command = command % (ENVIR['packagebuilder_home'], repos, package_name)
+        command = command % (ENVIR['spb_home'], repos, package_name)
         retcode = subprocess.call(command)
     else:
         logging.debug("propagate_package() files_to_delete: %s" %
@@ -844,12 +844,12 @@ def propagate_package():
             "retcode": chmod_retcode
         })
         command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@staging.bioconductor.org:%s/"
-        command = command % (ENVIR['packagebuilder_home'], build_product, repos)
+        command = command % (ENVIR['spb_home'], build_product, repos)
         logging.debug("propagate_package() Windows scp command = %s." %
                       command)
         retcode = subprocess.call(command)
         command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'chmod a+r %s/%s_*.zip'"
-        command = command % (ENVIR['packagebuilder_home'], repos, package_name)
+        command = command % (ENVIR['spb_home'], repos, package_name)
         remote_chmod_retcode = subprocess.call(command)
         logging.debug("propagate_package() Windows remote_chmod_retcode = %s" %
                       remote_chmod_retcode)
