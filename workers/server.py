@@ -147,6 +147,29 @@ def do_work(body):
 
             logging.info("on_message() job_dir: '%s'.", job_dir)
 
+            # create BBS-specific imports
+            os.environ['BBS_HOME'] = ENVIR['bbs_home']
+            os.environ['BBS_SSH_CMD'] = ENVIR['bbs_ssh_cmd'] + " -qi " + ENVIR['bbs_RSA_key'] + " -o StrictHostKeyChecking=no"
+            os.environ['BBS_R_HOME'] = ENVIR['bbs_R_home']
+            os.environ['BBS_R_CMD'] = ENVIR['bbs_R_cmd']
+            os.environ['BBS_BIOC_VERSION'] = ENVIR['bbs_Bioc_version']
+            os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd'] + " -rl --delete --exclude='.svn'"
+            os.environ['BBS_RSYNC_RSH_CMD'] = os.environ.get('BBS_RSYNC_CMD') + " -e " + os.environ.get('BBS_SSH_CMD')
+            os.environ['BBS_MODE'] = ENVIR['bbs_mode']
+            os.environ['BBS_BIOC_VERSIONED_REPO_PATH'] = os.environ.get('BBS_BIOC_VERSION') + "/" + os.environ.get('BBS_MODE')
+            os.environ['BBS_STAGE2_R_SCRIPT'] = os.environ.get('BBS_HOME') + "/" + os.environ.get('BBS_BIOC_VERSIONED_REPO_PATH') + "/STAGE2.R"
+            os.environ['BBS_NON_TARGET_REPOS_FILE'] = os.environ.get('BBS_HOME') + "/" + os.environ.get('BBS_BIOC_VERSIONED_REPO_PATH') + "/non_target_repos.txt"
+            os.environ['BBS_CENTRAL_RHOST'] = ENVIR['bbs_central_rhost']
+            os.environ['BBS_CENTRAL_RUSER'] = ENVIR['bbs_central_ruser']
+            os.environ['BBS_CENTRAL_RDIR'] = "/home/" +  os.environ.get('BBS_CENTRAL_RUSER') + "/public_html/BBS/" + os.environ.get('BBS_BIOC_VERSIONED_REPO_PATH')
+            os.environ['BBS_CENTRAL_BASEURL'] = "http://" + os.environ.get('BBS_CENTRAL_RHOST') + "/BBS/" + os.environ.get('BBS_BIOC_VERSIONED_REPO_PATH')
+            # R CMD check variables
+            os.environ['_R_CHECK_TIMINGS_']="0"
+            os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
+            os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
+
+
+
             shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")

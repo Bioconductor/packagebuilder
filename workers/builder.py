@@ -28,12 +28,8 @@ from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
 from bioconductor.config import TOPICS
 
-## BBS-specific imports
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
-os.environ['BBS_HOME'] = ENVIR['bbs_home']
-os.environ['BBS_SSH_CMD'] = ENVIR['bbs_ssh_cmd'] + " -qi " +
-    ENVIR['bbs_RSA_key'] + " -o StrictHostKeyChecking=no"
 import BBScorevars
 import dcf
 
@@ -277,18 +273,6 @@ def setup():
     global callcount
 
     logging.info("Starting setup().")
-
-    # set variables
-    os.environ['BBS_R_HOME'] = ENVIR['bbs_R_home']
-    os.environ['BBS_R_CMD'] = ENVIR['bbs_R_cmd']
-    os.environ['BBS_BIOC_VERSION'] = ENVIR['bbs_Bioc_version']
-    os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd'] +
-        " -rl --delete --exclude='.svn'"
-    os.environ['BBS_RSYNC_RSH_CMD'] = os.environ.get('BBS_RSYNC_CMD') + " -e " +
-        os.environ.get('BBS_SSH_CMD')
-    os.environ['_R_CHECK_TIMINGS_']="0"
-    os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
-    os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
 
     callcount = 1
 
