@@ -1,4 +1,3 @@
-
 # run me like this:
 # /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave "--args Depends=@@R (>= 2.10), utils@@; Imports=@@methods@@; Suggests=@@tools, tkWidgets, ALL@@;" /working_dir/../installPkgDeps.R /working_dir/installDeps.log
 
@@ -79,6 +78,10 @@ idx <-
 need <- c(have[idx], need)
 if (length(need))
     install.packages(need, bootstrap_libdir, repos=biocinstallRepos())
+message("bootstrap_libdir: ", bootstrap_libdir)
+#.libPaths(c(bootstrap_libdir, .libPaths()))
+.libPaths(c(.libPaths(), bootstrap_libdir))
+message(".libPaths():\n  ", paste(.libPaths(), collapse="\n  "))
 library(BiocInstaller)
 biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir, type="source")
 

@@ -127,15 +127,20 @@ def do_work(body):
     if ('job_id' in received_obj.keys()): # ignore malformed messages
         try:
             job_id = received_obj['job_id']
+            job_base = job_id.rsplit("_", 1)[0]
+            job_time = job_id.rsplit("_", 1)[1]
             bioc_version = received_obj['bioc_version']
 
             job_dir = os.path.join(ENVIR['spb_home'], "jobs")
             if not os.path.exists(job_dir):
                 os.mkdir(job_dir)
-            job_dir = os.path.join(job_dir, job_id)
+            job_dir_main = os.path.join(job_dir, job_base)
+            if not os.path.exists(job_dir_main):
+                os.mkdir(job_dir_main)
+            job_dir = os.path.join(job_dir_main, job_id)
             if not os.path.exists(job_dir):
                 os.mkdir(job_dir)
-            r_libs_dir = os.path.join(job_dir, "R-libs")
+            r_libs_dir = os.path.join(job_dir_main, "R-libs")
             if not os.path.exists(r_libs_dir):
                 os.mkdir(r_libs_dir)
             jobfilename = os.path.join(ENVIR['spb_home'], job_dir,
@@ -167,8 +172,6 @@ def do_work(body):
             os.environ['_R_CHECK_TIMINGS_']="0"
             os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
             os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
-
-
 
             shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 

@@ -329,10 +329,38 @@ def setup():
         logging.info("Initial R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
     else:
         logging.info("Initial R_LIBS_USER variable is empty.")
-    expectedRLibsUser = os.path.join(working_dir, "R-libs")
-    logging.info("Attempting change R_LIBS_USER to: {expectedRLibsUser}".format(expectedRLibsUser = expectedRLibsUser))
-    os.environ['R_LIBS_USER'] = expectedRLibsUser
+
+
+    # will this fail on windows?
+    # package lib
+    package_dir = working_dir.rsplit("/", 1)[0]
+    expectedRLibsUser = os.path.join(package_dir, "R-libs")
+
+    # system-lib
+    sysLib = os.environ['BBS_R_HOME'] + "library"
+
+    # figure out bootstrap-lib (see installPkgDeps.R)
+    newcmd =  os.environ['BBS_R_CMD'] + " --version"
+    tempVar = os.popen(newcmd).read()
+    Rver = re.findall(r'R\sversion\s(\d*\.\d*)\.\d*',tempVar)[0]
+    Rplat = re.findall(r'Platform:\s(\S*)\s', tempVar)[0]
+    platSys = platform.system()
+    if platSys == "Darwin":
+        bootLibs = os.environ['HOME'] + "/Library/R/" + Rver + "/library"
+    elif platSys == "Windows":
+        # backslash issues on windows??
+        bootLibs = os.environ['PACKAGEBUILDER_HOME'] + "/R/library"
+    else:
+        bootLibs = os.environ['HOME'] + "/R/" + Rplat + "-library/" + Rver
+
+    AllLibs = expectedRLibsUser + ":" + bootLibs + ":" + sysLib
+    if 'R_LIBS_USER' in os.environ:
+        AllLibs = AllLibs + ":" + os.environ['R_LIBS_USER']
+
+    logging.info("Attempting change R_LIBS_USER")
+    os.environ['R_LIBS_USER'] = AllLibs
     logging.info("New R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
+
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
         "bin"
@@ -456,7 +484,7 @@ def install_pkg_deps():
             args += '%s=@@%s@@; ' % (field, desc.getValue(field))
         except KeyError:
             pass
-    r_script = "%s/../../installPkgDeps.R" % working_dir
+    r_script = "%s/../../../installPkgDeps.R" % working_dir
     log = "%s/installDeps.log" % working_dir
     if args.strip() == "":
         args = "None=1"
@@ -1153,5 +1181,20 @@ if __name__ == "__main__":
             "body": body
         })
         logging.info("Normal build completion, %s." % body)
+
+        # clean up directory
+        path_tar = get_source_tarball_name()
+        if os.path.exists(path_tar):
+            os.remove(path_tar)
+
+        if (platform.system() == "Windows"):
+            path_zip = path_tar.replace(".tar.gz", ".zip")
+            if os.path.exists(path_zip):
+                os.remove(path_zip)
+        if os.path.exists("manifest.json"):
+            os.remove("manifest.json")
+
+        checkDir = "rm -rf " + re.split('_', path_tar)[0] + ".Rcheck"
+        os.system(checkDir)
 
     logging.info("End of main function, onexit() should run next.")
