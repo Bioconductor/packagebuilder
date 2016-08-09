@@ -13,6 +13,3 @@ before_install:
   - pyflakes workers/server.py
 script:
   - python -c 'print "Finished static analysis"'
-notifications:
-  email:
-    - brian@bioconductor.org
