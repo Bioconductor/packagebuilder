@@ -1,4 +1,4 @@
-git+https://git@github.com/bioconductor/bioc-common-python.git
+git+https://git@github.com/bioconductor/bioc-common-python.git@feature/github_compatibility#bioconductor==bioconductor
 argparse==1.2.1
 mechanize==0.2.5
 pytz==2015.7
