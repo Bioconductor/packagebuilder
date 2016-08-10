@@ -349,7 +349,7 @@ def setup():
         bootLibs = os.environ['HOME'] + "/Library/R/" + Rver + "/library"
     elif platSys == "Windows":
         # backslash issues on windows??
-        bootLibs = os.environ['PACKAGEBUILDER_HOME'] + "/R/library"
+        bootLibs = os.environ['SPB_HOME'] + "/R/library"
     else:
         bootLibs = os.environ['HOME'] + "/R/" + Rplat + "-library/" + Rver
 

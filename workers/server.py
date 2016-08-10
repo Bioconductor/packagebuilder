@@ -153,7 +153,7 @@ def do_work(body):
             logging.info("on_message() job_dir: '%s'.", job_dir)
 
             # create other imports
-            os.environ['PACKAGEBUILDER_HOME'] = ENVIR['packagebuilder_home']
+            os.environ['SPB_HOME'] = ENVIR['spb_home']
             # create BBS-specific imports
             os.environ['BBS_HOME'] = ENVIR['bbs_home']
             os.environ['BBS_SSH_CMD'] = ENVIR['bbs_ssh_cmd'] + " -qi " + ENVIR['bbs_RSA_key'] + " -o StrictHostKeyChecking=no"
