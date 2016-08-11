@@ -160,7 +160,7 @@ def do_work(body):
             os.environ['BBS_R_HOME'] = ENVIR['bbs_R_home']
             os.environ['BBS_R_CMD'] = ENVIR['bbs_R_cmd']
             os.environ['BBS_BIOC_VERSION'] = ENVIR['bbs_Bioc_version']
-            os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd'] + " -rl --delete --exclude='.svn'"
+            os.environ['BBS_RSYNC_CMD'] = ENVIR['bbs_rsync_cmd']
             os.environ['BBS_RSYNC_RSH_CMD'] = os.environ.get('BBS_RSYNC_CMD') + " -e " + os.environ.get('BBS_SSH_CMD')
             os.environ['BBS_MODE'] = ENVIR['bbs_mode']
             os.environ['BBS_BIOC_VERSIONED_REPO_PATH'] = os.environ.get('BBS_BIOC_VERSION') + "/" + os.environ.get('BBS_MODE')
@@ -170,6 +170,8 @@ def do_work(body):
             os.environ['BBS_CENTRAL_RUSER'] = ENVIR['bbs_central_ruser']
             os.environ['BBS_CENTRAL_RDIR'] = "/home/" +  os.environ.get('BBS_CENTRAL_RUSER') + "/public_html/BBS/" + os.environ.get('BBS_BIOC_VERSIONED_REPO_PATH')
             os.environ['BBS_CENTRAL_BASEURL'] = "http://" + os.environ.get('BBS_CENTRAL_RHOST') + "/BBS/" + os.environ.get('BBS_BIOC_VERSIONED_REPO_PATH')
+            os.environ['BBS_CURL_CMD'] =  ENVIR['bbs_curl_cmd']
+            os.environ['LANG'] = ENVIR['bbs_lang']
             # R CMD check variables
             os.environ['_R_CHECK_TIMINGS_']="0"
             os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
