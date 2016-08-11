@@ -128,7 +128,6 @@ def do_work(body):
         try:
             job_id = received_obj['job_id']
             job_base = job_id.rsplit("_", 1)[0]
-            job_time = job_id.rsplit("_", 1)[1]
             bioc_version = received_obj['bioc_version']
 
             job_dir = os.path.join(ENVIR['spb_home'], "jobs")

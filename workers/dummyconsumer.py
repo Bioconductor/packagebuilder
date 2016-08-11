@@ -9,7 +9,6 @@ License: http://www.apache.org/licenses/LICENSE-2.0
 """
 import uuid
 import logging
-import itertools
 
 from twisted.internet import reactor
 from twisted.internet.protocol import Protocol, ReconnectingClientFactory

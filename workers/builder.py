@@ -33,6 +33,15 @@ sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 import BBScorevars
 import dcf
 
+stomp = None
+manifest = None
+working_dir = None
+packagebuilder_ssh_cmd = None
+packagebuilder_scp_cmd = None
+build_product = None
+warnings = False
+callcount = None
+
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.INFO)
@@ -116,6 +125,7 @@ class Tailer(threading.Thread):
 # (as unicode) when attempting to write to the log file.
 def send_message(msg, status=None):
     global stomp
+    global manifest
     logging.info(u"Attempting to send message: '{msg}'".format(msg=msg))
     merged_dict = {}
     merged_dict['builder_id'] = BUILDER_ID
@@ -169,7 +179,6 @@ def send_dcf_info(dcf_file):
     })
 
 def is_build_required(manifest):
-    global package_name
     global svn_url_global
     svn_url_global = manifest['svn_url']
     package_name = manifest['job_id'].split("_")[0]
@@ -378,8 +387,6 @@ def setup_stomp():
 
 
 def git_clone():
-    global package_name
-    package_name = manifest['job_id'].split("_")[0]
     git_url = re.sub(r'\/$', '', manifest['svn_url'])
     if not git_url.endswith(".git"):
         git_url += ".git"
@@ -396,7 +403,6 @@ def git_clone():
 
 def svn_export():
     # Don't use BBS_SVN_CMD because it may not be defined on all nodes
-    global package_name
     package_name = manifest['job_id'].split("_")[0]
     svn_cmd = "svn --non-interactive --username %s --password %s export %s %s" % ( \
         ENVIR['svn_user'], ENVIR['svn_pass'], manifest['svn_url'], package_name)
@@ -411,7 +417,6 @@ def svn_export():
         sys.exit("svn export failed")
 
 def extract_tarball():
-    global package_name
     package_name = manifest['job_id'].split("_")[0]
     # first, log in to the tracker and get a cookie
     tracker_url = HOSTS['tracker']
@@ -472,6 +477,7 @@ def extract_tarball():
     send_dcf_info(dcf_file)
 
 def install_pkg_deps():
+    package_name = manifest['job_id'].split("_")[0]
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
     logging.debug("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
@@ -704,6 +710,7 @@ def build_package(source_build):
     flags = "--keep-empty-dirs --no-resave-data"
 
     if (source_build):
+        package_name = manifest['job_id'].split("_")[0]
         r_cmd = "%s CMD build %s %s" % \
                 (ENVIR['bbs_R_cmd'], flags, package_name)
     else:
@@ -823,6 +830,7 @@ def propagate_package():
     kib = rawsize / float(1024)
     filesize = "%.2f" % kib
 
+    package_name = manifest['job_id'].split("_")[0]
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
 
     if (platform.system() == "Windows"):
@@ -957,6 +965,7 @@ def onexit():
 
 def update_packages_file():
     global repos
+    global build_product
 
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
@@ -1164,6 +1173,7 @@ if __name__ == "__main__":
     result = build_package(True)
     logging.info("build_package() finished with result {res}".format(res=result))
     if (result == 0):
+        global warnings
         check_result = check_package()
         buildbin_result = build_package(False)
 
