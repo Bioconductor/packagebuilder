@@ -56,7 +56,7 @@ home <- path.expand("~")
 bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
     sprintf("~/Library/R/%s/library", r_ver)
 } else if (.Platform$OS.type == "windows") {
-    pkgbuilderHome <- Sys.getenv("SPB_HOME")
+    pkgbuilderHome <- Sys.getenv("PACKAGEBUILDER_HOME")
     pkgbuilderHome <- gsub("\\", "/", pkgbuilderHome, fixed=TRUE)
     file.path(pkgbuilderHome, "R", "library")
 } else {                                # linux

@@ -340,7 +340,6 @@ def setup():
         logging.info("Initial R_LIBS_USER variable is empty.")
 
 
-    # will this fail on windows?
     # package lib
     package_dir = working_dir.rsplit("/", 1)[0]
     expectedRLibsUser = os.path.join(package_dir, "R-libs")
@@ -349,18 +348,22 @@ def setup():
     sysLib = os.environ['BBS_R_HOME'] + "library"
 
     # figure out bootstrap-lib (see installPkgDeps.R)
-    newcmd =  os.environ['BBS_R_CMD'] + " --version"
-    tempVar = os.popen(newcmd).read()
-    Rver = re.findall(r'R\sversion\s(\d*\.\d*)\.\d*',tempVar)[0]
-    Rplat = re.findall(r'Platform:\s(\S*)\s', tempVar)[0]
     platSys = platform.system()
-    if platSys == "Darwin":
-        bootLibs = os.environ['HOME'] + "/Library/R/" + Rver + "/library"
-    elif platSys == "Windows":
+    if platSys == "Windows":
         # backslash issues on windows??
-        bootLibs = os.environ['SPB_HOME'] + "/R/library"
-    else:
-        bootLibs = os.environ['HOME'] + "/R/" + Rplat + "-library/" + Rver
+        bootLibs = os.environ['SPB_HOME'].replace("\workers", "") + "/R/library"
+    else: 
+        newcmd =  os.environ['BBS_R_CMD'] + " --version"
+        logging.info("BBS_R_CMD" + newcmd)
+        tempVar = os.popen(newcmd).read()
+        Rver = re.findall(r'R\sversion\s(\d*\.\d*)\.\d*',tempVar)[0]
+        Rplat = re.findall(r'Platform:\s(\S*)\s', tempVar)[0]
+        
+        if platSys == "Darwin":
+            bootLibs = os.environ['HOME'] + "/Library/R/" + Rver + "/library"
+        else:
+            bootLibs = os.environ['HOME'] + "/R/" + Rplat + "-library/" + Rver
+
 
     AllLibs = expectedRLibsUser + ":" + bootLibs + ":" + sysLib
     if 'R_LIBS_USER' in os.environ:
