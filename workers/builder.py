@@ -723,7 +723,7 @@ def build_package(source_build):
                 _call("rm -rf %s" % libdir, False)
             if (not (os.path.exists(libdir))):
                 os.mkdir(libdir)
-            r_cmd = "../../build-universal.sh %s %s" % (
+            r_cmd = os.environ['SPB_HOME'] + "/build-universal.sh %s %s" % (
                 get_source_tarball_name(), libdir)
 
     status = None
