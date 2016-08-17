@@ -1,5 +1,7 @@
-# run me like this:
-# /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave "--args Depends=@@R (>= 2.10), utils@@; Imports=@@methods@@; Suggests=@@tools, tkWidgets, ALL@@;" /working_dir/../installPkgDeps.R /working_dir/installDeps.log
+## run me like this:
+## /path/to/R CMD BATCH -q --vanilla --no-save --no-restore --slave \
+##     "--args Depends=@@R (>= 2.10), utils@@; Imports=@@methods@@; Suggests=@@tools, tkWidgets, ALL@@;" \
+##     /working_dir/../installPkgDeps.R /working_dir/installDeps.log
 
 options(useFancyQuotes=FALSE)
 
@@ -20,6 +22,17 @@ dependenciesFromArgs <- function(args) {
     segs = sub(pattern, "", segs[grepl(pattern, segs)])
     unlist(strsplit(gsub("@@ *", "", segs), ", *"))
 }
+
+validateInstallation <- function(pkgs, lib.loc, label) {
+    installed <- installed.packages(lib.loc)
+    if (!all(pkgs %in% rownames(installed))) {
+        missing <- setdiff(pkgs, rownames(installed))
+        stop("'", label, "' missing packages: ", paste(missing, collapse=", "))
+    }
+    TRUE
+}
+
+
 args <- commandArgs(TRUE)
 print("args are:")
 print(args)
@@ -28,171 +41,71 @@ deps <- dependenciesFromArgs(args)
 print("deps are:")
 print(deps)
 
+print(.libPaths())
+stopifnot(length(.libPaths()) == 3L)    # 1: R-libs              (pkg-specific)
+                                        # 2: packagebuilder/library (bootstrap)
+                                        # 3: R_HOME/library         (read-only)
+pkg_libdir <- .libPaths()[1]
+bootstrap_libdir <- .libPaths()[2]
 
 ##
-## R version and repository setup
+## validate pacakgebuilder/library (bootstrap library)
 ##
 
-if (!require(BiocInstaller))
-    source("https://bioconductor.org/biocLite.R")
-major <- R.Version()$major
-minor <- sub("\\..*", "", R.Version()$minor)
-r_ver <- sprintf("%s.%s", major, minor)
-
-repos <- c(biocinstallRepos(),
-           sprintf("http://bioconductor.org/scratch-repos/%s",
-                   as.character(BiocInstaller::biocVersion())))
-newrepos <- getOption("repos")
-newrepos["CRAN"] <- "http://cran.fhcrc.org"
-options(repos=newrepos, install.packages.compile.from.source="always")
-
-##
-## bootstrap installation
-##
-
-home <- path.expand("~")
-
-## Location used to install packgebuilder dependencies
-bootstrap_libdir <- if (Sys.info()['sysname'] == "Darwin") {
-    sprintf("~/Library/R/%s/library", r_ver)
-} else if (.Platform$OS.type == "windows") {
-    pkgbuilderHome <- Sys.getenv("PACKAGEBUILDER_HOME")
-    pkgbuilderHome <- gsub("\\", "/", pkgbuilderHome, fixed=TRUE)
-    file.path(pkgbuilderHome, "R", "library")
-} else {                                # linux
-    file.path(home, 'R', sprintf("%s-library", R.version$platform), r_ver)
-}
-
-## Dependencies for the packagebuilder itself
-bootstrap_pkgs <- c("graph", "biocViews", "knitr", "knitrBootstrap",
+bootstrap_pkgs <- c(
+    "graph", "biocViews", "knitr", "knitrBootstrap",
     "devtools", "codetools", "httr", "curl", "optparse")
 
-ap <- available.packages(contrib.url(biocinstallRepos()[c("CRAN", "BioCsoft")]))
-ip <- installed.packages(lib.loc = bootstrap_libdir,
-    fields=c("Version","Priority"))
+if (length(dir(bootstrap_libdir)) == 0L) { # first-time installation
+    ## BiocInstaller
+    source("https://bioconductor.org/biocLite.R")
+    if (BiocInstaller:::IS_USER)
+        ## FIXME: implement & use BiocInstaller::isDevel()
+        BiocInstaller::useDevel()
+    ## other packages
+    BiocInstaller::biocLite(bootstrap_pkgs, lib=bootstrap_libdir)
+} else {
+    update.packages(repos=BiocInstaller::biocinstallRepos(),
+                    lib.loc=bootstrap_libdir, ask=FALSE)
+}
 
-need <- bootstrap_pkgs[!bootstrap_pkgs %in% rownames(ip)]
-have <- setdiff(bootstrap_pkgs, need)
-idx <-
-    package_version(ip[have, "Version"]) < package_version(ap[have, "Version"])
-need <- c(have[idx], need)
-if (length(need))
-    install.packages(need, bootstrap_libdir, repos=biocinstallRepos())
-message("bootstrap_libdir: ", bootstrap_libdir)
-#.libPaths(c(bootstrap_libdir, .libPaths()))
-.libPaths(c(.libPaths(), bootstrap_libdir))
-message(".libPaths():\n  ", paste(.libPaths(), collapse="\n  "))
-library(BiocInstaller)
-biocLite("Bioconductor/BiocCheck", lib=bootstrap_libdir, type="source")
-
-## FIXME: validate post-condition
+devtools::install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
+bootstrap_pkgs <- c(bootstrap_pkgs, "BiocCheck")
+validateInstallation(bootstrap_pkgs, bootstrap_libdir, "bootstrap_pkgs")
 
 ##
-## update installed packages
+## repository and options setup
 ##
 
-old.libPaths <- .libPaths()
-.libPaths(c(.libPaths(), bootstrap_libdir))
-
-update.packages(repos=biocinstallRepos(), lib.loc=bootstrap_libdir,
-    instlib=bootstrap_libdir, ask=FALSE)
-
-.libPaths(old.libPaths)
+repos <- c(BiocInstaller::biocinstallRepos(),
+           sprintf("http://bioconductor.org/scratch-repos/%s",
+                   as.character(BiocInstaller::biocVersion())))
+options(install.packages.compile.from.source="always")
 
 ##
-## install dependencies
+## dependencies
 ##
 
-deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
-dp <- as.data.frame(ip)
-blacklist <- c(bootstrap_pkgs,
-               rownames(ip)[dp$Priority %in% "base"],
+ip <- installed.packages()
+blacklist <- c("R", bootstrap_pkgs, rownames(ip),
                if (.Platform$OS.type == "windows") "multicore")
+all_deps <- deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
+
+## install missing dependencies
 deps <- deps[!deps %in% blacklist]
+if (getOption("pkgType") != "source")
+    ## try to install binaries...
+    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, dependencies=TRUE)
+deps <- deps[!deps %in% rownames(installed.packages())]
+if (length(deps))
+    ## source (e.g., linux) or failed binary installations
+    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, dependencies=TRUE,
+                            type="source")
 
-withWarnings <- function(expr) {
-    myWarnings <- NULL
-    wHandler <- function(w) {
-        myWarnings <<- c(myWarnings, list(w))
-        invokeRestart("muffleWarning")
-    }
-    val <- withCallingHandlers(expr, warning = wHandler)
-    list(value = val, warnings = myWarnings)
-}
+validateInstallation(all_deps, pkg_libdir, "pkg_deps")
 
+## update previously installed dependencies
 
-installPkg <- function(pkg)
-{
-    if (pkg == "multicore" && .Platform$OS.type == "windows")
-        return()
+update.packages(all_deps, lib.loc=pkg_libdir)
 
-    if (!getOption("pkgType") == "source")
-    {
-        vnw <- withWarnings(install.packages(pkg, repos=repos,
-            dependencies=TRUE, INSTALL_opts="--merge-multiarch"))$warnings
-        res <- unlist(lapply(vnw$warnings, function(x) x$message))
-        if (!pkg %in% rownames(installed.packages()))
-            install.packages(pkg, type="source", repos=repos, dependencies=TRUE,
-              INSTALL_opts="--merge-multiarch")
-        if(!is.null(res))
-        {
-            res <- res[grep("not available", res)]
-            if (!length(res))
-                return()
-            pkgs <- strsplit(res, "'")[[1]]
-            pkgs <- pkgs[grep(" ", pkgs, invert=TRUE)]
-            install.packages(pkgs, type="source", repos=repos, dependencies=TRUE,
-              INSTALL_opts="--merge-multiarch")
-        }
-    } else {
-        install.packages(pkg, repos=repos, dependencies=TRUE,
-            INSTALL_opts="--merge-multiarch")
-    }
-}
-
-installDeps <- function(pkgs)
-{
-
-    builtIn <- function(pkg)
-    {
-        pkg %in% c("R", "tools", "utils", "methods", "base", "graphics")
-    }
-
-    #pkgs <- strsplit(depStr, ",", fixed=TRUE)[[1]]
-    for (pkg in pkgs) {
-        pkg <- trimws(pkg)
-        if (length(grep("(", pkg, fixed=TRUE))) { ## is there a version spec?
-            versionSpec <- gsub(".*\\((.*?)\\).*","\\1", pkg)
-            segs <- strsplit(versionSpec, " ", fixed=TRUE)
-            operator <- segs[[1]][1]
-            requiredVersion <- segs[[1]][2]
-            segs <- strsplit(pkg, "(", fixed=TRUE)
-            pkgName <- trimws(segs[[1]][1])
-            if (builtIn(pkgName)) next
-            ip <- installed.packages()
-            if (pkgName %in% rownames(ip)) {
-                installedVersion <- ip[pkgName, "Version"]
-                if (numeric_version(requiredVersion) >
-                  numeric_version(installedVersion)) {
-                    message(paste(pkgName, "version", installedVersion,
-                      "is too old, updating..."))
-                    installPkg(pkgName)
-                }
-            } else {
-                installPkg(pkgName)
-            }
-        } else {
-            if (builtIn(pkg)) next
-            if (!pkg %in% rownames(installed.packages()))
-                installPkg(pkg)
-        }
-    }
-}
-
-installDeps(deps)
-
-if (.Platform$OS.type == "windows")
-    biocLite("lattice", type="source")
-
-print("*** Final sessionInfo() ***")
 sessionInfo()

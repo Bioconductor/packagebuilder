@@ -339,39 +339,20 @@ def setup():
     else:
         logging.info("Initial R_LIBS_USER variable is empty.")
 
-
     # package lib
     package_dir = working_dir.rsplit("/", 1)[0]
     expectedRLibsUser = os.path.join(package_dir, "R-libs")
 
     # system-lib
-    sysLib = os.environ['BBS_R_HOME'] + "library"
+    sysLib = os.path.join(os.environ['BBS_R_HOME'], "library")
 
     # figure out bootstrap-lib (see installPkgDeps.R)
-    platSys = platform.system()
-    if platSys == "Windows":
-        # backslash issues on windows??
-        bootLibs = os.environ['SPB_HOME'].replace("\workers", "") + "/R/library"
-    else: 
-        newcmd =  os.environ['BBS_R_CMD'] + " --version"
-        logging.info("BBS_R_CMD" + newcmd)
-        tempVar = os.popen(newcmd).read()
-        Rver = re.findall(r'R\sversion\s(\d*\.\d*)\.\d*',tempVar)[0]
-        Rplat = re.findall(r'Platform:\s(\S*)\s', tempVar)[0]
-        
-        if platSys == "Darwin":
-            bootLibs = os.environ['HOME'] + "/Library/R/" + Rver + "/library"
-        else:
-            bootLibs = os.environ['HOME'] + "/R/" + Rplat + "-library/" + Rver
-
-
+    bootLibs = os.path.join(os.environ['SPB_HOME'], "library")
     AllLibs = expectedRLibsUser + ":" + bootLibs + ":" + sysLib
-    if 'R_LIBS_USER' in os.environ:
-        AllLibs = AllLibs + ":" + os.environ['R_LIBS_USER']
 
-    logging.info("Attempting change R_LIBS_USER")
     os.environ['R_LIBS_USER'] = AllLibs
-    logging.info("New R_LIBS_USER: {rLibsUser}".format(rLibsUser = os.environ['R_LIBS_USER']))
+    logging.info("New R_LIBS_USER: {rLibsUser}".format(
+        rLibsUser = os.environ['R_LIBS_USER']))
 
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
