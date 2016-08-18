@@ -58,10 +58,10 @@ bootstrap_pkgs <- c(
 
 if (length(dir(bootstrap_libdir)) == 0L) { # first-time installation
     ## BiocInstaller
-    source("https://bioconductor.org/biocLite.R")
-    if (BiocInstaller:::IS_USER)
-        ## FIXME: implement & use BiocInstaller::isDevel()
-        BiocInstaller::useDevel()
+    repos <- paste0("https://bioconductor.org/packages/",
+                    Sys.getenv("BBS_BIOC_VERSION"),
+                    "/bioc")
+    install.packages("BiocInstaller", repos=repos, lib=bootstrap_libdir)
     ## other packages
     BiocInstaller::biocLite(bootstrap_pkgs, lib=bootstrap_libdir)
 } else {
@@ -69,7 +69,11 @@ if (length(dir(bootstrap_libdir)) == 0L) { # first-time installation
                     lib.loc=bootstrap_libdir, ask=FALSE)
 }
 
+opaths <- .libPaths()
+.libPaths(bootstrap_libdir) # FIXME: source() & devtools don't obey lib=
 devtools::install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
+.libPaths(opaths)
+
 bootstrap_pkgs <- c(bootstrap_pkgs, "BiocCheck")
 validateInstallation(bootstrap_pkgs, bootstrap_libdir, "bootstrap_pkgs")
 
