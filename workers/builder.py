@@ -329,7 +329,6 @@ def setup():
     logging.info("Contents of `sys.argv`: {content}.".format(content = sys.argv))
     working_dir = os.path.split(sys.argv[1])[0]
     logging.info("Initial working directory: {wd}".format(wd = os.getcwd()))
-    logging.info("Attempting change to working directory: {dir}".format(dir = working_dir))
     os.chdir(working_dir)
     working_dir = os.getcwd()
     logging.info("New working directory: {wd}".format(wd = os.getcwd()))
@@ -474,7 +473,7 @@ def install_pkg_deps():
             args += '%s=@@%s@@; ' % (field, desc.getValue(field))
         except KeyError:
             pass
-    r_script = "%s/../../../installPkgDeps.R" % working_dir
+    r_script = os.path.join(ENVIR['spb_home'], "installPkgDeps.R")
     log = "%s/installDeps.log" % working_dir
     if args.strip() == "":
         args = "None=1"

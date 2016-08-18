@@ -42,19 +42,21 @@ print("deps are:")
 print(deps)
 
 print(.libPaths())
-stopifnot(length(.libPaths()) == 3L)    # 1: R-libs              (pkg-specific)
-                                        # 2: packagebuilder/library (bootstrap)
-                                        # 3: R_HOME/library         (read-only)
+stopifnot(length(.libPaths()) == 3L)
+                                # 1: R-libs              (pkg-specific)
+                                # 2: packagebuilder/workers/library (bootstrap)
+                                # 3: R_HOME/library         (read-only)
 pkg_libdir <- .libPaths()[1]
 bootstrap_libdir <- .libPaths()[2]
 
 ##
-## validate pacakgebuilder/library (bootstrap library)
+## validate pacakgebuilder/workers/library (bootstrap library)
 ##
 
 bootstrap_pkgs <- c(
     "graph", "biocViews", "knitr", "knitrBootstrap",
-    "devtools", "codetools", "httr", "curl", "optparse")
+    "devtools", "codetools", "httr", "curl", "optparse",
+    "GenomicFeatures", "ShortRead", "VariantAnnotation")
 
 if (length(dir(bootstrap_libdir)) == 0L) { # first-time installation
     ## BiocInstaller
@@ -73,7 +75,6 @@ opaths <- .libPaths()
 .libPaths(bootstrap_libdir) # FIXME: source() & devtools don't obey lib=
 devtools::install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
 .libPaths(opaths)
-
 bootstrap_pkgs <- c(bootstrap_pkgs, "BiocCheck")
 validateInstallation(bootstrap_pkgs, bootstrap_libdir, "bootstrap_pkgs")
 
@@ -93,10 +94,10 @@ options(install.packages.compile.from.source="always")
 ip <- installed.packages()
 blacklist <- c("R", bootstrap_pkgs, rownames(ip),
                if (.Platform$OS.type == "windows") "multicore")
-all_deps <- deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
+deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
 
 ## install missing dependencies
-deps <- deps[!deps %in% blacklist]
+pkg_deps <- deps <- deps[!deps %in% blacklist]
 if (getOption("pkgType") != "source")
     ## try to install binaries...
     BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, dependencies=TRUE)
@@ -106,10 +107,10 @@ if (length(deps))
     BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, dependencies=TRUE,
                             type="source")
 
-validateInstallation(all_deps, pkg_libdir, "pkg_deps")
+validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 
 ## update previously installed dependencies
 
-update.packages(all_deps, lib.loc=pkg_libdir)
+update.packages(pkg_deps, lib.loc=pkg_libdir)
 
 sessionInfo()
