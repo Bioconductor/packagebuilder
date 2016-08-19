@@ -339,7 +339,7 @@ def setup():
         logging.info("Initial R_LIBS_USER variable is empty.")
 
     # package lib
-    package_dir = working_dir.rsplit("/", 1)[0]
+    package_dir = os.path.dirname(working_dir)
     expectedRLibsUser = os.path.join(package_dir, "R-libs")
 
     # system-lib
@@ -347,7 +347,7 @@ def setup():
 
     # figure out bootstrap-lib (see installPkgDeps.R)
     bootLibs = os.path.join(os.environ['SPB_HOME'], "library")
-    AllLibs = expectedRLibsUser + ":" + bootLibs + ":" + sysLib
+    AllLibs = expectedRLibsUser + os.pathsep + bootLibs + os.pathsep + sysLib
 
     os.environ['R_LIBS_USER'] = AllLibs
     logging.info("New R_LIBS_USER: {rLibsUser}".format(
