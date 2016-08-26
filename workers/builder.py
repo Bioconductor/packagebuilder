@@ -817,8 +817,8 @@ def propagate_package():
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
 
     if (platform.system() == "Windows"):
-        command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'rm -f %s/%s_*.zip'"
-        command = command % (ENVIR['spb_home'], repos, package_name)
+        command = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no biocadmin@%s 'rm -f %s/%s_*.zip'"
+        command = command % (ENVIR['spb_RSA_key'], ENVIR['spb_staging_url'], repos, package_name)
         retcode = subprocess.call(command)
     else:
         logging.debug("propagate_package() files_to_delete: %s" %
@@ -846,13 +846,13 @@ def propagate_package():
             "body": "chmod_retcode=%d" % chmod_retcode,
             "retcode": chmod_retcode
         })
-        command = "c:/cygwin/bin/scp.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no %s biocadmin@staging.bioconductor.org:%s/"
-        command = command % (ENVIR['spb_home'], build_product, repos)
+        command = "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no %s biocadmin@%s:%s/"
+        command = command % (ENVIR['spb_RSA_key'], build_product, ENVIR['spb_staging_url'], repos)
         logging.debug("propagate_package() Windows scp command = %s." %
                       command)
         retcode = subprocess.call(command)
-        command = "c:/cygwin/bin/ssh.exe -qi %s/.packagebuilder.private_key.rsa -o StrictHostKeyChecking=no biocadmin@staging.bioconductor.org 'chmod a+r %s/%s_*.zip'"
-        command = command % (ENVIR['spb_home'], repos, package_name)
+        command = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no biocadmin@%s 'chmod a+r %s/%s_*.zip'"
+        command = command % (ENVIR['spb_RSA_key'], ENVIR['spb_staging_url'], repos, package_name)
         remote_chmod_retcode = subprocess.call(command)
         logging.debug("propagate_package() Windows remote_chmod_retcode = %s" %
                       remote_chmod_retcode)
@@ -897,14 +897,14 @@ def _call(command_str, shell):
     else:
         return(subprocess.call(command_str, shell=shell))
 
-def ssh(command, user='biocadmin', host='staging.bioconductor.org'):
+def ssh(command, user='biocadmin', host=ENVIR['spb_staging_url']):
     command = "%s %s@%s \"%s\"" % (packagebuilder_ssh_cmd, user, host, command)
     logging.debug("ssh() command: %s" % command)
     retcode = _call([command], shell=True)
     return(retcode)
 
 def scp(src, dest, srcLocal=True, user='biocadmin',
-        host='staging.bioconductor.org'):
+        host=ENVIR['spb_staging_url']):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
         chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
@@ -978,8 +978,8 @@ def update_packages_file():
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
     if pkg_type == "mac.binary.leopard":
         pkg_type = "mac.binary"
-    command = "%s biocadmin@staging.bioconductor.org 'R -f %s/update-repo.R --args %s %s'"
-    command = command % (packagebuilder_ssh_cmd, script_loc, repos, pkg_type)
+    command = "%s biocadmin@%s 'R -f %s/update-repo.R --args %s %s'"
+    command = command % (packagebuilder_ssh_cmd, ENVIR['spb_staging_url'], script_loc, repos, pkg_type)
     logging.debug("update_packages_file() command: %s"  % command)
     retcode = subprocess.call(command, shell=True)
     logging.debug("update_packages_file() retcode: %d" % retcode)
@@ -998,8 +998,8 @@ def update_packages_file():
         })
         sys.exit("updating packages failed")
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
-        command = "%s biocadmin@staging.bioconductor.org \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\""
-        command = command % packagebuilder_ssh_cmd
+        command = "%s biocadmin@%s \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\""
+        command = command % (packagebuilder_ssh_cmd, ENVIR['spb_staging_url'])
         logging.debug("update_packages_file() sync command = %s" % command)
         retcode = subprocess.call(command, shell=True)
         send_message({
