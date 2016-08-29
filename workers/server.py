@@ -10,6 +10,7 @@ import stomp
 import logging
 import threading
 import socket
+import platform
 from datetime import datetime
 from urllib2 import Request, urlopen, URLError
 # Modules created by Bioconductor
@@ -149,6 +150,8 @@ def do_work(body):
             url_pkg = url_name[4]
             cmd = os.path.join("https://api.github.com/repos/",url_user,
                                url_pkg, "commits/HEAD")
+            if plaform.system() == "Windows":
+                cmd = cmd.replace("\\", "/")
             request = Request(cmd)
             try:
                 response = urlopen(request)
