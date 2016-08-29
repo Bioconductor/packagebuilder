@@ -39,6 +39,7 @@ working_dir = None
 packagebuilder_ssh_cmd = None
 packagebuilder_scp_cmd = None
 build_product = None
+warnings = False
 callcount = None
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
@@ -1156,7 +1157,6 @@ if __name__ == "__main__":
     logging.info("build_package() finished with result {res}".format(res=result))
     if (result == 0):
         global warnings
-        warnings = False
         check_result = check_package()
         buildbin_result = build_package(False)
 
