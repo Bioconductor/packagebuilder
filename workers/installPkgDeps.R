@@ -82,9 +82,9 @@ validateInstallation(bootstrap_pkgs, bootstrap_libdir, "bootstrap_pkgs")
 ## repository and options setup
 ##
 
-repos <- c(BiocInstaller::biocinstallRepos(),
-           sprintf("http://bioconductor.org/scratch-repos/%s",
-                   as.character(BiocInstaller::biocVersion())))
+siteRepos <- sprintf(
+    "http://bioconductor.org/scratch-repos/%s",
+    as.character(BiocInstaller::biocVersion()))
 options(install.packages.compile.from.source="always")
 
 ##
@@ -100,18 +100,20 @@ deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
 pkg_deps <- deps <- deps[!deps %in% blacklist]
 if (getOption("pkgType") != "source")
     ## try to install binaries...
-    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, repos=repos,
-                            dependencies=TRUE)
+    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir,
+                            siteRepos=siteRepos, dependencies=TRUE)
 deps <- deps[!deps %in% rownames(installed.packages())]
 if (length(deps))
     ## source (e.g., linux) or failed binary installations
-    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, repos=repos,
-                            dependencies=TRUE, type="source")
+    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir,
+                            siteRepos=siteRepos, dependencies=TRUE,
+                            type="source")
 
 validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 
 ## update previously installed dependencies
 
-update.packages(pkg_deps, lib.loc=pkg_libdir, repos=repos)
+update.packages(pkg_deps, lib.loc=pkg_libdir,
+                repos=biocinstallRepos(siteRepos))
 
 sessionInfo()
