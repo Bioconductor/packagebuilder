@@ -100,17 +100,18 @@ deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
 pkg_deps <- deps <- deps[!deps %in% blacklist]
 if (getOption("pkgType") != "source")
     ## try to install binaries...
-    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, dependencies=TRUE)
+    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, repos=repos,
+                            dependencies=TRUE)
 deps <- deps[!deps %in% rownames(installed.packages())]
 if (length(deps))
     ## source (e.g., linux) or failed binary installations
-    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, dependencies=TRUE,
-                            type="source")
+    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir, repos=repos,
+                            dependencies=TRUE, type="source")
 
 validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 
 ## update previously installed dependencies
 
-update.packages(pkg_deps, lib.loc=pkg_libdir)
+update.packages(pkg_deps, lib.loc=pkg_libdir, repos=repos)
 
 sessionInfo()
