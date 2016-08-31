@@ -113,7 +113,7 @@ validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 
 ## update previously installed dependencies
 
-update.packages(pkg_deps, lib.loc=pkg_libdir,
-                repos=biocinstallRepos(siteRepos))
+update.packages(oldPkgs=pkg_deps, lib.loc=pkg_libdir,
+                repos=BiocInstaller::biocinstallRepos(siteRepos))
 
 sessionInfo()
