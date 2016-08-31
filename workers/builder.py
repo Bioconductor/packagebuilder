@@ -936,6 +936,9 @@ def onexit():
         svn_url_global
     except NameError:
         svn_url_global = "undefined"
+
+    logging.info("Cleaning Directory().")
+    clean_up_dir()
     logging.info("Ending via onexit().")
     send_message({
         "body": "builder.py exited",
@@ -1091,6 +1094,44 @@ def get_package_source():
         return("tracker")
     raise
 
+def clean_up_dir():
+
+    path_tar = get_source_tarball_name()
+    if os.path.exists(path_tar):
+        os.remove(path_tar)
+
+    if (platform.system() == "Windows"):
+        path_zip = path_tar.replace(".tar.gz", ".zip")
+        if os.path.exists(path_zip):
+            os.remove(path_zip)
+        lib_dir = re.split('_', path_tar)[0] + ".buildbin-libdir"
+        if os.path.exists(lib_dir):
+            os.system("rm -rf " + lib_dir) 
+        if os.path.exists("1err.txt"):
+            os.remove("1err.txt")
+        if os.path.exists("1out.txt"):
+            os.remove("1out.txt")
+        if os.path.exists("2err.txt"):
+            os.remove("2err.txt")
+        if os.path.exists("2out.txt"):
+            os.remove("2out.txt")
+
+    if (platform.system() == "Darwin"):
+        path_tgz = path_tar.replace(".tar.gz", ".tgz")
+        if os.path.exists(path_tgz):
+            os.remove(path_tgz)
+        if os.path.exists("libdir"):
+            os.system("rm -rf libdir")
+
+    if os.path.exists("manifest.json"):
+        os.remove("manifest.json")
+
+    pkgDirName = re.split('_', path_tar)[0]
+    cloneDir = "rm -rf " + pkgDirName
+    if os.path.exists(pkgDirName):
+        os.system(cloneDir)
+
+
 
 ## Main namespace. execution starts here.
 if __name__ == "__main__":
@@ -1175,41 +1216,5 @@ if __name__ == "__main__":
         })
         logging.info("Normal build completion, %s." % body)
 
-
-    # clean up directory
-
-    path_tar = get_source_tarball_name()
-    if os.path.exists(path_tar):
-        os.remove(path_tar)
-
-    if (platform.system() == "Windows"):
-        path_zip = path_tar.replace(".tar.gz", ".zip")
-        if os.path.exists(path_zip):
-            os.remove(path_zip)
-        lib_dir = re.split('_', path_tar)[0] + ".buildbin-libdir"
-        if os.path.exists(lib_dir):
-            os.system("rm -rf " + lib_dir) 
-        if os.path.exists("1err.txt"):
-            os.remove("1err.txt")
-        if os.path.exists("1out.txt"):
-            os.remove("1out.txt")
-        if os.path.exists("2err.txt"):
-            os.remove("2err.txt")
-        if os.path.exists("2out.txt"):
-            os.remove("2out.txt")
-
-    if (platform.system() == "Darwin"):
-        path_tgz = path_tar.replace(".tar.gz", ".tgz")
-        if os.path.exists(path_tgz):
-            os.remove(path_tgz)
-        if os.path.exists("libdir"):
-            os.system("rm -rf libdir")
-
-    if os.path.exists("manifest.json"):
-        os.remove("manifest.json")
-
-    cloneDir = "rm -rf " + re.split('_', path_tar)[0]
-    os.system(cloneDir)
- 
-
-    logging.info("End of main function, onexit() should run next.")
+        
+        logging.info("End of main function, onexit() should run next.")
