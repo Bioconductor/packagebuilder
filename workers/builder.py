@@ -1097,6 +1097,8 @@ def get_package_source():
 def clean_up_dir():
 
     path_tar = get_source_tarball_name()
+    if path_tar == None:
+        path_tar = manifest['job_id'].split("_")[0] + ".tar.gz"
     if os.path.exists(path_tar):
         os.remove(path_tar)
 
@@ -1106,7 +1108,7 @@ def clean_up_dir():
             os.remove(path_zip)
         lib_dir = re.split('_', path_tar)[0] + ".buildbin-libdir"
         if os.path.exists(lib_dir):
-            os.system("rm -rf " + lib_dir) 
+            os.system("rm -rf " + lib_dir)
         if os.path.exists("1err.txt"):
             os.remove("1err.txt")
         if os.path.exists("1out.txt"):
@@ -1126,7 +1128,7 @@ def clean_up_dir():
     if os.path.exists("manifest.json"):
         os.remove("manifest.json")
 
-    pkgDirName = re.split('_', path_tar)[0]
+    pkgDirName = manifest['job_id'].split("_")[0]
     cloneDir = "rm -rf " + pkgDirName
     if os.path.exists(pkgDirName):
         os.system(cloneDir)
@@ -1216,5 +1218,6 @@ if __name__ == "__main__":
         })
         logging.info("Normal build completion, %s." % body)
 
-        
-        logging.info("End of main function, onexit() should run next.")
+
+
+    logging.info("End of main function, onexit() should run next.")
