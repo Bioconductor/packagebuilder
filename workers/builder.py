@@ -375,7 +375,7 @@ def git_clone():
     git_cmd = "git clone %s" % git_url
     send_message({"status": "git_cmd", "body": git_cmd})
     retcode = subprocess.call(git_cmd, shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": "finished git clone"})
+    send_message({"status": "post_processing", "retcode": retcode, "body": "Finished git clone. "})
     send_message({"status": "git_result", "result": retcode, "body": \
         "git clone completed with status %d" % retcode})
     if (not retcode == 0):
@@ -390,9 +390,8 @@ def svn_export():
         ENVIR['svn_user'], ENVIR['svn_pass'], manifest['svn_url'], package_name)
     clean_svn_cmd = svn_cmd.replace(ENVIR['svn_user'],"xxx").replace(ENVIR['svn_pass'],"xxx")
     send_message({"status": "svn_cmd", "body": clean_svn_cmd})
-    send_message({"status": "post_processing", "retcode": 0, "body": "starting svn export"})
     retcode = subprocess.call(svn_cmd, shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": "finished svn export"})
+    send_message({"status": "post_processing", "retcode": retcode, "body": "Finished svn export. "})
     send_message({"status": "svn_result", "result": retcode, "body": \
         "svn export completed with status %d" % retcode})
     if (not retcode == 0):
@@ -426,8 +425,7 @@ def extract_tarball():
     send_message({
         "status": "post_processing",
         "retcode": retcode,
-        "body": "download of tarball completed with status %d" % retcode
-    })
+        "body": "Download of tarball completed. "})
     if (retcode != 0):
         logging.error("extract_tarball() Failed to 'curl' tarball.")
         raise
@@ -447,8 +445,7 @@ def extract_tarball():
     send_message({
         "status": "post_processing",
         "retcode": retcode,
-        "body": "untar of tarball completed with status %d" % retcode
-    })
+        "body": "Untar of tarball completed. "})
     if (not retcode == 0):
         logging.error("extract_tarball() Failed to 'untar' tarball.")
         raise
@@ -482,7 +479,8 @@ def install_pkg_deps():
       (rscript_binary, r_script, args.strip(), log)
 
     send_message({
-        "body": "Installing dependencies...",
+        "status": "Installing dependencies",
+        "body": "Installing dependencies",
         "status": "preprocessing",
         "retcode": 0
     })
@@ -490,7 +488,7 @@ def install_pkg_deps():
                   "\n  %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({
-        "body": "Result of installing dependencies: %d" % retcode,
+        "body": "Finished installing dependencies. ",
         "status": "post_processing",
         "retcode": retcode
     })
@@ -524,7 +522,10 @@ def do_check(cmd):
     retcode = pope.wait()
 
     stop_time = datetime.datetime.now()
-    elapsed_time = str(stop_time - start_time)
+    time_dif = stop_time - start_time
+    min_time, sec_time = divmod(time_dif.seconds,60)
+    sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
+    elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
     out_fh.close()
     background.stop()
 
@@ -539,11 +540,14 @@ def do_check(cmd):
             break
     out_fh.close()
 
+    # result_code is used differently than retcode
+    # in spb_history/archiever.py
     send_message({
         "status": "check_complete",
         "result_code": retcode,
+        "retcode": retcode,
         "warnings": warnings,
-        "body": "Check completed with status %d" % retcode,
+        "body": "Check completed",
         "elapsed_time": elapsed_time})
 
     return (retcode)
@@ -580,6 +584,7 @@ def win_multiarch_check():
         send_message({
             "status": "check_complete",
             "result_code": retcode,
+            "retcode": retcode,
             "warnings": False,
             "body": "Pre-check installation failed with status %d" % retcode,
             "elapsed_time": 999
@@ -715,11 +720,18 @@ def build_package(source_build):
     logging.debug("build_package() Before build, working dir is %s." %
                   working_dir)
 
+    start_time = datetime.datetime.now()
     if ((not source_build) and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
     else:
         send_message({"status": status, "body": r_cmd})
         retcode = do_build(r_cmd, buildmsg, source_build)
+
+    stop_time = datetime.datetime.now()
+    time_dif = stop_time - start_time
+    min_time, sec_time = divmod(time_dif.seconds,60)
+    sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
+    elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
 
     # check for warnings
     out_fh = open(outfile)
@@ -737,15 +749,15 @@ def build_package(source_build):
     else:
         complete_status = "buildbin_complete"
 
-    # todo - fix elapsed time throughout
+    # result_code is used differently than retcode
+    # in spb_history/archiever.py
     send_message({
         "status": complete_status,
         "result_code": retcode,
+        "retcode": retcode,
         "warnings": warnings,
         "body": "Build completed with status %d" % retcode,
-        "elapsed_time": -1
-    })
-
+        "elapsed_time": elapsed_time})
 
     return (retcode)
 
@@ -826,7 +838,7 @@ def propagate_package():
 
     logging.debug("propagate_package() Result of deleting files: %d." % retcode)
     send_message({
-        "body": "Pruning older packages from repository",
+        "body": "Pruning older packages from repository. ",
         "status": "post_processing",
         "retcode": retcode
     })
@@ -862,7 +874,7 @@ def propagate_package():
 
     logging.debug("propagate_package() Result of copying file: %d" % retcode)
     send_message({
-        "body": "Copied build file to repository",
+        "body": "Copied build file to repository. ",
         "status": "post_processing",
         "retcode": retcode,
         "build_product": build_product,
@@ -910,7 +922,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
         send_message({
             "status": "post_processing",
             "retcode": chmod_retcode,
-            "body": "Set read permissions on build product"
+            "body": "Set read permissions on build product. "
         })
         if chmod_retcode != 0:
             sys.exit("chmod failed")
@@ -988,7 +1000,7 @@ def update_packages_file():
     send_message({
         "status": "post_processing",
         "retcode": retcode,
-        "body": "Updated packages list"
+        "body": "Updated packages list. "
     })
     if retcode != 0:
         send_message({
@@ -1007,7 +1019,7 @@ def update_packages_file():
         send_message({
             "status": "post_processing",
             "retcode": retcode,
-            "body": "Synced repository to website",
+            "body": "Synced repository to website. ",
             "build_product": build_product,
             "url": url
         })
@@ -1153,7 +1165,7 @@ if __name__ == "__main__":
                       manifest['bioc_version'])
         sys.exit("BioC version not supported")
 
-    send_message("Builder has been started")
+    send_message({"status": "Builder has been started"})
 
     if not is_valid_url():
         send_message({

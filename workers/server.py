@@ -214,6 +214,7 @@ def do_work(body):
             ## TODO - somehow close builder_log filehandle if possible
             msg_obj = {}
             msg_obj['builder_id'] = BUILDER_ID
+            msg_obj['status'] = "Got Build Request"
             msg_obj['body'] = "Got build request..."
             msg_obj['first_message'] = True
             msg_obj['job_id'] = job_id
