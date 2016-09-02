@@ -479,7 +479,6 @@ def install_pkg_deps():
       (rscript_binary, r_script, args.strip(), log)
 
     send_message({
-        "status": "Installing dependencies",
         "body": "Installing dependencies",
         "status": "preprocessing",
         "retcode": 0
