@@ -2,6 +2,14 @@
 
 ## Assume this script is started by a shell script which has read
 ## BBS variables and also changed to the correct directory.
+import logging
+
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.INFO)
+
+logging.getLogger("stomp.py").setLevel(logging.WARNING)
+
 
 import os
 import os.path
@@ -15,10 +23,11 @@ import platform
 import unicodedata
 import atexit
 import mechanize
-import logging
 import re
 import urllib2
-from stomp.listener import PrintingListener
+#from stomp.listener import PrintingListener
+from stomp.listener import StatsListener
+from urllib2 import Request, urlopen, URLError
 
 # Modules created by Bioconductor
 from bioconductor.communication import getNewStompConnection
@@ -40,12 +49,6 @@ packagebuilder_ssh_cmd = None
 packagebuilder_scp_cmd = None
 build_product = None
 callcount = None
-
-logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.INFO)
-
-logging.getLogger("stomp.py").setLevel(logging.WARNING)
 
 log_highlighter = "***************"
 
@@ -98,6 +101,7 @@ class Tailer(threading.Thread):
                     "sequence": self.message_sequence,
                     "body": bytes
                 })
+                logging.info(self.status + ":\n" + bytes)
                 prevsize = st.st_size
                 logging.debug("Tailer.run() done %s" % self.status)
                 break
@@ -117,6 +121,7 @@ class Tailer(threading.Thread):
                     "sequence": self.message_sequence,
                     "body": bytes
                 })
+                logging.info(self.status + ":\n" + bytes)
                 self.message_sequence += 1
                 prevsize = st.st_size
 
@@ -125,7 +130,7 @@ class Tailer(threading.Thread):
 def send_message(msg, status=None):
     global stomp
     global manifest
-    logging.info(u"Attempting to send message: '{msg}'".format(msg=msg))
+    logging.debug(u"Attempting to send message: '{msg}'".format(msg=msg))
     merged_dict = {}
     merged_dict['builder_id'] = BUILDER_ID
     merged_dict['client_id'] = manifest['client_id']
@@ -133,17 +138,16 @@ def send_message(msg, status=None):
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
-        logging.info(u"msg is dict")
+        logging.debug(u"msg is dict")
         merged_dict.update(msg)
         if not ('status' in merged_dict.keys()):
             if not (status == None):
                 merged_dict['status'] = status
     else:
-        logging.info(u"msg is NOT dict")
+        logging.debug(u"msg is NOT dict")
         merged_dict['body'] = msg
         if not (status == None):
             merged_dict['status'] = status
-    logging.info(u"merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
 
     if("body" in merged_dict):
         body = None
@@ -151,19 +155,19 @@ def send_message(msg, status=None):
             body = unicode(merged_dict['body'], errors='replace')
         except TypeError:
             body = merged_dict['body']
-        logging.info(u"Final modified body: '{body}'".format(body=body))
+        logging.debug(u"Final modified body: '{body}'".format(body=body))
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
-        logging.info(u"Ascii encoded body: '{body}'".format(body=merged_dict['body']))
+        logging.debug(u"Ascii encoded body: '{body}'".format(body=merged_dict['body']))
 
-    logging.info(u"Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
+    logging.debug(u"Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
     json_str = json.dumps(merged_dict)
-    logging.info(u"JSON json_str: '{json_str}'".format(json_str=json_str))
+    logging.debug(u"JSON json_str: '{json_str}'".format(json_str=json_str))
 
-    logging.debug(u"send_message() Sending message: %s" % json_str)
+    logging.debug(u"Sending message: %s" % json_str)
     stomp.send(destination=TOPICS['events'], body=json_str,
                headers={"persistent": "true"})
-    logging.info(u"send_message(): Message sent.")
+    logging.debug(u"send_message(): Message sent.")
 
 def send_dcf_info(dcf_file):
     try:
@@ -280,6 +284,7 @@ def setup():
         packagebuilder_rsync_rsh_cmd, packagebuilder_scp_cmd
     global callcount
 
+
     logging.info("Starting setup().")
 
     callcount = 1
@@ -309,7 +314,7 @@ def setup():
     timeout = 10
     i = 0
     while (os.stat(sys.argv[1]).st_size == 0):
-        logging.debug("setup() Empty manifest file, waiting.")
+        logging.debug("Empty manifest file, waiting.")
         time.sleep(1)
         i += 1
         if i == timeout:
@@ -320,12 +325,11 @@ def setup():
     manifest_fh = open(sys.argv[1], "r")
     manifest_json = manifest_fh.read()
     manifest_fh.close()
-    logging.debug("setup() manifest_json = %s" % manifest_json)
+    logging.debug("Reading manifest_json = %s" % manifest_json)
     manifest = json.loads(manifest_json)
     manifest['svn_url'] = manifest['svn_url'].strip()
-    logging.info(log_highlighter + "\n\n")
-    logging.info("Attempting to determine `working_dir` based on sys.argv.")
-    logging.info("Contents of `sys.argv`: {content}.".format(content = sys.argv))
+    logging.debug("Attempting to determine `working_dir` based on sys.argv.")
+    logging.debug("Contents of `sys.argv`: {content}.".format(content = sys.argv))
     working_dir = os.path.split(sys.argv[1])[0]
     logging.info("Initial working directory: {wd}".format(wd = os.getcwd()))
     os.chdir(working_dir)
@@ -355,14 +359,15 @@ def setup():
     os.environ['PATH'] = os.environ['PATH'] + \
         os.pathsep + ENVIR['bbs_R_home'] + os.sep + \
         "bin"
-    logging.debug("setup() Working dir = %s" % working_dir)
-    logging.info(log_highlighter + "\n\n")
+    logging.debug("Working dir = %s" % working_dir)
     logging.info("Finished setup().")
 
 def setup_stomp():
     global stomp
+    logging.info("Getting Stomp Connection:")
     try:
-        stomp = getNewStompConnection('', PrintingListener())
+        #stomp = getNewStompConnection('', PrintingListener())
+        stomp = getNewStompConnection('', StatsListener())
     except:
         logging.error("setup_stomp(): Cannot connect.")
         raise
@@ -374,10 +379,12 @@ def git_clone():
         git_url += ".git"
     git_cmd = "git clone %s" % git_url
     send_message({"status": "git_cmd", "body": git_cmd})
+    logging.info("git_clone command: " + git_cmd)
     retcode = subprocess.call(git_cmd, shell=True)
     send_message({"status": "post_processing", "retcode": retcode, "body": "Finished git clone. "})
     send_message({"status": "git_result", "result": retcode, "body": \
         "git clone completed with status %d" % retcode})
+    logging.info("Finished git clone. \n git clone completed with status: " +  str(retcode))
     if (not retcode == 0):
         sys.exit("git clone failed")
 
@@ -459,7 +466,7 @@ def install_pkg_deps():
     package_name = manifest['job_id'].split("_")[0]
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
-    logging.debug("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
+    logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
     fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
@@ -483,7 +490,7 @@ def install_pkg_deps():
         "status": "preprocessing",
         "retcode": 0
     })
-    logging.info("install_pkg_deps() Command to install dependencies:" +
+    logging.info("Command to install dependencies:" +
                   "\n  %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({
@@ -491,6 +498,7 @@ def install_pkg_deps():
         "status": "post_processing",
         "retcode": retcode
     })
+    logging.info("Finished Installing Dependencies.\n completed with status: " + str(retcode))
     return retcode
 
 def get_source_tarball_name():
@@ -549,6 +557,9 @@ def do_check(cmd):
         "body": "Check completed",
         "elapsed_time": elapsed_time})
 
+    logging.info("Check Complete\n check completed with status: " + str(retcode) +
+                 " Elapsed time: " + elapsed_time)
+
     return (retcode)
 
 def win_multiarch_check():
@@ -569,12 +580,13 @@ def win_multiarch_check():
         " --timings %s && %s CMD BiocCheck --build-output-file=R.out --new-package %s" % (
             pkg, pkg, r, pkg, tarball, pkg, r, pkg, pkg, tarball, r, tarball))
     send_message({"status": "check_cmd", "body": cmd})
-
+    logging.info("R Check Command:\n" + cmd)
     send_message({
         "status": "checking",
         "sequence": 0,
         "body": "Installing package prior to check...\n\n"
     })
+    logging.info("Installing package prior to check...\n\n")
     retcode = win_multiarch_buildbin("checking")
     if (retcode == 0):
         send_message({"status": "clear_check_console"})
@@ -591,6 +603,7 @@ def win_multiarch_check():
     return (retcode)
 
 def win_multiarch_buildbin(message_stream):
+    logging.info("Starting win_multiarch_buildbin")
     tarball = get_source_tarball_name()
     pkg = tarball.split("_")[0]
     libdir = "%s.buildbin-libdir" % pkg
@@ -631,7 +644,7 @@ def check_package():
         ENVIR['bbs_R_cmd'], tarball)
 
     send_message({"status": "check_cmd", "body": cmd})
-
+    logging.info("R Check Command:\n" + cmd)
     retcode = do_check(cmd)
 
     return (retcode)
@@ -646,7 +659,7 @@ def do_build(cmd, message_stream, source):
     out_fh = open(outfile, "w")
     logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
     logging.info("The working directory: {wd}".format(wd=os.getcwd()))
-    logging.info("The current environment variables: \n {envVars}".format(envVars=os.environ))
+    logging.debug("The current environment variables: \n {envVars}".format(envVars=os.environ))
     logging.info("Build command: '{cmd}'.".format(cmd= cmd))
     background = Tailer(outfile, message_stream)
     background.start()
@@ -677,6 +690,7 @@ def build_package(source_build):
 
     if ((not source_build) and (pkg_type == "source")):
         send_message({"status": "skip_buildbin", "body": "skipped"})
+        logging.info("Skip buildbin")
         return(0)
 
     if (not source_build):
@@ -689,6 +703,7 @@ def build_package(source_build):
         else:
             pkg_type = "source"
         send_message({"status": "starting_buildbin", "body": ""})
+        logging.info("Start buildbin")
 
     global message_sequence
     global warnings
@@ -716,7 +731,7 @@ def build_package(source_build):
     else:
         status = "r_buildbin_cmd"
         outfile = "Rbuildbin.out"
-    logging.debug("build_package() Before build, working dir is %s." %
+    logging.debug("Before build, working dir is %s." %
                   working_dir)
 
     start_time = datetime.datetime.now()
@@ -757,13 +772,12 @@ def build_package(source_build):
         "warnings": warnings,
         "body": "Build completed with status %d" % retcode,
         "elapsed_time": elapsed_time})
+    logging.info(complete_status + "\n Build completed with status: " + str(retcode) +
+                 " Elapsed time: " + elapsed_time)
 
     return (retcode)
 
 def svn_info():
-    #global manifest
-
-    # todo - make more bulletproof
     logging.debug("svn_info() svn_url is %s" % manifest['svn_url'])
     svn_info = subprocess.Popen([
         "svn", "info", manifest['svn_url']
@@ -779,6 +793,35 @@ def svn_info():
     svn_hash['status'] = "svn_info"
     svn_hash['body'] = "svn info"
     send_message(svn_hash)
+
+def git_info():
+    logging.info("git_info():")
+    logging.info("git_url is %s" % manifest['svn_url'])
+    url_name = manifest['svn_url'].split("/")
+    url_user = url_name[3]
+    url_pkg = url_name[4]
+    cmd = os.path.join("https://api.github.com/repos/",url_user,
+                       url_pkg, "commits/HEAD")
+    if platform.system() == "Windows":
+        cmd = cmd.replace("\\", "/")
+    request = Request(cmd)
+    try:
+        response = urlopen(request)
+        res = response.read()
+        git_dir = json.loads(res)
+        sha = git_dir['sha']
+        last_auth = git_dir['commit']['author']['name']
+        last_date = git_dir['commit']['author']['date']
+        commit_msg = git_dir['commit']['message']
+        files_mod = ''
+        for dic in git_dir['files']:
+            files_mod = files_mod + " "  + dic['filename']
+        logging.info("\n Commit ID: " + sha + "\n Last Change Author: " +
+                      last_auth + "\n Last Chage Date: " + last_date +
+                      "\n Last Commit Message: \n" + commit_msg +
+                      "\n Files Changes: " + files_mod)
+    except URLError, err_url:
+        logging.info('Cannot access github log: %s', err_url)
 
 # This function does the following, acting on behalf of biocadmin on staging.bioconductor.org:
 #   1. First prune old copies of the package in a path like :
@@ -831,11 +874,11 @@ def propagate_package():
         command = command % (ENVIR['spb_RSA_key'], ENVIR['spb_staging_url'], repos, package_name)
         retcode = subprocess.call(command)
     else:
-        logging.debug("propagate_package() files_to_delete: %s" %
+        logging.info("propagate_package() files_to_delete: %s" %
                       files_to_delete)
         retcode = ssh("rm -f %s" % files_to_delete)
 
-    logging.debug("propagate_package() Result of deleting files: %d." % retcode)
+    logging.info("Finished propagate_package().\n Result of deleting files: %d." % retcode)
     send_message({
         "body": "Pruning older packages from repository. ",
         "status": "post_processing",
@@ -846,10 +889,10 @@ def propagate_package():
         sys.exit("repos prune failed")
 
     if (platform.system() == "Windows"):
-        logging.debug("propagate_package() Windows chmod")
+        logging.info("propagate_package() Windows chmod")
         chmod_retcode = subprocess.call(
             "chmod a+r %s" % os.path.join(working_dir, package_name))
-        logging.debug("propagate_package() Windows chmod_retcode = %d" %
+        logging.info("propagate_package() Windows chmod_retcode = %d" %
                       chmod_retcode)
         send_message({
             "status": "chmod_retcode",
@@ -858,20 +901,20 @@ def propagate_package():
         })
         command = "c:/cygwin/bin/scp.exe -qi %s -o StrictHostKeyChecking=no %s biocadmin@%s:%s/"
         command = command % (ENVIR['spb_RSA_key'], build_product, ENVIR['spb_staging_url'], repos)
-        logging.debug("propagate_package() Windows scp command = %s." %
+        logging.info("propagate_package() Windows scp command = %s." %
                       command)
         retcode = subprocess.call(command)
         command = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no biocadmin@%s 'chmod a+r %s/%s_*.zip'"
         command = command % (ENVIR['spb_RSA_key'], ENVIR['spb_staging_url'], repos, package_name)
         remote_chmod_retcode = subprocess.call(command)
-        logging.debug("propagate_package() Windows remote_chmod_retcode = %s" %
+        logging.info("propagate_package() Windows remote_chmod_retcode = %s" %
                       remote_chmod_retcode)
     else:
-        logging.debug("propagate_package() %s chmod not run" %
+        logging.info("propagate_package() %s chmod not run" %
                       platform.system())
         retcode = scp(build_product, repos)
 
-    logging.debug("propagate_package() Result of copying file: %d" % retcode)
+    logging.info("propagate_package() Result of copying file: %d" % retcode)
     send_message({
         "body": "Copied build file to repository. ",
         "status": "post_processing",
@@ -909,7 +952,7 @@ def _call(command_str, shell):
 
 def ssh(command, user='biocadmin', host=ENVIR['spb_staging_url']):
     command = "%s %s@%s \"%s\"" % (packagebuilder_ssh_cmd, user, host, command)
-    logging.debug("ssh() command: %s" % command)
+    logging.info("ssh() command: %s" % command)
     retcode = _call([command], shell=True)
     return(retcode)
 
@@ -917,6 +960,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
         host=ENVIR['spb_staging_url']):
     if (srcLocal):
         chmod_cmd = "chmod a+r %s" % src
+        logging.info("chmod_cmd: " + chmod_cmd)
         chmod_retcode = _call([chmod_cmd], shell=True) #todo abort build if retcode != 0
         send_message({
             "status": "post_processing",
@@ -925,7 +969,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
         })
         if chmod_retcode != 0:
             sys.exit("chmod failed")
-        logging.debug("scp() chmod retcode: %s" % chmod_retcode)
+        logging.info("scp() chmod retcode: %s" % chmod_retcode)
         send_message({
             "status": "chmod_retcode",
             "body": "chmod_retcode=%d" % chmod_retcode,
@@ -936,7 +980,7 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
     else:
         command = "%s %s@%s:%s %s" % (
             packagebuilder_scp_cmd, user, host, src, dest)
-    logging.debug("scp() command: %s" % command)
+    logging.info("scp() command: %s" % command)
     retcode = _call([command], shell=True)
 
     return(retcode)
@@ -993,9 +1037,9 @@ def update_packages_file():
         pkg_type = "mac.binary"
     command = "%s biocadmin@%s 'R -f %s/update-repo.R --args %s %s'"
     command = command % (packagebuilder_ssh_cmd, ENVIR['spb_staging_url'], script_loc, repos, pkg_type)
-    logging.debug("update_packages_file() command: %s"  % command)
+    logging.info("update_packages_file() command: %s"  % command)
     retcode = subprocess.call(command, shell=True)
-    logging.debug("update_packages_file() retcode: %d" % retcode)
+    logging.info("update_packages_file() retcode: %d" % retcode)
     send_message({
         "status": "post_processing",
         "retcode": retcode,
@@ -1013,7 +1057,7 @@ def update_packages_file():
     if (manifest['repository'] == 'course' or manifest['repository'] == 'scratch'):
         command = "%s biocadmin@%s \"source ~/.bash_profile && cd /home/biocadmin/bioc-test-web/bioconductor.org && rake deploy_production\""
         command = command % (packagebuilder_ssh_cmd, ENVIR['spb_staging_url'])
-        logging.debug("update_packages_file() sync command = %s" % command)
+        logging.info("update_packages_file() sync command = %s" % command)
         retcode = subprocess.call(command, shell=True)
         send_message({
             "status": "post_processing",
@@ -1038,7 +1082,7 @@ def update_packages_file():
             "url": url})
 
 def get_r_version():
-    logging.debug("get_r_version() BBS_R_CMD = %s" % ENVIR['bbs_R_cmd'])
+    logging.info("BBS_R_CMD = %s" % ENVIR['bbs_R_cmd'])
     r_version_raw, stderr = subprocess.Popen([
         ENVIR['bbs_R_cmd'],"--version"
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
@@ -1047,6 +1091,7 @@ def get_r_version():
     return r_version_line.replace("R version ", "")
 
 def get_node_info():
+    logging.info("Node Info:")
     r_version = get_r_version()
     osys = BBScorevars.getNodeSpec(BUILDER_ID, "OS")
     arch = BBScorevars.getNodeSpec(BUILDER_ID, "Arch")
@@ -1059,6 +1104,8 @@ def get_node_info():
         "platform": plat,
         "body": "node_info",
         "bioc_version": ENVIR['bbs_Bioc_version']})
+    logging.info("\n os: " + osys +  "\n r_version: " + r_version +
+                 "\n bioc_version: " + ENVIR['bbs_Bioc_version'])
 
 def is_valid_url():
     # todo bulletproof this; sometimes fails bogusly on windows
@@ -1154,10 +1201,14 @@ if __name__ == "__main__":
         sys.exit("missing manifest and R version arguments")
     logging.info("Starting builder.py.")
 
+    logging.info("\n\n" + log_highlighter + "\n\n")
+
     setup()
     atexit.register(onexit)
 
     setup_stomp()
+
+    logging.info("\n\n" + log_highlighter + "\n\n")
 
     if (manifest['bioc_version'] != ENVIR['bbs_Bioc_version']):
         logging.error("main() BioC-%s not supported." %
@@ -1175,10 +1226,15 @@ if __name__ == "__main__":
         sys.exit("invalid svn url")
 
     get_node_info()
-    # FIXME need to do something similar for git repos? (git_info())???:
+    logging.info("\n\n" + log_highlighter + "\n\n")
+
     if get_package_source() == "svn":
         svn_info()
+        logging.info("\n\n" + log_highlighter + "\n\n")
 
+    if get_package_source() == "github":
+        git_info()
+        logging.info("\n\n" + log_highlighter + "\n\n")
 
     is_build_required = is_build_required(manifest)
     if not (is_build_required):
@@ -1200,19 +1256,26 @@ if __name__ == "__main__":
     elif get_package_source() == "github":
         git_clone()
 
+    logging.info("\n\n" + log_highlighter + "\n\n")
+    logging.info("Installing Package Dependencies:")
     result = install_pkg_deps()
     if (result != 0):
         logging.error("main() Failed to install dependencies: %d." % result)
         raise Exception("failed to install dependencies")
 
+    logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Attempting to build package")
     result = build_package(True)
-    logging.info("build_package() finished with result {res}".format(res=result))
+    logging.info("\n\n" + log_highlighter + "\n\n")
+
     if (result == 0):
         global warnings
         warnings = False
+        logging.info("Starting to check package")
         check_result = check_package()
         buildbin_result = build_package(False)
+
+        logging.info("\n\n" + log_highlighter + "\n\n")
 
         if buildbin_result == 0: # and check_result == 0:
             propagate_package()
