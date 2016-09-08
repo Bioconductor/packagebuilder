@@ -3,17 +3,21 @@
 ## Assume this script is started by a shell script which has read
 ## BBS variables and also changed to the correct directory.
 import logging
+import sys
+from bioconductor.config import ENVIR
 
+log_level = int(ENVIR['log_level'])
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.INFO)
+                    level=log_level)
+
 
 logging.getLogger("stomp.py").setLevel(logging.WARNING)
 
+logging.info("logg" + str(log_level))
 
 import os
 import os.path
-import sys
 import json
 import subprocess
 import threading
@@ -33,7 +37,6 @@ from urllib2 import Request, urlopen, URLError
 from bioconductor.communication import getNewStompConnection
 from bioconductor.config import BIOC_R_MAP
 from bioconductor.config import BUILDER_ID
-from bioconductor.config import ENVIR
 from bioconductor.config import HOSTS
 from bioconductor.config import TOPICS
 
@@ -800,10 +803,8 @@ def git_info():
     url_name = manifest['svn_url'].split("/")
     url_user = url_name[3]
     url_pkg = url_name[4]
-    cmd = os.path.join("https://api.github.com/repos/",url_user,
-                       url_pkg, "commits/HEAD")
-    if platform.system() == "Windows":
-        cmd = cmd.replace("\\", "/")
+    cmd = "/".join(["https://api.github.com/repos",url_user,
+                       url_pkg, "commits/HEAD"])
     request = Request(cmd)
     try:
         response = urlopen(request)
