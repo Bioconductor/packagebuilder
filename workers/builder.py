@@ -497,7 +497,7 @@ def install_pkg_deps():
                   "\n  %s" % cmd)
     retcode = subprocess.call(cmd, shell=True)
     send_message({
-        "body": "Finished installing dependencies. ",
+        "body": "Installing dependency status: " + str(retcode) + ". ",
         "status": "post_processing",
         "retcode": retcode
     })
@@ -1262,7 +1262,6 @@ if __name__ == "__main__":
     result = install_pkg_deps()
     if (result != 0):
         logging.error("main() Failed to install dependencies: %d." % result)
-        raise Exception("failed to install dependencies")
 
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Attempting to build package")
