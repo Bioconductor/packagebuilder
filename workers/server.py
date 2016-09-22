@@ -128,7 +128,8 @@ def do_work(body):
     if ('job_id' in received_obj.keys()): # ignore malformed messages
         try:
             job_id = received_obj['job_id']
-            job_base = job_id.rsplit("_", 1)[0]
+            # job_base = job_id.rsplit("_", 1)[0]
+            job_base = received_obj['client_id'].rsplit(":")[1]
             bioc_version = received_obj['bioc_version']
 
             job_dir = os.path.join(ENVIR['spb_home'], "jobs")

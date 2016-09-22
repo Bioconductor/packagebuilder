@@ -489,7 +489,7 @@ def install_pkg_deps():
       (rscript_binary, r_script, args.strip(), log)
 
     send_message({
-        "body": "Installing dependencies",
+        "body": "Installing dependencies. ",
         "status": "preprocessing",
         "retcode": 0
     })
@@ -502,6 +502,31 @@ def install_pkg_deps():
         "retcode": retcode
     })
     logging.info("Finished Installing Dependencies.\n completed with status: " + str(retcode))
+    return retcode
+
+def install_pkg():
+    package_name = manifest['job_id'].split("_")[0]
+    package_dir = os.path.dirname(working_dir)
+    pkg_git_clone = os.path.join(working_dir, package_name)
+
+    r_cmd = ENVIR['bbs_R_cmd']
+    lib_dir = os.path.join(package_dir, "R-libs")
+
+    cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
+
+    send_message({
+        "body": "Installing package: " + package_name,
+        "status": "preprocessing",
+        "retcode": 0
+    })
+    logging.info("Command to install package:" + "\n  %s" % cmd)
+    retcode = subprocess.call(cmd, shell=True)
+    send_message({
+        "body": "Installing package status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
+    logging.info("Finished Installing Package.\n completed with status: " + str(retcode))
     return retcode
 
 def get_source_tarball_name():
@@ -1262,6 +1287,10 @@ if __name__ == "__main__":
     result = install_pkg_deps()
     if (result != 0):
         logging.error("main() Failed to install dependencies: %d." % result)
+
+    result = install_pkg()
+    if (result != 0):
+        logging.error("main() Failed to install package: %d." % result)
 
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Attempting to build package")
