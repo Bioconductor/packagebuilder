@@ -1,48 +1,86 @@
 Developing
 ==========
+# Running the Single Package Builder locally
 
-#### Running the SPB stack locally
-To run the Single Package Builder locally, you'll need an ActiveMQ instance.  The
-simplest way to accomplish that, is using Docker. We'll use [this docker image](https://github.com/disaster37/activemq).  
+### Installation
 
-```
-# Get the image
-docker pull rmohr/activemq:5.10.0
+To run the Single Package Builder (SPB) locally, you will need to clone the following Bioconductor Github repositories: 
 
-# Start ActiveMQ
-docker run --name='activemq' -d -p 8161:8161 -p 61616:61616 -p 61613:61613 \
-    rmohr/activemq:5.10.0
-```
-If you need to debug ActiveMQ, open a shell.  You may want to inspect the content
-of `/var/log/activemq` and `/data/activemq`: 
-```
-# Debugging ActiveMQ
-developer@laptop:~/$ docker exec -it activemq /bin/bash
-root@c604e22226f6:/# cd /var/log/activemq/
-root@c604e22226f6:/var/log/activemq# ls -l
-total 12
--rw-r--r-- 1 activemq activemq 3537 Dec  7 03:54 activemq.log
--rw-r--r-- 1 activemq activemq    0 Dec  7 03:54 audit.log
--rw-r--r-- 1 activemq activemq 4518 Dec  7 03:54 wrapper.log
-root@c604e22226f6:/var/log/activemq# cd /data/activemq/
-root@c604e22226f6:/data/activemq# ls -l
-total 4
-drwxr-xr-x 2 activemq activemq 4096 Dec  7 03:54 kahadb
+* packagebuilder
+* spb\_history
+* BBS
+* bioc-common-python
 
-```
-#### Setting up the Python environment
+The active branch on our systems for packagebuilder and spb\_history is currently feature/github_compatibility so it will be important to checkout this branch after cloning the master repositories.
+
+1. packagebuilder
+    ```
+    git clone git@github.com:Bioconductor/spb_history.git
+
+    cd spb_history 
+    
+    git checkout feature/github_compatibility
+    
+    cd ..
+    ```
+2. spb_history
+    ```
+    git clone git@github.com:Bioconductor/packagebuilder.git
+
+    cd packagebuilder 
+
+    git checkout feature/github_compatibility 
+    
+    cd ..
+    ```
+3. BBS
+    ```
+    git clone git@github.com:Bioconductor/BBS.git
+    
+    cd .. 
+    ```
+ 
+4. bioc-common-python
+    ```
+    git clone git@github.com:Bioconductor/bioc-common-python.git
+    
+    cd ..
+    ```
+
+### Set up RabbitMQ messaging client
+To run the SPB locally, you'll need an RabbitMQ instance.  The
+simplest way to accomplish that, is using Docker. We'll use [this docker image](https://github.com/resilva87/docker-rabbitmq-stomp).  
+
+**Prerequisites**: On Linux, you need Docker
+[installed](https://docs.docker.com/installation/) and
+on [Mac](http://docs.docker.com/installation/mac/)
+or [Windows](http://docs.docker.com/installation/windows/)
+you need Docker Toolbox installed and running.
+
+**Note**: You may need sudo before all docker commands
+
+#### Get the image
+```docker pull resilva87/docker-rabbitmq-stomp```
+
+#### Start stomp broker
+```docker run -d -e RABBITMQ_NODENAME=my-rabbit --name rabbitmq -p 61613:61613 resilva87/docker-rabbitmq-stomp```
+
+
+### Setting up the Python environment
 
 To work on the SPB, you should use a virtual environment.  Eventually, a
-[virtualenv] (http://docs.python-guide.org/en/latest/dev/virtualenvs/) should also
+[virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) should also
 be used in production.
 
 1. Create a virtual environment for your work (this is where you'll install dependencies
   of the SPB).  If `virtualenv` is not installed on your machine,
   [install it](http://virtualenv.readthedocs.org/en/latest/installation.html).  Afterwards,
-  create an environment called "env":
+  create an environment called "env" in the directory above where you cloned packagebuilder, spb_history, BBS, and bioc-common-python:   
+  
   ```
   virtualenv env
   ```
+  
   This virtual environment is important, as we do not want to pollute the
   global Python package space.  Assume other python services are running
   on this host and require different versions of various modules.
@@ -61,58 +99,110 @@ be used in production.
   that you install **version 1.8.4** of Django, as newer versions have caused
   problems.
 
-  Install the dependencies :
+    Install the dependencies :
 
-  ```
-  pip install stomp.py pytz stompy django==1.8.4
-  ```
+    ```pip install stomp.py pytz stompy django==1.8.4```
+
+4. Install additional dependencies:    
+
+    Install the necessary PIP-DEPENDENCIES and global variable environment. 
+    ```
+    cd packagebuilder 
+    pip install --upgrade -r ./PIP-DEPENDENCIES--packagebuilder.txt 
+    cd ../spb_history 
+    pip install --upgrade -r ./PIP-DEPENDENCIES--spb_history.txt
+    cd ../bioc-common-python
+    pip install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
+    python setup.py install
+    ```
+
+### Configuration
+
+1. In the packagebuilder and spb\_history directories: 
+
+    Create a new directory entitled `spb-properties` with a text file entitled `spb.properties`. Be mindful of capitalization and punctuation. The `spb.properties` file should contain the following: 
+```
+[Sensitive]
+svn.user=
+svn.pass=
+tracker.user=
+tracker.pass=
+github.token=
+```
+    The values can be undefined. 
+
+
+2. You'll need to modify two configuration files. These files should be updated and identical in both packagebuilder and spb\_history directories.
+
+    i. Copy the provided `TEMPLATE.properties` to a unique properties file for your system `<your machine name>.properties`. Update all the values in this file as necessary. The `builders` value should match `<your machine name>`.
+
+    ii. Secondly, change `bioconductor.properties` values. The `environment` variable should match  `<your machine name>` 
+
+
+
+### Run a local build node
+There are several pieces to the SPB. To see each piece run interactively, open new shells for each of the following commands below **Be sure to source the virtual environment created above in EVERY shell**
+
+
+1. packagebuilder: Start the main server
+
+    The main builder server is in the packagebuilder directory and will store it's data in the `workers` subdirectory.  To start the builder service, run the following in the packagebuilder top directory:
+    ```
+    python -m workers.server 
+    ```
   
-#### Configuration
-Right now, you'll need to modify two configuration files (we plan to fix this).
+    You should see some output similar to the follow which indicates the server is up and running and your rabbitmq was initialized properly:
+    ```
+    INFO: 09/13/2016 10:37:33 AM server.py:238 - Connection established using new communication module
+    INFO: 09/13/2016 10:37:33 AM server.py:241 - Subscribed to destination /topic/buildjobs
+    INFO: 09/13/2016 10:37:33 AM server.py:244 - Subscribed to  /topic/keepalive
+    INFO: 09/13/2016 10:37:33 AM server.py:249 - Waiting for messages; CTRL-C to exit.
+    ```
 
-1. Set all "changeme" properties in the file `development.properties`.  Real values are 
-not needed for every property.
+2. (optional) spb_history: archiver
+    
+    The archiver shows logging/progress messages while the package is being built and checked. This is in the spb\_history directory. To start the archiver, run the following in the spb\_history top directory: 
+    ```
+    python -m archiver
+    ```
 
-2. Secondly, change and uncomment the value of `BBS_R_HOME` and `BBS_HOME` in the
-file `workers/static-config.sh`.  `BBS_R_HOME` should be set to the directory that
-contains R's `bin/`, `tools/`, `doc/`, etc.  `BBS_HOME` contains your local copy
-of the BBS git repository.
+3. (optional) spb_history: track build completion
 
-#### Run a local build node
-The builder service will store it's data in the `work` directory.  To start the
-builder service, run the following :
-  ```
-  python -m workers.server > server.log 2>&1 &
-  ```
-  You should see some output by viewing `server.log`:
+    The track build completion shows logging/progress messages while the package is being built and checked as well as when the process finishes and the completed output is available for view on the web page. This is in the spb\_history directory. To start the track\_build\_completion, run the following in the spb\_history top directory: 
+    ```
+    python -m track_build_completion
+    ```
 
-  ```
-  nohup: ignoring input
-  [2015-12-01 12:05:39.565315] Attempting to connect to stomp broker
-'broker.bioconductor.org:61613'
-  [2015-12-01 12:05:39.624604] on_connecting broker.bioconductor.org 61613
-  [2015-12-01 12:05:39.624690] on_send STOMP {'accept-version': '1.1'}
-  [2015-12-01 12:05:39.624776] Connected to stomp broker 'broker.bioconductor.org:61613'
-  [2015-12-01 12:05:39.624893] on_send SUBSCRIBE {'ack': 'client', 'destination':
-'/topic/buildjobs', 'id': 'eae21baf7e5042d292f3046a28334b7d'}
-  [2015-12-01 12:05:39.624924] Subscribed to channel /topic/buildjobs
-  [2015-12-01 12:05:39.624977]  [*] Waiting for messages. To exit press CTRL+C
-  [2015-12-01 12:05:39.664368] on_connected {'session':
-'ID:broker-46292-1448469945488-2:60', 'version': '1.1', 'server': 'ActiveMQ/5.6.0',
-'heart-beat': '0,0'}
+4. (optional) spb_history: Django web app - this allows a local web view of build report
 
-  ```
+    The Django web application allows for a local web view of the build report. Once the report is generated you can open the following `http://0.0.0.0:8000/` to view in web browser. To start Django, run the following in the spb\_history top directory: 
+    ```
+    python -m manage runserver 0.0.0.0:8000
+    ```
 
-#### Running the Django web app
-  To run Django (`archiver.py`):
-  ```
-  python -m spb_history.archiver > archiver.log 2>&1 &
-  ```
+#### Testing 
+
+To test the connections, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
+
+```
+python pinger.py
+```
+You should see responses from any of the activated pieces above. 
+An example with only the packagebuilder main server activated with no optional pieces: 
+
+```
+(env) lori@lori-HP-ZBook-15-G2:~/a/singlePackageBuilder/spb_history$ python pinger.py
+INFO: 09/26/2016 01:08:53 PM Attempting to connect using new communication module
+INFO: 09/26/2016 01:08:53 PM Connection established using new communication module
+INFO: 09/26/2016 01:08:53 PM {"host": "lori-HP-ZBook-15-G2", "script": "server.py"}
+```
+
 
 #### Kick off a job
-To kick off a job, run the command below.  Be sure you're in a terminal with the
-appropriate virtualenv activated.
+To kick off a job, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
+
 ```
-python -m spb_history.rerun_build 1343 \
-  https://tracker.bioconductor.org/file6714/spbtest_0.99.1.tar.gz
+python rerun_build.py 51 https://github.com/Bioconductor/spbtest3
 ```
+
+The output directory and log files for the build are created in the `spb_home` directory specified in the `<your machine name>.properties` file in subdirectory: jobs/51/
