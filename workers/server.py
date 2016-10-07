@@ -244,7 +244,7 @@ try:
                     ack='auto')
     logging.info("Subscribed to  %s" % "/topic/keepalive")
 except Exception as e:
-    logging.error("main() Could not connect to ActiveMQ: %s." % e)
+    logging.error("main() Could not connect to RabbitMQ: %s." % e)
     raise
 
 logging.info('Waiting for messages; CTRL-C to exit.')
