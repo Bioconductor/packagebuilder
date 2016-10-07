@@ -351,9 +351,7 @@ def setup():
     # system-lib
     sysLib = os.path.join(os.environ['BBS_R_HOME'], "library")
 
-    # figure out bootstrap-lib (see installPkgDeps.R)
-    bootLibs = os.path.join(os.environ['SPB_HOME'], "library")
-    AllLibs = expectedRLibsUser + os.pathsep + bootLibs + os.pathsep + sysLib
+    AllLibs = expectedRLibsUser + os.pathsep + sysLib
 
     os.environ['R_LIBS_USER'] = AllLibs
     logging.info("New R_LIBS_USER: {rLibsUser}".format(
@@ -369,7 +367,6 @@ def setup_stomp():
     global stomp
     logging.info("Getting Stomp Connection:")
     try:
-        #stomp = getNewStompConnection('', PrintingListener())
         stomp = getNewStompConnection('', StatsListener())
     except:
         logging.error("setup_stomp(): Cannot connect.")

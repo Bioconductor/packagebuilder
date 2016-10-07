@@ -42,41 +42,54 @@ print("deps are:")
 print(deps)
 
 print(.libPaths())
-stopifnot(length(.libPaths()) == 3L)
+stopifnot(length(.libPaths()) == 2L)
                                 # 1: R-libs              (pkg-specific)
-                                # 2: packagebuilder/workers/library (bootstrap)
-                                # 3: R_HOME/library         (read-only)
+                                # 2: R_HOME/library         (read-only)
 pkg_libdir <- .libPaths()[1]
-bootstrap_libdir <- .libPaths()[2]
+R_libdir <- .libPaths()[2]
+
+
+#
+# Try to install (but will it cause issues with daily builder)
+# but check R_libdir to see if exist first
+# shouldn't cause issues with daily builder as +w only to owner
+#
+
+## load BiocInstaller
+repos <- paste0("https://bioconductor.org/packages/",
+                Sys.getenv("BBS_BIOC_VERSION"),
+                "/bioc")
+install.packages("BiocInstaller", repos=repos, lib=pkg_libdir)
+
 
 ##
-## validate pacakgebuilder/workers/library (bootstrap library)
+## check that needed packages to run SPB are installed
 ##
 
-bootstrap_pkgs <- c(
-    "graph", "biocViews", "knitr", "knitrBootstrap",
-    "devtools", "codetools", "httr", "curl", "optparse",
-    "GenomicFeatures", "ShortRead", "VariantAnnotation")
+SPB_pkgs <- c(
+   "graph", "biocViews", "knitr", "knitrBootstrap",
+   "devtools", "codetools", "httr", "curl", "optparse",
+   "GenomicFeatures", "ShortRead", "VariantAnnotation")
+pkgs_already <- dir(R_libdir)
+needed_pkgs<- SPB_pkgs[!SPB_pkgs %in% pkgs_already]
 
-if (length(dir(bootstrap_libdir)) == 0L) { # first-time installation
-    ## BiocInstaller
-    repos <- paste0("https://bioconductor.org/packages/",
-                    Sys.getenv("BBS_BIOC_VERSION"),
-                    "/bioc")
-    install.packages("BiocInstaller", repos=repos, lib=bootstrap_libdir)
-    ## other packages
-    BiocInstaller::biocLite(bootstrap_pkgs, lib=bootstrap_libdir)
+if(length(needed_pkgs) != 0L){
+    ## install other needed packages
+    BiocInstaller::biocLite(needed_pkgs, lib=R_libdir)
 } else {
-    update.packages(repos=BiocInstaller::biocinstallRepos(),
-                    lib.loc=bootstrap_libdir, ask=FALSE)
+    tryCatch(update.packages(repos=BiocInstaller::biocinstallRepos(),
+                             lib.loc=R_libdir, ask=FALSE),
+             error=function(e) conditionMessage(e))
 }
 
 opaths <- .libPaths()
-.libPaths(bootstrap_libdir) # FIXME: source() & devtools don't obey lib=
-devtools::install_github("Bioconductor/BiocCheck", lib=bootstrap_libdir)
+.libPaths(pkg_libdir) # FIXME: source() & devtools don't obey lib=
+devtools::install_github("Bioconductor/BiocCheck", lib=pkg_libdir)
 .libPaths(opaths)
-bootstrap_pkgs <- c(bootstrap_pkgs, "BiocCheck")
-validateInstallation(bootstrap_pkgs, bootstrap_libdir, "bootstrap_pkgs")
+
+validateInstallation(SPB_pkgs, R_libdir, "SPB_pkgs")
+validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
+
 
 ##
 ## repository and options setup
@@ -92,7 +105,7 @@ options(install.packages.compile.from.source="always")
 ##
 
 ip <- installed.packages()
-blacklist <- c("R", bootstrap_pkgs, rownames(ip),
+blacklist <- c("R", rownames(ip),
                if (.Platform$OS.type == "windows") "multicore")
 deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
 
@@ -111,9 +124,9 @@ if (length(deps))
 
 validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 
-## update previously installed dependencies
-
-update.packages(oldPkgs=pkg_deps, lib.loc=pkg_libdir,
-                repos=BiocInstaller::biocinstallRepos(siteRepos))
+## update pkg_libdir
+tryCatch(update.packages(lib.loc=pkg_libdir, ask=FALSE,
+                         repos=BiocInstaller::biocinstallRepos(siteRepos)),
+         error=function(e) conditionMessage(e))
 
 sessionInfo()
