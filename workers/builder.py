@@ -1206,8 +1206,8 @@ def clean_up_dir():
         if os.path.exists("libdir"):
             os.system("rm -rf libdir")
 
-    if os.path.exists("manifest.json"):
-        os.remove("manifest.json")
+#    if os.path.exists("manifest.json"):
+#        os.remove("manifest.json")
 
     pkgDirName = manifest['job_id'].split("_")[0]
     cloneDir = "rm -rf " + pkgDirName
