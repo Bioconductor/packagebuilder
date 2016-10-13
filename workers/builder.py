@@ -538,22 +538,26 @@ def get_source_tarball_name():
             break
     return(tarball)
 
-def do_check(cmd):
+def do_check(cmdCheck, cmdBiocCheck):
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
 
     out_fh = open(outfile, "w")
-    start_time = datetime.datetime.now()
 
     background = Tailer(outfile, "checking")
     background.start()
-    pope = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
+
+    start_time = datetime.datetime.now()
+    pope = subprocess.Popen(cmdCheck, stdout=out_fh, stderr=subprocess.STDOUT,
                             shell=True)
-
-    retcode = pope.wait()
-
+    retcode1 = pope.wait()
     stop_time = datetime.datetime.now()
+
+    pope2 = subprocess.Popen(cmdBiocCheck, stdout=out_fh,
+                             stderr=subprocess.STDOUT, shell=True)
+    retcode2 = pope2.wait()
+
     time_dif = stop_time - start_time
     min_time, sec_time = divmod(time_dif.seconds,60)
     sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
@@ -572,18 +576,21 @@ def do_check(cmd):
             break
     out_fh.close()
 
-    # result_code is used differently than retcode
-    # in spb_history/archiever.py
+    if (retcode1 == 0 and retcode2 == 0):
+        retcode = 0
+    else:
+        retcode = 1
+
     send_message({
         "status": "check_complete",
-        "result_code": retcode,
         "retcode": retcode,
         "warnings": warnings,
         "body": "Check completed",
         "elapsed_time": elapsed_time})
 
-    logging.info("Check Complete\n check completed with status: " + str(retcode) +
-                 " Elapsed time: " + elapsed_time)
+    logging.info("Check Complete\n R CMD check completed with status: " +
+                 str(retcode1) + " Elapsed time: " + elapsed_time +
+                 ". \n R CMD BiocCheck completed with status: " + str(retcode2))
 
     return (retcode)
 
@@ -597,15 +604,20 @@ def win_multiarch_check():
         os.mkdir(libdir)
 
     r = ENVIR['bbs_R_cmd']
-    cmd = (
-        "rm -rf %s.buildbin-libdir && mkdir %s.buildbin-libdir"
-        " && %s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
-        " %s >%s-install.out 2>&1 && %s CMD check --library=%s.buildbin-libdir"
+
+    cmd = ("%s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
+           " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
+
+    cmdCheck = ("%s CMD check --library=%s.buildbin-libdir"
         " --install='check:%s-install.out' --force-multiarch --no-vignettes"
-        " --timings %s && %s CMD BiocCheck --build-output-file=R.out --new-package %s" % (
-            pkg, pkg, r, pkg, tarball, pkg, r, pkg, pkg, tarball, r, tarball))
+        " --timings %s" % (r, pkg, pkg, tarball))
+
+    cmdBiocCheck = ("%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (r, tarball))
+
     send_message({"status": "check_cmd", "body": cmd})
-    logging.info("R Check Command:\n" + cmd)
+    logging.info("R Install Command:\n" + cmd)
+    logging.info("R Check Command:\n" + cmdCheck)
+    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
     send_message({
         "status": "checking",
         "sequence": 0,
@@ -614,12 +626,26 @@ def win_multiarch_check():
     logging.info("Installing package prior to check...\n\n")
     retcode = win_multiarch_buildbin("checking")
     if (retcode == 0):
-        send_message({"status": "clear_check_console"})
-        retcode = do_check(cmd)
+           send_message({"status": "clear_check_console"})
+
+           # run install
+           outfileI = "Rinstall.out"
+           if (os.path.exists(outfileI)):
+             os.remove(outfileI)
+           out_fh = open(outfileI, "w")
+           pope = subprocess.Popen(cmd, stdout=out_fh,
+                                   stderr=subprocess.STDOUT,
+                                   shell=True)
+           retcode1 = pope.wait()
+           out_fh.close()
+           if (retcode1 != 0):
+               logging.info("Install cmd failed")
+           # run check
+           retcode = do_check(cmdCheck, cmdBiocCheck)
+
     else:
         send_message({
             "status": "check_complete",
-            "result_code": retcode,
             "retcode": retcode,
             "warnings": False,
             "body": "Pre-check installation failed with status %d" % retcode,
@@ -649,14 +675,10 @@ def win_multiarch_buildbin(message_stream):
     return do_build(cmd, message_stream, False)
 
 def check_package():
-    send_message({"status": "starting_check", "body": ""}) # apparently ignored
+    send_message({"status": "starting_check", "body": ""})
 
     if (platform.system() == "Windows"):
         return(win_multiarch_check())
-
-    outfile = "Rcheck.out"
-    if (os.path.exists(outfile)):
-        os.remove(outfile)
 
     tarball = get_source_tarball_name()
 
@@ -664,13 +686,14 @@ def check_package():
     if (platform.system() == "Darwin"):
         extra_flags = " --no-multiarch "
 
-    cmd = "%s CMD check --no-vignettes --timings %s %s && %s CMD BiocCheck --build-output-file=R.out --new-package %s" % (
-        ENVIR['bbs_R_cmd'], extra_flags, tarball,
-        ENVIR['bbs_R_cmd'], tarball)
+    cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
 
-    send_message({"status": "check_cmd", "body": cmd})
-    logging.info("R Check Command:\n" + cmd)
-    retcode = do_check(cmd)
+    cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
+
+    send_message({"status": "check_cmd", "body": cmdCheck})
+    logging.info("R Check Command:\n" + cmdCheck)
+    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
+    retcode = do_check(cmdCheck, cmdBiocCheck)
 
     return (retcode)
 
@@ -788,17 +811,14 @@ def build_package(source_build):
     else:
         complete_status = "buildbin_complete"
 
-    # result_code is used differently than retcode
-    # in spb_history/archiever.py
     send_message({
         "status": complete_status,
-        "result_code": retcode,
         "retcode": retcode,
         "warnings": warnings,
         "body": "Build completed with status %d" % retcode,
         "elapsed_time": elapsed_time})
-    logging.info(complete_status + "\n Build completed with status: " + str(retcode) +
-                 " Elapsed time: " + elapsed_time)
+    logging.info(complete_status + "\n Build completed with status: " +
+                 str(retcode) + " Elapsed time: " + elapsed_time)
 
     return (retcode)
 
