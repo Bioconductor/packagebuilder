@@ -11,27 +11,13 @@ To run the Single Package Builder (SPB) locally, you will need to clone the foll
 * BBS
 * bioc-common-python
 
-The active branch on our systems for packagebuilder and spb\_history is currently feature/github_compatibility so it will be important to checkout this branch after cloning the master repositories.
-
 1. packagebuilder
     ```
     git clone git@github.com:Bioconductor/spb_history.git
-
-    cd spb_history
-
-    git checkout feature/github_compatibility
-
-    cd ..
     ```
 2. spb_history
     ```
     git clone git@github.com:Bioconductor/packagebuilder.git
-
-    cd packagebuilder
-
-    git checkout feature/github_compatibility
-
-    cd ..
     ```
 3. BBS
     ```
