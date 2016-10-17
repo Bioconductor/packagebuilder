@@ -54,9 +54,9 @@ When a package is submitted to the github contributions
 submitted to the Single Package Builder (SPB).
 
 There are several components to this integration. The
-first manages when issues (packages) are submitted. The code 
-for this component can be found at 
-[issue_tracker_github](https://github.com/Bioconductor/issue_tracker_github) 
+first manages when issues (packages) are submitted. The code
+for this component can be found at
+[issue_tracker_github](https://github.com/Bioconductor/issue_tracker_github)
 and is implemented on the AWS cloud instance issues.bioconductor.org
 
 
@@ -91,8 +91,8 @@ Here are the moving parts, first briefly and then in more detail.
   rabbitmq. All it does is run an RabbitMQ
   message broker. Messages are passed using a text protocol
   called STOMP.
-* Issue manager. Currently implemented on the machine  
-  issues.bioconductor.org. It detects when a package is submitted, 
+* Issue manager. Currently implemented on the machine
+  issues.bioconductor.org. It detects when a package is submitted,
   or updated, and sends a message to the SPB telling it to start a build.
 * build node server; a python script called [server.py](workers/server.py) should
   be running on each build node at all times. When an

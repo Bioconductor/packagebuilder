@@ -1,5 +1,5 @@
 #
-# make cron job to run once a day. 
+# make cron job to run once a day.
 #
 
 import os
@@ -25,10 +25,10 @@ issue_nums = set()
 for k in git_dir:
     # only issues closed for more than 30 days
     closing_date = k['closed_at']
-    diff_date = datetime.datetime.today() - datetime.datetime.strptime(closing_date, '%Y-%m-%dT%H:%M:%SZ') 
+    diff_date = datetime.datetime.today() - datetime.datetime.strptime(closing_date, '%Y-%m-%dT%H:%M:%SZ')
     if diff_date.days > 30:
         issue_nums.add(k['number'])
-    
+
 
 job_dir = os.path.join(ENVIR['spb_home'], "jobs")
 for issue_name in list(issue_nums):
@@ -43,4 +43,3 @@ for issue_name in list(issue_nums):
             logging.error("Remove of package " + pkg_rm + " Failed")
     else:
         logging.debug("Issue " + pkg_rm + " Not Found")
-
