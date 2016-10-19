@@ -22,15 +22,11 @@ To run the Single Package Builder (SPB) locally, you will need to clone the foll
 3. BBS
     ```
     git clone git@github.com:Bioconductor/BBS.git
-
-    cd ..
     ```
 
 4. bioc-common-python
     ```
     git clone git@github.com:Bioconductor/bioc-common-python.git
-
-    cd ..
     ```
 
 ### Set up RabbitMQ messaging client
