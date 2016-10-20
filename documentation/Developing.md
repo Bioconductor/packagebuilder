@@ -1,7 +1,7 @@
 Developing
 ==========
 
-This page describes how to configure and run a local instance of the Single Package Builder.
+This page describes how to configure and run the Single Package Builder locally.
 
 Table of Contents
 -----------------
