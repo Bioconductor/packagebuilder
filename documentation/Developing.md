@@ -10,9 +10,9 @@ Table of Contents
 [**Set up Python environment**](#python)  
 [**Configuration**](#configuration)  
 [**Usage**](#usage)
-* [**Start a local build node**](#localnode)
-* [**Test communications**](#communications)
-* [**Kick off a job**](#job)
+* [*Run a local build node*](#localnode)
+* [*Test communications*](#communications)
+* [*Kick off a job*](#job)
 
 <a name="installation"></a>
 Installation
@@ -138,7 +138,6 @@ github.token=
 <a name="usage"></a>
 Usage
 -----
-
 <a name="localnode"></a>
 #### Run a local build node
 
