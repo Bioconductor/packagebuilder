@@ -2,53 +2,66 @@ Developing
 ==========
 # Running the Single Package Builder locally
 
-### Installation
+Table of Contents
+-----------------
+
+[**Installation**](#installation)  
+[**Set up RabbitMQ messaging client**](#rabbitmq)  
+[**Set up Python environment**](#python)  
+[**Configuration**](#configuration)  
+[**Usage**](#usage)
+* [**Start a local build node**](#localnode)
+* [**Test communications**](#communications)
+* [**Kick off a job**](#job)
+
+<a name="installation"></a>
+Installation
+------------
 
 To run the Single Package Builder (SPB) locally, you will need to clone the following Bioconductor Github repositories:
 
-* packagebuilder
-* spb\_history
-* BBS
-* bioc-common-python
-
-1. packagebuilder
+* packagebuilder  
     ```
     git clone git@github.com:Bioconductor/spb_history.git
     ```
-2. spb_history
+* spb\_history  
     ```
     git clone git@github.com:Bioconductor/packagebuilder.git
     ```
-3. BBS
+* BBS  
     ```
     git clone git@github.com:Bioconductor/BBS.git
     ```
-
-4. bioc-common-python
+* bioc-common-python  
     ```
     git clone git@github.com:Bioconductor/bioc-common-python.git
     ```
-
-### Set up RabbitMQ messaging client
+    
+<a name="rabbitmq"></a>
+Set up RabbitMQ messaging client
+--------------------------------
 To run the SPB locally, you'll need an RabbitMQ instance.  The
 simplest way to accomplish that, is using Docker. We'll use [this docker image](https://github.com/resilva87/docker-rabbitmq-stomp).
 
-**Prerequisites**: On Linux, you need Docker
-[installed](https://docs.docker.com/installation/) and
-on [Mac](http://docs.docker.com/installation/mac/)
-or [Windows](http://docs.docker.com/installation/windows/)
-you need Docker Toolbox installed and running.
+* Prerequisites  
+On Linux, you need Docker [installed](https://docs.docker.com/installation/) and on [Mac](http://docs.docker.com/installation/mac/)
+or [Windows](http://docs.docker.com/installation/windows/) you need Docker Toolbox installed and running.
 
 **Note**: You may need sudo before all docker commands
 
-#### Get the image
-```docker pull resilva87/docker-rabbitmq-stomp```
+* Get the image
+```
+docker pull resilva87/docker-rabbitmq-stomp
+```
 
-#### Start stomp broker
-```docker run -d -e RABBITMQ_NODENAME=my-rabbit --name rabbitmq -p 61613:61613 resilva87/docker-rabbitmq-stomp```
+* Start stomp broker
+```
+docker run -d -e RABBITMQ_NODENAME=my-rabbit --name rabbitmq -p 61613:61613 resilva87/docker-rabbitmq-stomp
+```
 
-
-### Setting up the Python environment
+<a name="python"></a>
+Setting up the Python environment
+---------------------------------
 
 To work on the SPB, you should use a virtual environment.  Eventually, a
 [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) should also
@@ -98,7 +111,9 @@ be used in production.
     python setup.py install
     ```
 
-### Configuration
+<a name="configuration"></a>
+Configuration
+-------------
 
 1. In the packagebuilder and spb\_history directories:
 
@@ -113,7 +128,6 @@ github.token=
 ```
     The values can be undefined.
 
-
 2. You'll need to modify two configuration files. These files should be updated and identical in both packagebuilder and spb\_history directories.
 
     i. Copy the provided `TEMPLATE.properties` to a unique properties file for your system `<your machine name>.properties`. Update all the values in this file as necessary. The `builders` value should match `<your machine name>`.
@@ -121,8 +135,13 @@ github.token=
     ii. Secondly, change `bioconductor.properties` values. The `environment` variable should match  `<your machine name>`
 
 
+<a name="usage"></a>
+Usage
+-----
 
-### Run a local build node
+<a name="localnode"></a>
+#### Run a local build node
+
 There are several pieces to the SPB. To see each piece run interactively, open new shells for each of the following commands below **Be sure to source the virtual environment created above in EVERY shell**
 
 
@@ -161,8 +180,9 @@ There are several pieces to the SPB. To see each piece run interactively, open n
     ```
     python -m manage runserver 0.0.0.0:8000
     ```
-
-#### Testing
+    
+<a name="communications"></a>
+#### Test communications
 
 To test the connections, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
 
@@ -179,7 +199,7 @@ INFO: 09/26/2016 01:08:53 PM Connection established using new communication modu
 INFO: 09/26/2016 01:08:53 PM {"host": "lori-HP-ZBook-15-G2", "script": "server.py"}
 ```
 
-
+<a name="job"></a>
 #### Kick off a job
 To kick off a job, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
 
