@@ -10,9 +10,9 @@ Table of Contents
 [**Set up Python environment**](#python)  
 [**Configuration**](#configuration)  
 [**Usage**](#usage)
-* [*Run a local build node*](#localnode)
-* [*Test communications*](#communications)
-* [*Kick off a job*](#job)
+* [Run a local build node](#localnode)
+* [Test communications](#communications)
+* [Kick off a job](#job)
 
 <a name="installation"></a>
 Installation
