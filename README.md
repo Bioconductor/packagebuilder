@@ -6,17 +6,21 @@ Status](https://travis-ci.org/Bioconductor/packagebuilder.svg)](https://travis-c
 Overview
 ========
 
-The single package builder runs R CMD build and R CMD check on packages and provides output of these processes. The system consists of the EC2 instances staging.bioconductor.org, issues.bioconductor.org and rabbitmq as well as the current devel build machines. The flow of information starts at issues.bioconductor.org triggered by a new package submission or update (version bump). A message is sent to rabbitmq which sends messages to the build nodes. staging.bioconductor.org tracks build progress and records logs.
+The single package builder runs R CMD build and R CMD check on packages and provides the output of these processes. The system consists of the EC2 instances staging.bioconductor.org, issues.bioconductor.org and rabbitmq as well as the current devel build machines. The flow of information starts at issues.bioconductor.org triggered by a new package submission or update (version bump). A message is sent to rabbitmq which sends messages to the build nodes. staging.bioconductor.org tracks build progress and records logs.
 
-* Code  
+Code
+====
+
 Code for the SPB is stored in [GitHub](https://github.com/Bioconductor/packagebuilder).
 
 Currently, the SPB consists of 2 components in this git repo, in top-level directories:
-* spb_history - A Django web app to track build history.
+  * spb_history - A Django web app to track build history.
   Accessible at http://staging.bioconductor.org:4000
-* workers - Python scripts that run on each build machine
+  * workers - Python scripts that run on each build machine
 
-* Options to start a build:
+Options to start a build
+=========================
+
 1. Submitting packages to [github](https://github.com/Bioconductor/Contributions)
 2. Running the [rerun_build.py](spb_history/rerun_build.py) script
 
@@ -51,14 +55,14 @@ System Integration
 A job is submitted to the Single Package Builder (SPB) when a package is submitted to the github contributions
 (https://github.com/Bioconductor/Contributions) or when the version of an existing package is bumped.
 
-New Package Submission
-----------------------
+* New Package Submission
+
 The code that manages when issues (packages) are submitted can be found at
 [issue_tracker_github](https://github.com/Bioconductor/issue_tracker_github)
 and is implemented on the AWS cloud instance issues.bioconductor.org.
 
-Version bump
-------------
+* Version bump
+
 When a package submits a version bump, the above manager is run.
 It sends a message to the listeners on each build node as described
 at the start of this document.
@@ -71,7 +75,7 @@ When the build is complete, another script on staging
 is listening, and it posts a message to the contribuctions issue
 (using an HTTPS request) including a link to the build report.
 
-## SPB Moving Parts
+* SPB Moving Parts
 
 The SPB was designed to use a message broker (in this case RabbitMQ)
 so that components could be loosely coupled and so that they could
