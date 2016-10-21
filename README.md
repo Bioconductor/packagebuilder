@@ -3,17 +3,20 @@ Bioconductor Single Package Builder (SPB)
 [![Build
 Status](https://travis-ci.org/Bioconductor/packagebuilder.svg)](https://travis-ci.org/Bioconductor/packagebuilder)
 
-The code is stored in [GitHub](https://github.com/Bioconductor/packagebuilder).
+Overview
+========
 
-Currently, SPB consists of 2 components in this git repo, in top-level directories:
+The single package builder runs R CMD build and R CMD check on packages and provides output of these processes. The system consists of the EC2 instances staging.bioconductor.org, issues.bioconductor.org and rabbitmq as well as the current devel build machines. The flow of information starts at issues.bioconductor.org triggered by a new package submission or update (version bump). A message is sent to rabbitmq which sends messages to the build nodes. staging.bioconductor.org tracks build progress and records logs.
+
+* Code  
+Code for the SPB is stored in [GitHub](https://github.com/Bioconductor/packagebuilder).
+
+Currently, the SPB consists of 2 components in this git repo, in top-level directories:
 * spb_history - A Django web app to track build history.
   Accessible at http://staging.bioconductor.org:4000
 * workers - Python scripts that run on each build machine
 
-Overview
-========
-
-##### Options to start a build:
+* Options to start a build:
 1. Submitting packages to [github](https://github.com/Bioconductor/Contributions)
 2. Running the [rerun_build.py](spb_history/rerun_build.py) script
 
@@ -36,45 +39,37 @@ particular to that build machine (called e.g. petty.sh or moscato2.bat)
 which sets environment variables, then runs [builder.py](workers/builder.py) to do the
 actual building.
 
-
-
 Build Machines
 ==============
 
 See `active_devel_builders` in http://bioconductor.org/config.yaml
 to see which machines are used by the SPB.
 
-
-
 System Integration
 ===========================
 
-When a package is submitted to the github contributions
-(https://github.com/Bioconductor/Contributions), a job is
-submitted to the Single Package Builder (SPB).
+A job is submitted to the Single Package Builder (SPB) when a package is submitted to the github contributions
+(https://github.com/Bioconductor/Contributions) or when the version of an existing package is bumped.
 
-There are several components to this integration. The
-first manages when issues (packages) are submitted. The code
-for this component can be found at
+New Package Submission
+----------------------
+The code that manages when issues (packages) are submitted can be found at
 [issue_tracker_github](https://github.com/Bioconductor/issue_tracker_github)
-and is implemented on the AWS cloud instance issues.bioconductor.org
+and is implemented on the AWS cloud instance issues.bioconductor.org.
 
-
-Integration Workflow
---------------------
+Version bump
+------------
 When a package submits a version bump, the above manager is run.
 It sends a message to the listeners on each build node as described
 at the start of this document.
 
-The message sent to SPB contains a flag indicating that this build was
+In both cases, the message sent to the  SPB contains a flag indicating that this build was
 originated by the SPB.
 
 When the build is complete, another script on staging
 [track_build_completion.py](spb_history/track_build_completion.py)
 is listening, and it posts a message to the contribuctions issue
 (using an HTTPS request) including a link to the build report.
-
-
 
 ## SPB Moving Parts
 
