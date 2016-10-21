@@ -64,7 +64,12 @@ the various components of the SPB.
 
 Then to start or re-start the server, do this:
 
-nohup python server.py > server.log 2>&1 &
+    nohup python server.py > server.log 2>&1 &
+
+Alternatively, you can start all relevant scripts for the spb 
+
+    killall python
+    ./run-build-server.sh
 
 Note that `pkgbuild`'s crontab has entries that will
 start the server when the node is rebooted.
@@ -86,6 +91,7 @@ and `server.stderr.log` also exist and contain the
 output that windows generates when trying to start
 the server.
 
+[Legacy - May not work]
 To actually stop and restart the service on windows
 you use the Server Manager. Navigate to Services.
 Find the service called "BioC Single Package Builder"
@@ -96,6 +102,19 @@ can restart it by selecting the row called
 restart button (which looks like an audio "Play"
 button with a vertical line to the left of it).
 
+Alternatively [This works]
+To actually stop and restart the service on windows
+you use the Server Manager. Navigate to 
+Configuration -> Task Scheduler -> Task Scheduler Library -> BBS. 
+Fine the task called "spb-server" and not if it is running 
+(should say "Running" in shte "Status" column). Whether or not it is
+running, you can restart it by selecting the row called "spb-server" and 
+right-click. This will bring a drop down menu of options.
+First select End to stop the task. Optionally at this point, you can 
+navigate the the d:\packagebuilder in an admin command window and `rm server.log`. 
+Then back in the task scheduler, right-click ob spb-server, and choose Run. 
+The "Status" should change to "Run"; if it does not repeat the process.
+
 ## Scripts on staging.bioconuctor.org
 
 It is essential that the scripts `track_build_completion.py`
@@ -105,7 +124,7 @@ You can check that these are running by ssh'ing to
 staging.bioconductor.org as the `biocadmin` user.
 Refer to the "credentials" google doc if you need help with this.
 
-Then `cd` to `~/packagebuilder/spb_history`.
+Then `cd` to `~/packagebuilder`.
 
 You can determine if the scripts are running as follows:
 
@@ -122,32 +141,35 @@ Note that if either of these scripts were not running, you probably
 have to restart a given build to get it to complete (see
 next section).
 
+Alternatively, if both scripts were down or a reboot is necessary, 
+the following will restart all scripts relevant to the spb
+
+    killall python
+    ./all.sh
+    
+
 ### Manually restarting a build
 
 ssh to staging.bioconductor.org as `biocadmin`.
-cd to `~/packagebuilder/spb_history`.
+cd to `~/packagebuilder`.
+source the virtual environment `. env/bin/activate`
 
 You need to determine two pieces of information in
 order to restart a build manually. Both pieces can
-be determined in the tracker
-([https://tracker.bioconductor.org](https://tracker.bioconductor.org)).
-Find the issue containing the tarball that you want to
-restart a build of. Let's say for example that the issue number is
-558 (the issue number will appear in the tracker URL, for
-example
-[https://tracker.bioconductor.org/issue558](https://tracker.bioconductor.org/issue558)).
-Then get the URL of the tarball that
-you want to restart a build for. You can do this by right-clicking
-on the appropriate link and choosing "Copy Link".
+be determined in the GitHub tracker
+([https://github.com/Bioconductor/Contributions/issues](https://github.com/Bioconductor/Contributions/issues)).
+Find the issue number assigned to the package that you want to
+restart a build of. 
+Then get the URL of the GitHub repository containing all the code of the package that you want to restart a build for. You can do this by right-clicking on the appropriate link and choosing "Copy Link".
+
 An example URL is:
 
-[https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz](https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz)
+[https://github.com/Bioconductor/spbtest3](https://github.com/Bioconductor/spbtest3)
 
 So now with these two pieces of information you
 can restart an SPB build as follows:
 
-    python rerun_build.py 558
-https://tracker.bioconductor.org/file3243/spbtest2_0.99.0.tar.gz
+    python rerun_build.py 51 https://github.com/Bioconductor/spbtest3
 
 You can then monitor the build by going to
 [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)
@@ -158,7 +180,7 @@ You might wonder why you have to ssh to staging.biooconductor.org
 to run this script. Seemingly you should be able to check out
 and run the rerun_build.py script on your own machine.
 The reason is that not every machine has access to the
-security group under which the ActiveMQ broker runs.
+security group under which the RabbitMQ broker runs.
 You can give your IP (or subnet) access to this
 group
 [here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=stomp;sort=Name).
