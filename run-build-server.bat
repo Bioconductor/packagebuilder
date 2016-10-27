@@ -7,7 +7,7 @@ echo "Activating virtual environment"
 @rem call env\Scripts\activate.bat
 @rem call not supported anymore
 @rem Interactively initialized with the following:
-.\env\Scripts\activate.bat
+.\env\Scripts\activate
 
 @rem ALL OF THESE ARE SET IN PROPERTIES FILES/SERVER.py
 set BBS_PYTHON_CMD=C:\Python27\python.exe
