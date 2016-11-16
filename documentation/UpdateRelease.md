@@ -1,5 +1,14 @@
 Update After Release
 ====================
+### Bioc-common-python (Deploy on all build nodes and staging)
+
+Update BIOC_R_MAP in bioconductor/config.py file.
+
+To initilize this change on all nodes and staging
+
+1. git pull
+2. initialize virtual environment
+3. python setup.py install
 
 ### Packagebuilder (build nodes)
 
@@ -17,18 +26,12 @@ out the crontab jobs
 2. Update \<machine\>.properties file (If new version of R)
 3. Create the needed directory struture at
 `loc/www/bioconductor-test.fhcrc.org/scratch-repos`
-4. Update viewhistory/helper.py to account for new BioC and R versions 
+4. Update viewhistory/helper.py to account for new BioC and R versions
 
 (**Best Practice:** After these changes and the one below restart spb on staging)
 
-### Bioc-common-python (Deploy on all build nodes and staging)
+### Website Config File
 
-Update BIOC_R_MAP in bioconductor/config.py file. 
-
-To initilize this change on all nodes and staging 
-
-1. git pull
-2. initialize virtual environment
-3. python setup.py install
-
-
+1. Update the website config.yaml file `http://bioconductor.org/config.yaml`
+There is a section for `Single Package Builder:` ; change the BioC and R
+versions accordingly.
