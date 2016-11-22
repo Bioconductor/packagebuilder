@@ -198,6 +198,8 @@ def do_work(body):
             os.environ['_R_CHECK_TIMINGS_']="0"
             os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
             os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
+            # R CMD BiocCheck variable
+            os.environ['BIOC_DEVEL_PASSWORD'] = ENVIR['bioc_devel_password']
 
             shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
