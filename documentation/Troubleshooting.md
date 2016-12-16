@@ -84,7 +84,7 @@ start the server when the node is rebooted.
 On windows the server.py script is managed by
 a windows task scheduler.
 
-On windows you should log into the build node as Administrator.
+On windows you should log into the build node as pkgbuild.
 You can examine the server logs by switching to the packagebuilder directory, 
 which is `C:\Users\pkgbuild\packagebuilder`. You can examine server.log in the 
 same way as you would on a unix node. The file `server.log` exist and contain 
@@ -94,10 +94,19 @@ To actually stop and restart the service on windows you can use the Server
 Manager Task Scheduler. Open the task scheduler and navigate to Task Scheduler -> Task Scheduler Library -> BBS. Find the task called `spb-server` and see if it is not running (should say 
 "Running" in the "Status" column). Whether or not it is running, you can restart
 it by selecting the row called `spb-server` and right-click. This will bring a 
-drop down menu of options. First select `End` to stop the task. Optionally at 
+drop down menu of options. Select `End` to stop the task. Optionally at 
 this point, you can navigate to the `~/packagebuilder/` in the admin command 
-window and `rm server.log`. Then back in the task scheduler, right-click on 
-`spb-server` again, and choose `Run`. The Status" should change to "Run"; if it
+window and `rm server.log`. We also must stop the taks
+loggon_pkgbuild_at_startup. Selecting the row called
+`loggon_pkgbuild_at_startup` and right-click. This will bring a drop down menu
+of options. Select `End` to stop the task. Next bring up the Task Manager. One
+way to do this is to right-click on the bottom tool bar and Select `Task
+Manager` in the drop down menu that appears. Select the tab called
+`Details`. Next order the tasks by `User name`. Find the process `python.exe`
+Running by the user name pkgbuild. Select this row and terminate the process.  
+Then back in the task scheduler, right-click on `loggon_pkgbuild_at_startup`
+again, and choose `Run`, the "Status" should change to "Running". The select
+`spb-server`, and choose `Run`, the "Status" should change to "Running"; if it
 does not repeat the process.
 
 
