@@ -32,6 +32,7 @@ import urllib2
 #from stomp.listener import PrintingListener
 from stomp.listener import StatsListener
 from urllib2 import Request, urlopen, URLError
+from threading import Timer
 
 # Modules created by Bioconductor
 from bioconductor.communication import getNewStompConnection
@@ -548,15 +549,50 @@ def do_check(cmdCheck, cmdBiocCheck):
     background = Tailer(outfile, "checking")
     background.start()
 
+    timeout_limit = int(ENVIR['timeout_limit'])
+    min_time, sec_time = divmod(timeout_limit, 60)
+
     start_time = datetime.datetime.now()
+    kill = lambda process: process.kill()
     pope = subprocess.Popen(cmdCheck, stdout=out_fh, stderr=subprocess.STDOUT,
                             shell=True)
-    retcode1 = pope.wait()
+    my_timer = Timer(timeout_limit, kill, [pope])
+    try:
+        my_timer.start()
+        retcode1 = pope.wait()
+    finally:
+        my_timer.cancel()
+
     stop_time = datetime.datetime.now()
 
+    # in testing, had to close and reopen with append
+    # in order to have ERROR message occur in middle of pipe/check
+    # if not the message would be at the bottom of BiocCheck and checks would
+    # not format correctly
+    out_fh.close()
+    out_fh = open(outfile, "a")
+    if (retcode1 == -9):
+         out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time) + "mins\n\n\n")
+    out_fh.close()
+
+    out_fh = open(outfile, "a")
     pope2 = subprocess.Popen(cmdBiocCheck, stdout=out_fh,
                              stderr=subprocess.STDOUT, shell=True)
-    retcode2 = pope2.wait()
+    my_timer = Timer(timeout_limit, kill, [pope2])
+    try:
+        my_timer.start()
+        retcode2 = pope2.wait()
+    finally:
+        my_timer.cancel()
+
+    # in testing, had to close and reopen with append
+    # in order to have ERROR message occur in middle of pipe/check
+    # if not the message would be at the bottom of BiocCheck and checks would
+    # not format correctly
+    out_fh.close()
+    out_fh = open(outfile, "a")
+    if (retcode2 == -9):
+         out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time) + "mins\n\n\n")
 
     time_dif = stop_time - start_time
     min_time, sec_time = divmod(time_dif.seconds,60)
