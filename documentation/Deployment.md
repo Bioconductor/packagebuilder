@@ -257,4 +257,16 @@ interactively or automatically.
 # Other
 Don't forget if these are replacing other build nodes or updating, go to the old
 build nodes and turn off/kill the listeners and to comment out the crontab jobs
-  
+
+
+# Updating property files :
+
+1. Pull bioc-common-python and packagebuilder
+2. source env/bin/activate
+3. killall python
+4. cd ../bioc-common-python
+5. pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
+6. python setup.py install
+7. cd ../packagebuilder
+8. pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
+9. restart node 
