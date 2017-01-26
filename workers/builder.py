@@ -572,7 +572,7 @@ def do_check(cmdCheck, cmdBiocCheck):
     out_fh.close()
     out_fh = open(outfile, "a")
     if (retcode1 == -9):
-         out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time) + "mins\n\n\n")
+         out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " +  str(min_time) + "mins\n\n\n")
     out_fh.close()
 
     out_fh = open(outfile, "a")
@@ -614,6 +614,8 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     if (retcode1 == 0 and retcode2 == 0):
         retcode = 0
+    elif (retcode1 == -9 or retcode2 == -9):
+        retcode = -9
     else:
         retcode = 1
 
