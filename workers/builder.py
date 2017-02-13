@@ -753,39 +753,15 @@ def do_build(cmd, message_stream, source):
     timeout_limit = int(ENVIR['timeout_limit'])
     min_time, sec_time = divmod(timeout_limit, 60)
 
-    logging.info("Timeout set: '{tol}'.".format(tol= str(timeout_limit)))
-
-#    kill = lambda process: process.kill()
-#    pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
-#                             shell=True)
-#    my_timer = Timer(timeout_limit, kill, [pope])
-#    try:
-#        my_timer.start()
-#        retcode = pope.wait()
-#    finally:
-#        my_timer.cancel()
-
-    class Command(object):
-        def __init__(self, cmd):
-            self.cmd = cmd
-            self.process = None
-        def run(self, timeout):
-            def target(): 
-                self.process = subprocess.Popen(self.cmd, stdout=out_fh, stderr=subprocess.STDOUT, shell=True)
-                self.process.wait()
-            thread = threading.Thread(target=target)
-            thread.start()
-            thread.join(timeout)
-            if thread.is_alive():
-                self.process.terminate()
-                thread.join()
-            return self.process.returncode
-
-    command = Command(cmd)
-    retcode = command.run(timeout=timeout_limit)
- 
-    logging.info("Retcode is: '{ret}'.".format(ret=str(retcode)))
-
+    kill = lambda process: process.kill()
+    pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
+                             shell=True)
+    my_timer = Timer(timeout_limit, kill, [pope])
+    try:
+        my_timer.start()
+        retcode = pope.wait()
+    finally:
+        my_timer.cancel()
 
     background.stop()
     out_fh.close()
