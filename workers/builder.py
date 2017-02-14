@@ -770,7 +770,7 @@ def do_build(cmd, message_stream, source):
     # in order to have ERROR message occur in middle of pipe
     # if not the message would be at the bottom not format correctly
     out_fh = open(outfile, "a")
-    if (retcode == -15):
+    if (retcode == -9):
         out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + "mins\n\n\n")
     out_fh.close()
 
