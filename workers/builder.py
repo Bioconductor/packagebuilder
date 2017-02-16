@@ -783,17 +783,11 @@ def do_build(cmd, message_stream, source):
     finally:
         my_timer.cancel()
 
-    background.stop()
-    out_fh.close()
-
-    # in testing, had to close and reopen with append
-    # in order to have ERROR message occur in middle of pipe
-    # if not the message would be at the bottom not format correctly
-    out_fh = open(outfile, "a")
     if (retcode == -9):
         out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + "mins\n\n\n")
-    out_fh.close()
 
+    out_fh.close()
+    background.stop()
     logging.debug("do_build() Before joining background thread.")
     background.join()
     logging.debug("do_build() After joining background thread.")
