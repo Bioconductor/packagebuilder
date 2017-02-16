@@ -647,7 +647,8 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     logging.info("Check Complete\n R CMD check completed with status: " +
                  str(retcode1) + " Elapsed time: " + elapsed_time +
-                 ". \n R CMD BiocCheck completed with status: " + str(retcode2))
+                 ". \n R CMD BiocCheck completed with status: " + 
+                 str(retcode2)+ " Elapsed time: " + elapsed_time2)
 
     return (retcode)
 
