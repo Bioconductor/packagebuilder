@@ -564,18 +564,30 @@ def do_check(cmdCheck, cmdBiocCheck):
         my_timer.cancel()
 
     stop_time = datetime.datetime.now()
+    time_dif = stop_time - start_time
+    min_time, sec_time = divmod(time_dif.seconds,60)
+    sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
+    elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
+
+    if (timeout_limit <= time_dif.seconds):
+        logging.info("Build time indicates TIMEOUT")
+        retcode1 = -9
 
     # in testing, had to close and reopen with append
     # in order to have ERROR message occur in middle of pipe/check
     # if not the message would be at the bottom of BiocCheck and checks would
     # not format correctly
+    out_fh.flush()
     out_fh.close()
     out_fh = open(outfile, "a")
     if (retcode1 == -9):
          out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " +  str(min_time) + "mins\n\n\n")
+
+    out_fh.flush()
     out_fh.close()
 
     out_fh = open(outfile, "a")
+    start_time2 = datetime.datetime.now()
     pope2 = subprocess.Popen(cmdBiocCheck, stdout=out_fh,
                              stderr=subprocess.STDOUT, shell=True)
     my_timer = Timer(timeout_limit, kill, [pope2])
@@ -585,19 +597,26 @@ def do_check(cmdCheck, cmdBiocCheck):
     finally:
         my_timer.cancel()
 
+    stop_time2 = datetime.datetime.now()
+    time_dif2 = stop_time2 - start_time2
+    min_time2, sec_time2 = divmod(time_dif2.seconds,60)
+    sec_time2 = str(format(float(str(time_dif2).split(":")[2]), '.2f'))
+    elapsed_time2 = str(min_time2) + " minutes " + sec_time2 + " seconds"
+    if (timeout_limit <= time_dif2.seconds):
+        logging.info("Build time indicates TIMEOUT")
+        retcode2 = -9
+
     # in testing, had to close and reopen with append
     # in order to have ERROR message occur in middle of pipe/check
     # if not the message would be at the bottom of BiocCheck and checks would
     # not format correctly
+    out_fh.flush()
     out_fh.close()
     out_fh = open(outfile, "a")
     if (retcode2 == -9):
          out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time) + "mins\n\n\n")
 
-    time_dif = stop_time - start_time
-    min_time, sec_time = divmod(time_dif.seconds,60)
-    sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
-    elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
+    out_fh.flush()
     out_fh.close()
     background.stop()
 
@@ -865,6 +884,12 @@ def build_package(source_build):
         complete_status = "build_complete"
     else:
         complete_status = "buildbin_complete"
+
+    # to catch windows timeout
+    timeout_limit = int(ENVIR['timeout_limit'])
+    if (timeout_limit <= time_dif.seconds):
+        logging.info("Build time indicates TIMEOUT")
+        retcode = -9
 
     send_message({
         "status": complete_status,
