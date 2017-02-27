@@ -46,7 +46,8 @@ the various components of the SPB.
  the build node as the `pkgbuild` user; (the "credentials"
  Google Doc can tell you how to do this).
 
- You should `cd` to the `~/packagebuilder` directory.
+ You should `cd` to the `~/packagebuilder` directory. I generally always
+ activate the virtual environment as well `source env/bin/activate`.
  Then do this to see if the `server.py` script is running:
 
      ps aux|grep server.py|grep -v grep
@@ -73,6 +74,7 @@ Then to start or re-start the server, do this:
 
 Alternatively, you can start all relevant scripts for the spb
 
+    source env/bin/activate
     killall python
     ./run-build-server.sh
 
@@ -121,7 +123,8 @@ You can check that these are running by ssh'ing to
 staging.bioconductor.org as the `biocadmin` user.
 Refer to the "credentials" google doc if you need help with this.
 
-Then `cd` to `~/packagebuilder`.
+Then `cd` to `~/packagebuilder`. I generally always activate the virtual
+environment as well `source env/bin/activate`.
 
 You can determine if the scripts are running as follows:
 
@@ -159,6 +162,7 @@ manage and `kill -9` both. To restart use the following command:
 Alternatively, if all scripts were down or a manual reboot is necessary, the 
 following will restart all scripts relevant to the spb
 
+    source env/bin/activate
     killall python
     ./all.sh
 
