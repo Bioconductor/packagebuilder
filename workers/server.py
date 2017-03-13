@@ -35,6 +35,7 @@ if sys.platform == "win32":
     if "USERDNSDOMAIN" in os.environ:
         BUILDER_ID += "." + os.environ['USERDNSDOMAIN'].lower()
 BUILDER_ID = BUILDER_ID.replace(".local", "")
+BUILDER_ID = BUILDER_ID.replace(".bioconductor.org", "")
 ## Temporary hack
 if (BUILDER_ID.lower().startswith("dhcp") or \
   BUILDER_ID == 'PHS-ITs-Lion-Test-MacBook.local'):
