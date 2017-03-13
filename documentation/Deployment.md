@@ -42,13 +42,16 @@ on the same server), you'll need to create a virtual environment.
 ```
    pip install stomp.py pytz stompy
    
-   pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
-   
    cd ../bioc-common-python
    
    pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
    
    python setup.py install
+
+   cd ../packagebuilder
+
+   pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
+   
 ```
    
   **Note:** If there is trouble with a particular version of a dependency
@@ -258,6 +261,19 @@ interactively or automatically.
 Don't forget if these are replacing other build nodes or updating, go to the old
 build nodes and turn off/kill the listeners and to comment out the crontab jobs
 
+
+
+Occassionally, we have builder ids that have additional naming information
+(oaxaca.local, toluca2.bioconductor.org, etc...), to get the information to
+display correctly on the build reports ensure the following: 
+
+1. appropriate changes were made: see above Adjust
+spb_history/staging.bioconductor.org - to add entries to report.css, etc. 
+2. on the builder/server - adjust server.py to truncate name
+3. on the builder/server - adjust bioc-common-python/bioconductor/config.py to
+truncate name 
+4. on the builder/server reinstall property file: see below for updating
+property files
 
 # Updating property files :
 
