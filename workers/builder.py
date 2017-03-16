@@ -53,6 +53,7 @@ packagebuilder_ssh_cmd = None
 packagebuilder_scp_cmd = None
 build_product = None
 callcount = None
+workflow = None
 
 log_highlighter = "***************"
 
@@ -464,12 +465,20 @@ def extract_tarball():
     send_dcf_info(dcf_file)
 
 def install_pkg_deps():
+    global workflow
     package_name = manifest['job_id'].split("_")[0]
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
     logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    try: 
+        isWorkflow = desc.getValue("workFlow")
+    except KeyError:
+        pass
+    if (isWorkflow.lower() == "true"): 
+        workflow = True
+        logging.info("Package is a workflow.")
     fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
     args = ""
     for field in fields:
@@ -545,6 +554,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 #   killed output of BiocCheck and wouldn't write
 #   temporary fix: only add message for unix system
 #
+    global workflow
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
@@ -555,6 +565,8 @@ def do_check(cmdCheck, cmdBiocCheck):
     background.start()
 
     timeout_limit = int(ENVIR['timeout_limit'])
+    if workflow:
+        timeout_limit = timeout_limit*3
     min_time, sec_time = divmod(timeout_limit, 60)
 
     start_time = datetime.datetime.now()
@@ -573,6 +585,8 @@ def do_check(cmdCheck, cmdBiocCheck):
     min_time, sec_time = divmod(time_dif.seconds,60)
     sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
     elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
+
+    logging.debug("The timeout_limit is: " + str(timeout_limit))
 
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
@@ -765,6 +779,7 @@ def check_package():
     return (retcode)
 
 def do_build(cmd, message_stream, source):
+    global workflow
     if source:
         outfile = "R.out"
     else:
@@ -780,6 +795,8 @@ def do_build(cmd, message_stream, source):
     background.start()
 
     timeout_limit = int(ENVIR['timeout_limit'])
+    if workflow:
+        timeout_limit = timeout_limit*3
     min_time, sec_time = divmod(timeout_limit, 60)
 
     kill = lambda process: process.kill()
@@ -805,6 +822,7 @@ def do_build(cmd, message_stream, source):
 
 def build_package(source_build):
     global pkg_type
+    global workflow
 
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
 
@@ -891,6 +909,8 @@ def build_package(source_build):
 
     # to catch windows timeout
     timeout_limit = int(ENVIR['timeout_limit'])
+    if workflow:
+        timeout_limit = timeout_limit*3
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
