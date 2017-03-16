@@ -473,9 +473,10 @@ def install_pkg_deps():
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
     try: 
-        isWorkflow = desc.getValue("workFlow")
+        isWorkflow = desc.getValue("Workflow")
     except KeyError:
         pass
+        isWorkflow = "false"
     if (isWorkflow.lower() == "true"): 
         workflow = True
         logging.info("Package is a workflow.")
@@ -586,7 +587,7 @@ def do_check(cmdCheck, cmdBiocCheck):
     sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
     elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
 
-    logging.debug("The timeout_limit is: " + str(timeout_limit))
+    logging.info("The timeout_limit is: " + str(timeout_limit))
 
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
