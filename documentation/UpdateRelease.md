@@ -22,11 +22,12 @@ out the crontab jobs
 
 ### spb_history (staging)
 
-1. Update bioconductor.properties file for new version of BioC
-2. Update \<machine\>.properties file (If new version of R)
-3. Create the needed directory struture at
+1. Update staging.properties file for new builder nodes 
+2. Update bioconductor.properties file for new version of BioC
+3. Update \<machine\>.properties file (If new version of R)
+4. Create the needed directory struture at
 `loc/www/bioconductor-test.fhcrc.org/scratch-repos`
-4. Update viewhistory/helper.py to account for new BioC and R versions
+5. Update viewhistory/helper.py to account for new BioC and R versions
 
 (**Best Practice:** After these changes and the one below restart spb on staging)
 
