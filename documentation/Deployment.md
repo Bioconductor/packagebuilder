@@ -63,6 +63,7 @@ on the same server), you'll need to create a virtual environment.
    are: libffi-dev, build-essential, libssl-dev, python-dev, openssl. These 
    generally would be installed with [sudo] apt-get install \<name\>
    
+   **Note:** Sometimes the 'egg' doesn't install properly when installing the above      from bioc-common-python and there is an ERROR when installing the packagebuilder     dependencies. If this is the case go back and redo the bioc-common-python            commands above.
 
 #### Configuration 
 
@@ -91,8 +92,7 @@ github.token=
     variable should match  `<host name>` and update the BioC version
     accordingly
     
-3. **NOTE:** For Bioconductor Nodes, you may need to copy over private/public key 
-information from previous build nodes or on private GitHub.  
+3. **NOTE:** For Bioconductor Nodes, you may need to create new private/public key information and add the key to known hosts on staging.bioconductor.org (.packagebuilder.prive_key.rsa / .packagebuilder.prive_key.rsa.pub)
 
 #### Start server
 Kick off the server 
@@ -108,6 +108,11 @@ Crontab for pkgbuild on `<host name>`:
 @reboot /home/pkgbuild/packagebuilder/run-build-server.sh
 00 04 * * * /home/pkgbuild/packagebuilder/run-cleanUpIssues.sh
 ```
+
+#### MAC specific Note:
+
+If the new node is a new version of MAC OS, the following script on staging.bioconductor.org should be updated: 
+`/loc/www/bioconductor-test.fhcrc.org/scratch-repos/<BiocVersion>/update-repo.R`
 
 # Windows Install: 
 
@@ -144,13 +149,16 @@ on the same server), you'll need to create a virtual environment.
 ```
    pip install stomp.py pytz stompy
    
-   pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
-   
    cd ../bioc-common-python
    
    pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
    
    python setup.py install
+
+   cd ../packagebuilder
+
+   pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
+
 ```
    
   **Note:** If there is trouble with a particular version of a dependency
@@ -188,8 +196,7 @@ github.token=
     variable should match  `<host name>` and update the BioC version
     accordingly
     
-3. **NOTE:** For Bioconductor Nodes, you may need to copy over private/public key 
-information from previous build nodes or on private GitHub.  
+3. **NOTE:** For Bioconductor Nodes, you may need to create new private/public key information and add the key to known hosts on staging.bioconductor.org (.packagebuilder.prive_key.rsa / .packagebuilder.prive_key.rsa.pub)
   
   **NOTE:** The single package builder utilizes directories shared with the 
   daily builder (biocbuild) mainly the same R. It may be necessary to have 
@@ -263,7 +270,7 @@ build nodes and turn off/kill the listeners and to comment out the crontab jobs
 # Troubleshoot
 
 
-Occassionally, we have builder ids that have additional naming information
+A. Occassionally, we have builder ids that have additional naming information
 (oaxaca.local, toluca2.bioconductor.org, etc...), to get the information to
 display correctly on the build reports ensure the following: 
 
@@ -275,7 +282,7 @@ truncate name
 4. on the builder/server reinstall property file: see below for updating
 property files
 
-Also when a node is first being deployed it might have issues connecting to
+B. Also when a node is first being deployed it might have issues connecting to
 rabbitmq.bioconductor.org.  If the node is not displaying as active on staging,
 log back into the node and check /Users/pkgbuild/packagebuilder/server.log.  
 

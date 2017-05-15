@@ -26,8 +26,11 @@ out the crontab jobs
 2. Update bioconductor.properties file for new version of BioC
 3. Update \<machine\>.properties file (If new version of R)
 4. Create the needed directory struture at
-`loc/www/bioconductor-test.fhcrc.org/scratch-repos`
-5. Update viewhistory/helper.py to account for new BioC and R versions
+`/loc/www/bioconductor-test.fhcrc.org/scratch-repos`
+5. Update
+`/loc/www/bioconductor-test.fhcrc.org/scratch-repos/<BiocVersion>/update-repo.R`
+for new mac binary (if necessary)
+6. Update viewhistory/helper.py to account for new BioC and R versions
 
 (**Best Practice:** After these changes and the one below restart spb on staging)
 
