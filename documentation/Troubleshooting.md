@@ -236,6 +236,31 @@ staging.bioconductor.org should be restarted as they are talking to a stale
 rabbitmq instance. Follow the procedures above for restarting listners on 
 build nodes and for restarting all scripts on staging. 
 
+# Node not connecting to Rabbitmq
+
+When a node is first being deployed it might have issues connecting to
+rabbitmq.bioconductor.org.  If the node is not displaying as active on staging,
+log back into the node and check /Users/pkgbuild/packagebuilder/server.log.  
+
+If you see something like the following you will have to adjust the security
+setting on the AWS instance for rabbitmq:
+
+```
+ERROR: 05/15/2017 07:06:35 AM communication.py:30 - Cannot connect to Stomp at 'rabbitmq.bioconductor.org:61613'.
+ERROR: 05/15/2017 07:06:35 AM server.py:250 - main() Could not connect to RabbitMQ: 
+```
+Log on to AWS, EC2 instances, select instances and find the
+rabbitmq.bioconductor.org:
+
+1. Select that instance. 
+2. In the description box below, find Security groups, click on stomp. 
+3. Select Inbound
+4. Select Edit
+5. Add a custom tcp rule, for port 61613, for the IP address of the node and add
+`/32` : so the format `<IP>/32`
+
+If you don't know the nodes IP address you can run the following command line on
+the node `ifconfig |grep inet`
 
  
 

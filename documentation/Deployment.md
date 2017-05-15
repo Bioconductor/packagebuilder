@@ -255,12 +255,12 @@ python pinger.py
 ```
 There should be an entry for the new server provided it is running either 
 interactively or automatically. 
-  
 
 # Other
 Don't forget if these are replacing other build nodes or updating, go to the old
 build nodes and turn off/kill the listeners and to comment out the crontab jobs
 
+# Troubleshoot
 
 
 Occassionally, we have builder ids that have additional naming information
@@ -274,6 +274,30 @@ spb_history/staging.bioconductor.org - to add entries to report.css, etc.
 truncate name 
 4. on the builder/server reinstall property file: see below for updating
 property files
+
+Also when a node is first being deployed it might have issues connecting to
+rabbitmq.bioconductor.org.  If the node is not displaying as active on staging,
+log back into the node and check /Users/pkgbuild/packagebuilder/server.log.  
+
+If you see something like the following you will have to adjust the security
+setting on the AWS instance for rabbitmq:
+
+```
+ERROR: 05/15/2017 07:06:35 AM communication.py:30 - Cannot connect to Stomp at 'rabbitmq.bioconductor.org:61613'.
+ERROR: 05/15/2017 07:06:35 AM server.py:250 - main() Could not connect to RabbitMQ: 
+```
+Log on to AWS, EC2 instances, select instances and find the
+rabbitmq.bioconductor.org:
+
+1. Select that instance. 
+2. In the description box below, find Security groups, click on stomp. 
+3. Select Inbound
+4. Select Edit
+5. Add a custom tcp rule, for port 61613, for the IP address of the node and add
+`/32` : so the format `<IP>/32`
+
+If you don't know the nodes IP address you can run the following command line on
+the node `ifconfig |grep inet`
 
 # Updating property files :
 
