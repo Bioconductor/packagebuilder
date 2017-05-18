@@ -262,6 +262,18 @@ rabbitmq.bioconductor.org:
 If you don't know the nodes IP address you can run the following command line on
 the node `ifconfig |grep inet`
 
- 
+
+# Valid push but no report and no TIMEOUT
+
+1.  Check http://staging.bioconductor.org:8000/ for the package.  See if
+temporary build report is displaying correctly 
+
+2. Sometimes when connection is bad/slow (or other misc reasons), the build
+report will not show the OS /Arch - this generally means it couldn't connect
+correctly. 
+
+3. Recommended to restart that particular node 
+
+4. Also Recommend restart staging.bioconductor.org scripts. 
 
 
