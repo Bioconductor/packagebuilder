@@ -74,12 +74,21 @@ pkgs_already <- dir(R_libdir)
 needed_pkgs<- SPB_pkgs[!SPB_pkgs %in% pkgs_already]
 
 if(length(needed_pkgs) != 0L){
-    ## install other needed packages
-    BiocInstaller::biocLite(needed_pkgs, lib=R_libdir)
+
+    pkgs_already2 <- dir(pkg_libdir)
+    needed_pkgs2<- needed_pkgs[!needed_pkgs  %in% pkgs_already2]
+    ## install other needed packages in pkg_libdir
+    ## pkgbuild doesn't have write access to R_libdir
+    if(length(needed_pkgs2) != 0L)
+        BiocInstaller::biocLite(needed_pkgs2, lib=pkg_libdir)
+    validateInstallation(needed_pkgs, pkg_libdir, "SPB_pkgs")
+    
+    # if some were found in R_lib check validInstall
+    found_pkgs <- SPB_pkgs[SPB_pkgs %in% pkgs_already]
+    if (length(found_pkgs) != 0L)
+        validateInstallation(found_pkgs, R_libdir, "SPB_pkgs2")
 } else {
-    tryCatch(update.packages(repos=BiocInstaller::biocinstallRepos(),
-                             lib.loc=R_libdir, ask=FALSE),
-             error=function(e) conditionMessage(e))
+    validateInstallation(SPB_pkgs, R_libdir, "SPB_pkgs")
 }
 
 opaths <- .libPaths()
@@ -87,7 +96,6 @@ opaths <- .libPaths()
 devtools::install_github("Bioconductor/BiocCheck", lib=pkg_libdir)
 .libPaths(opaths)
 
-validateInstallation(SPB_pkgs, R_libdir, "SPB_pkgs")
 validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
 
 
