@@ -97,6 +97,17 @@ be used in production.
     pip install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
     python setup.py install
     ```
+  **Note:** If there is trouble with a particular version of a dependency
+   you can update the versions in these files. These versions were stable 
+   and working on our systems. 
+   
+   **Note:** There are several system dependecies that may need to be 
+   installed. Some common ones that have been needed if not already installed 
+   are: libffi-dev, build-essential, libssl-dev, python-dev, openssl. These 
+   generally would be installed with [sudo] apt-get install \<name\>
+   
+   **Note:** Sometimes the 'egg' doesn't install properly when installing the above      from bioc-common-python and there is an ERROR when installing the packagebuilder     dependencies. If this is the case go back and redo the bioc-common-python            commands above.
+
 
 ### Configuration
 
@@ -121,6 +132,13 @@ github.token=
     ii. Secondly, change `bioconductor.properties` values. The `environment` variable should match  `<your machine name>`
 
 
+3. In the BBS directory: 
+
+   i. Create a directory for `<your machine name>` in `BBS/nodes/`. A file
+   `local-settings.sh` should be created. If you have access to the other
+   existing nodes, I would suggest just coping an existing file over. 
+
+   ii. Update `BBS/nodes/nodespecs.py` to include an entry for `<your machine name>`.
 
 ### Run a local build node
 There are several pieces to the SPB. To see each piece run interactively, open new shells for each of the following commands below **Be sure to source the virtual environment created above in EVERY shell**
