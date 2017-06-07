@@ -176,14 +176,15 @@ may need to be restarted (see section Reactivating Rabbitmq)
 
 ### Manually restarting a build
 
-ssh to staging.bioconductor.org as `biocadmin`.
-cd to `~/packagebuilder`.
-Activate the virtual environment `source env/bin/activate`
+ssh to staging, change to the apropriate directory, and activate the virtual environment
+
+    ssh biocadmin@staging.bioconductor.org
+    cd ~/packagebuilder
+    source env/bin/activate
 
 You need to determine two pieces of information in
 order to restart a build manually. Both pieces can
-be determined in the GitHub tracker
-([https://github.com/Bioconductor/Contributions/issues](https://github.com/Bioconductor/Contributions/issues)).
+be determined in the [GitHub tracker][].
 Find the issue number assigned to the package that you want to
 restart a build of. The get the URL of the GitHub repository containing all the 
 code of the package that you want to start a build for. 
@@ -191,7 +192,6 @@ code of the package that you want to start a build for.
 An example is [spbtest3](https://github.com/Bioconductor/Contributions/issues/51):
 It's issue number is 51 and it's URL is:
 [https://github.com/Bioconductor/spbtest3](https://github.com/Bioconductor/spbtest3).
-
 
 So now with these two pieces of information you can restart an SPB build as follows:
 
@@ -211,6 +211,8 @@ You can give your IP (or subnet) access to this
 group
 [here](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#SecurityGroups:search=stomp;sort=Name).
 You need to enable TCP access on port 61613 (the STOMP port).
+
+[GitHub tracker]: https://github.com/Bioconductor/Contributions/issues
 
 # Restarting RabbitMQ
 
