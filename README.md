@@ -15,7 +15,9 @@ Overview
 
 ##### Options to start a build:
 1. Submitting packages to [github](https://github.com/Bioconductor/Contributions)
-2. Running the [rerun_build.py](spb_history/rerun_build.py) script
+2. [Manually restart][] a build.
+
+[Manually restart]: https://github.com/Bioconductor/packagebuilder/blob/master/documentation/Troubleshooting.md#manually-restarting-a-build
 
 These all send messages to an installation of RabbitMQ (a Java-based messaging framework)
 to listeners on each build machine ([server.py](workers/server.py)). The build machines
