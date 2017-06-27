@@ -690,9 +690,9 @@ def win_multiarch_check():
     cmd = ("%s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
            " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
 
-    cmdCheck = ("%s CMD check --library=%s.buildbin-libdir"
-        " --install='check:%s-install.out' --force-multiarch --no-vignettes"
-        " --timings %s" % (r, pkg, pkg, tarball))
+    cmdCheck = ('%s CMD check --library=%s.buildbin-libdir'
+        ' --install="check:%s-install.out" --force-multiarch --no-vignettes'
+        ' --timings %s' % (r, pkg, pkg, tarball))
 
     cmdBiocCheck = ("%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (r, tarball))
 
