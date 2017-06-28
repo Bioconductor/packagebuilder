@@ -696,7 +696,9 @@ def win_multiarch_check():
 
     cmdBiocCheck = ("%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (r, tarball))
 
-    send_message({"status": "check_cmd", "body": cmd})
+    cmdMessage = cmd + "  &&  " + cmdCheck +  "  &&  " + cmdBiocCheck
+
+    send_message({"status": "check_cmd", "body": cmdMessage})
     logging.info("R Install Command:\n" + cmd)
     logging.info("R Check Command:\n" + cmdCheck)
     logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
@@ -772,7 +774,9 @@ def check_package():
 
     cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
 
-    send_message({"status": "check_cmd", "body": cmdCheck})
+    cmdMessage = cmdCheck + "  &&  " + cmdBiocCheck
+
+    send_message({"status": "check_cmd", "body": cmdMessage})
     logging.info("R Check Command:\n" + cmdCheck)
     logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
     retcode = do_check(cmdCheck, cmdBiocCheck)
