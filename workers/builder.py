@@ -6,7 +6,7 @@ import logging
 import sys
 from bioconductor.config import ENVIR
 
-log_level = int(ENVIR['log_level'])
+log_level = int(ENVIR['log_level_builder'])
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=log_level)
@@ -14,7 +14,7 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)
 
 logging.getLogger("stomp.py").setLevel(logging.WARNING)
 
-logging.info("logg" + str(log_level))
+logging.info("log" + str(log_level))
 
 import os
 import os.path

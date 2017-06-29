@@ -18,12 +18,15 @@ from bioconductor.config import TOPICS
 from bioconductor.config import BUILDER_ID
 from bioconductor.communication import getNewStompConnection
 
+log_level = int(ENVIR['log_level_server'])
 
 logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s:%(lineno)s - %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.INFO)
+                    level=log_level)
 
 logging.getLogger("stomp.py").setLevel(logging.WARNING)
+
+logging.info("log" + str(log_level))
 
 # FIXME Get this information dynamically.  Consider bioc-cm or
 #       master.bioconductor.org/config.yaml
@@ -101,7 +104,7 @@ class MyListener(stomp.ConnectionListener):
             "received message from %s before thread" % headers['destination']}
         stomp.send(body=json.dumps(debug_msg),
             destination="/topic/keepalive_response")
-
+        logging.debug(debug_msg)
 
         logging.info("on_message() Message received")
 
@@ -224,7 +227,7 @@ def do_work(body):
             json_str = json.dumps(msg_obj)
             stomp.send(destination=TOPICS['events'], body=json_str,
                        headers={"persistent": "true"})
-            logging.info("on_message() Reply sent")
+            logging.debug("on_message() Reply sent")
             blderProcess.wait()
             logging.info("on_message() blderProcess finished with status {s}.".format(s=blderProcess.returncode))
             builder_log.close()
