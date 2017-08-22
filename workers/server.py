@@ -161,6 +161,7 @@ def do_work(body):
                 run_dir = json.loads(res)['sha'][0:7]
             except URLError, err_url:
                 logging.info('Cannot access github log: %s', err_url)
+                logging.debug('URL: %s', cmd)
                 run_dir = job_id
 
             job_dir = os.path.join(job_dir_main, run_dir)

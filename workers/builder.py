@@ -383,12 +383,27 @@ def git_clone():
     send_message({"status": "git_cmd", "body": git_cmd})
     logging.info("git_clone command: " + git_cmd)
     retcode = subprocess.call(git_cmd, shell=True)
-    send_message({"status": "post_processing", "retcode": retcode, "body": "Finished git clone. "})
-    send_message({"status": "git_result", "result": retcode, "body": \
-        "git clone completed with status %d" % retcode})
     logging.info("Finished git clone. \n git clone completed with status: " +  str(retcode))
     if (not retcode == 0):
+        send_message({
+            "status": "build_complete",
+            "retcode": retcode,
+            "warnings": False,
+            "body": "Git clone Failed with status %d" % retcode,
+            "elapsed_time": "NA"})
+        send_message({"status": "post_processing",
+                      "retcode": retcode,
+                      "body": "Git clone Failed. "})
+
         sys.exit("git clone failed")
+    else:
+        send_message({"status": "post_processing",
+                      "retcode": retcode,
+                      "body": "Finished git clone. "})
+        send_message({"status": "git_result",
+                      "result": retcode, "body": \
+                      "git clone completed with status %d" % retcode})
+
 
 
 
@@ -472,12 +487,12 @@ def install_pkg_deps():
     logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
-    try: 
+    try:
         isWorkflow = desc.getValue("Workflow")
     except KeyError:
         pass
         isWorkflow = "false"
-    if (isWorkflow.lower() == "true"): 
+    if (isWorkflow.lower() == "true"):
         workflow = True
         logging.info("Package is a workflow.")
     fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
