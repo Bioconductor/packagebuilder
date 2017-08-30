@@ -955,6 +955,11 @@ def propagate_package():
     package_name = manifest['job_id'].split("_")[0]
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
 
+#    send_message({
+#        "body": "Pruning older packages from repository. ",
+#        "status": "preprocessing",
+#        "retcode": retcode
+#    })
     if (platform.system() == "Windows"):
         command = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no biocadmin@%s 'rm -f %s/%s_*.zip'"
         command = command % (ENVIR['spb_RSA_key'], ENVIR['spb_staging_url'], repos, package_name)
@@ -965,11 +970,11 @@ def propagate_package():
         retcode = ssh("rm -f %s" % files_to_delete)
 
     logging.info("Finished propagate_package().\n Result of deleting files: %d." % retcode)
-    send_message({
-        "body": "Pruning older packages from repository. ",
-        "status": "post_processing",
-        "retcode": retcode
-    })
+#    send_message({
+#        "body": "Pruning older packages from repository status:" + retcode + ". ",
+#        "status": "post_processing",
+#        "retcode": retcode
+#    })
     if retcode != 0:
         logging.error("propagate_package() Failed to prune repos.")
         sys.exit("repos prune failed")
