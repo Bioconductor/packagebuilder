@@ -876,6 +876,11 @@ def git_info():
     cmd = "/".join(["https://api.github.com/repos",url_user,
                        url_pkg, "commits/HEAD"])
     request = Request(cmd)
+    send_message({
+        "body": "Accessing git_info. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
     try:
         response = urlopen(request)
         res = response.read()
@@ -891,8 +896,18 @@ def git_info():
                       last_auth + "\n Last Chage Date: " + last_date +
                       "\n Last Commit Message: \n" + commit_msg +
                       "\n Files Changes: " + files_mod)
+        send_message({
+        "body": "Accessing git_info complete. ",
+        "status": "post_processing",
+        "retcode": 0
+        })
     except URLError, err_url:
         logging.info('Cannot access github log: %s', err_url)
+        send_message({
+            "body": "Accessing git_info failed. ",
+            "status": "post_processing",
+            "retcode": -1
+        })
 
 # This function does the following, acting on behalf of biocadmin on staging.bioconductor.org:
 #   1. First prune old copies of the package in a path like :
