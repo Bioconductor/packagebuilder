@@ -26,7 +26,6 @@ import datetime
 import platform
 import unicodedata
 import atexit
-import mechanize
 import re
 import urllib2
 import requests
