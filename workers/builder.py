@@ -1201,11 +1201,13 @@ def get_node_info():
 def is_valid_url():
 
     github_url = re.sub(r'\.git$', '', manifest['svn_url'])
+    logging.info("Checking valid github_url: " + github_url)
     if not github_url.endswith("/"):
         github_url += "/"
     github_url += "master/DESCRIPTION"
     github_url = github_url.replace("https://github.com",
     "https://raw.githubusercontent.com")
+    logging.debug("Checking valid github_url: " + github_url)
     response = requests.get(github_url)
     # 1xx info 2xx success 3xx redirect 4xx client error 5xx server error
     return response.status_code < 400
