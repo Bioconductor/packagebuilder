@@ -193,59 +193,26 @@ def is_build_required(manifest):
     package_name = manifest['job_id'].split("_")[0]
     logging.info("Starting is_build_required() '%s'." % package_name)
 
-    if (get_package_source() == "svn"):
-        description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-        logging.debug("is_build_required() package source is svn" +
-            "\n  description_url = " + description_url +
-            "\n  svn_user ="  + ENVIR['svn_user'] +
-            "\n  svn_pass = " + ENVIR['svn_pass'])
-        try:
-            description = subprocess.Popen([
-                "curl", "-k", "-s", "--user", "%s:%s" %
-                (ENVIR['svn_user'], ENVIR['svn_pass']),
-                description_url
-            ], stdout=subprocess.PIPE).communicate()[0]
-            # TODO - handle it if description does not exist
-        except:
-            logging.error("is_build_required() curl exception: %s.",
-                          sys.exc_info()[0])
-            raise
-
-        logging.debug("is_build_required()" +
-                      "\n  description = %s" % description +
-                      "\n  length = %d" % len(description))
-
-        dcf_file = dcf.DcfRecordParser(description.rstrip().split("\n"))
-        send_dcf_info(dcf_file)
-
-        svn_version = dcf_file.getValue("Version")
-    elif get_package_source() == "github":
-        github_url = re.sub(r'\.git$', '', manifest['svn_url'])
-        if not github_url.endswith("/"):
-            github_url += "/"
+    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
+    if not github_url.endswith("/"):
+        github_url += "/"
         # We only build the master branch. There had better be one.
         # (technically we build whatever the default branch is, but
         # this step looks at master because to find out what the
         # default branch is at this point we would need octokit here).
-        github_url += "master/DESCRIPTION"
-        github_url = github_url.replace("https://github.com",
-          "https://raw.githubusercontent.com")
-        try:
-            f = urllib2.urlopen(github_url)
-            dcf_text = f.read()
-            dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
-            send_dcf_info(dcf_file)
-            svn_version = dcf_file.getValue("Version")
-        except:
-            logging.error("ERROR: is_build_required() failed\n  Could not open ",
-                          github_url)
-            sys.exit("Exiting") 
-    elif get_package_source() == "tracker":
-        tmp = manifest["svn_url"].split("/")
-        pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
-        if (pkgname.find("_") == -1): # package name doesn't have version in it
-            return(True) # TODO - download tarball and examine DESCRIPTION file
-        svn_version = pkgname.split("_")[1]
+    github_url += "master/DESCRIPTION"
+    github_url = github_url.replace("https://github.com",
+      "https://raw.githubusercontent.com")
+    try:
+        f = urllib2.urlopen(github_url)
+        dcf_text = f.read()
+        dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
+        send_dcf_info(dcf_file)
+        svn_version = dcf_file.getValue("Version")
+    except:
+        logging.error("ERROR: is_build_required() failed\n  Could not open ",
+                      github_url)
+        sys.exit("Exiting") 
 
     if ("force" in manifest.keys()):
         if (manifest['force'] is True):
@@ -261,7 +228,6 @@ def is_build_required(manifest):
         'mac.binary': "bin/macosx/contrib/" + r_version,
         'mac.binary.mavericks': "bin/macosx/mavericks/contrib/" + r_version
     }
-    # todo - put repos url in config file (or get it from user)
     base_repo_url = HOSTS['bioc']
     if (manifest['repository'] == 'course'):
         base_repo_url += '/course-packages'
