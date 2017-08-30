@@ -212,7 +212,7 @@ def is_build_required(manifest):
     except:
         logging.error("ERROR: is_build_required() failed\n  Could not open ",
                       github_url)
-        sys.exit("Exiting") 
+        sys.exit("Exiting is_build_required check failed") 
 
     if ("force" in manifest.keys()):
         if (manifest['force'] is True):
@@ -296,7 +296,6 @@ def setup():
         i += 1
         if i == timeout:
             logging.warning("Empty manifest file in setup().")
-            # todo - send a message and do something with it
             break
     time.sleep(1)
     manifest_fh = open(sys.argv[1], "r")
@@ -354,6 +353,9 @@ def git_clone():
     git_cmd = "git clone %s" % git_url
     send_message({"status": "git_cmd", "body": git_cmd})
     logging.info("git_clone command: " + git_cmd)
+    send_message({"status": "preprocessing",
+                  "retcode": 0,
+                  "body": "Starting Git clone. "})
     retcode = subprocess.call(git_cmd, shell=True)
     logging.info("Finished git clone. \n git clone completed with status: " +  str(retcode))
     if (not retcode == 0):
@@ -371,7 +373,7 @@ def git_clone():
     else:
         send_message({"status": "post_processing",
                       "retcode": retcode,
-                      "body": "Finished git clone. "})
+                      "body": "Finished Git clone. "})
         send_message({"status": "git_result",
                       "result": retcode, "body": \
                       "git clone completed with status %d" % retcode})
