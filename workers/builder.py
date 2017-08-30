@@ -438,7 +438,7 @@ def install_pkg():
     cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
 
     send_message({
-        "body": "Installing package: " + package_name,
+        "body": "Installing package: " + package_name + ". ",
         "status": "preprocessing",
         "retcode": 0
     })
@@ -694,7 +694,17 @@ def check_package():
     send_message({"status": "check_cmd", "body": cmdMessage})
     logging.info("R Check Command:\n" + cmdCheck)
     logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
+    send_message({
+        "body": "Starting Check package. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
     retcode = do_check(cmdCheck, cmdBiocCheck)
+    send_message({
+        "body": "Checking Package status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
 
     return (retcode)
 
