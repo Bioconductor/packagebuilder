@@ -808,6 +808,11 @@ def build_package(source_build):
     logging.debug("Before build, working dir is %s." %
                   working_dir)
 
+    send_message({
+        "body": "Starting Build package. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
     start_time = datetime.datetime.now()
     if ((not source_build) and pkg_type == "win.binary"):
         retcode = win_multiarch_buildbin(buildmsg)
@@ -820,6 +825,11 @@ def build_package(source_build):
     min_time, sec_time = divmod(time_dif.seconds,60)
     sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
     elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
+    send_message({
+        "body": "Build Package status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
 
     # check for warnings
     out_fh = open(outfile)
