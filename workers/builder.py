@@ -29,6 +29,7 @@ import atexit
 import mechanize
 import re
 import urllib2
+import requests
 #from stomp.listener import PrintingListener
 from stomp.listener import StatsListener
 from urllib2 import Request, urlopen, URLError
@@ -229,11 +230,16 @@ def is_build_required(manifest):
         github_url += "master/DESCRIPTION"
         github_url = github_url.replace("https://github.com",
           "https://raw.githubusercontent.com")
-        f = urllib2.urlopen(github_url)
-        dcf_text = f.read()
-        dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
-        send_dcf_info(dcf_file)
-        svn_version = dcf_file.getValue("Version")
+        try:
+            f = urllib2.urlopen(github_url)
+            dcf_text = f.read()
+            dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
+            send_dcf_info(dcf_file)
+            svn_version = dcf_file.getValue("Version")
+        except:
+            logging.error("ERROR: is_build_required() failed\n  Could not open ",
+                          github_url)
+            sys.exit("Exiting") 
     elif get_package_source() == "tracker":
         tmp = manifest["svn_url"].split("/")
         pkgname = tmp[len(tmp)-1].replace(".tar.gz", "")
@@ -1275,42 +1281,19 @@ def get_node_info():
                  "\n bioc_version: " + ENVIR['bbs_Bioc_version'])
 
 def is_valid_url():
-    # todo bulletproof this; sometimes fails bogusly on windows
-    if (manifest['svn_url'].lower().startswith(HOSTS['svn'])):
-        svn_url = True
-    elif (manifest['svn_url'].lower().find("tracker.fhcrc.org") > -1 or
-      manifest['svn_url'].lower().find("tracker.bioconductor.org") > -1): # todo, ensure .tar.gz end
-        svn_url = False
-    elif "https://github.com" in manifest['svn_url'].lower():
-        svn_url = False
-    else:
-        return False
 
-    if svn_url:
-
-        description_url = manifest['svn_url'].rstrip("/") + "/DESCRIPTION"
-
-        timeout = 10
-        i  = 0
-        description = None
-        while i < timeout:
-            i += 1
-            description = subprocess.Popen([
-                "curl", "-k", "-s", "--user",
-                "%s:%s" % (ENVIR['svn_user'], ENVIR['svn_pass']),
-                description_url
-            ], stdout=subprocess.PIPE).communicate()[0]
-            logging.warning("is_valid_url() Invalid svn URL; retrying.")
-            time.sleep(0.5)
-            if (len(description) > 0):
-                break
-
-        if (len(description) == 0  or description.lower().find("404 not found") > -1):
-            return False
-        return True
-    return True
+    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
+    if not github_url.endswith("/"):
+        github_url += "/"
+    github_url += "master/DESCRIPTION"
+    github_url = github_url.replace("https://github.com",
+    "https://raw.githubusercontent.com")
+    response = requests.get(github_url)
+    # 1xx info 2xx success 3xx redirect 4xx client error 5xx server error
+    return response.status_code < 400
 
 def get_package_source():
+
     if manifest['svn_url'].lower().startswith(HOSTS['svn']):
         return("svn")
     if "https://github.com" in manifest['svn_url'].lower():
@@ -1385,12 +1368,15 @@ if __name__ == "__main__":
     send_message({"status": "Builder has been started"})
 
     if not is_valid_url():
+        send_message({"status": "preprocessing",
+            "retcode": -1,
+            "body": "Invalid Github URL"})
         send_message({
             "status": "invalid_url",
-            "body": "Invalid SVN url."
+            "body": "Invalid Github url."
         })
-        logging.error("main() Invalid svn url.")
-        sys.exit("invalid svn url")
+        logging.error("main() Invalid Github url.")
+        sys.exit("invalid github url")
 
     get_node_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
@@ -1409,6 +1395,9 @@ if __name__ == "__main__":
             "status": "build_not_required",
             "body": "Identical versions for %s." % get_package_source()
         })
+        send_message({"status": "preprocessing",
+            "retcode": 0,
+            "body": "Identical versions for %s." % get_package_source()})
         send_message({
             "status": "normal_end",
             "body": "Build not required."
