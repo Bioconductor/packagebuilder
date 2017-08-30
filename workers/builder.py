@@ -1210,15 +1210,6 @@ def is_valid_url():
     # 1xx info 2xx success 3xx redirect 4xx client error 5xx server error
     return response.status_code < 400
 
-def get_package_source():
-
-    if manifest['svn_url'].lower().startswith(HOSTS['svn']):
-        return("svn")
-    if "https://github.com" in manifest['svn_url'].lower():
-        return("github")
-    if "tracker.bioconductor.org" in manifest['svn_url'].lower():
-        return("tracker")
-    raise
 
 def clean_up_dir():
 
@@ -1250,9 +1241,6 @@ def clean_up_dir():
             os.remove(path_tgz)
         if os.path.exists("libdir"):
             os.system("rm -rf libdir")
-
-#    if os.path.exists("manifest.json"):
-#        os.remove("manifest.json")
 
     pkgDirName = manifest['job_id'].split("_")[0]
     cloneDir = "rm -rf " + pkgDirName
@@ -1299,23 +1287,19 @@ if __name__ == "__main__":
     get_node_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
-    if get_package_source() == "svn":
-        svn_info()
-        logging.info("\n\n" + log_highlighter + "\n\n")
-
-    if get_package_source() == "github":
-        git_info()
-        logging.info("\n\n" + log_highlighter + "\n\n")
+    git_info()
+    logging.info("\n\n" + log_highlighter + "\n\n")
 
     is_build_required = is_build_required(manifest)
     if not (is_build_required):
         send_message({
             "status": "build_not_required",
-            "body": "Identical versions for %s." % get_package_source()
+            "body": "Identical versions."
         })
         send_message({"status": "preprocessing",
             "retcode": 0,
-            "body": "Identical versions for %s." % get_package_source()})
+            "body": "Identical versions. "
+        })
         send_message({
             "status": "normal_end",
             "body": "Build not required."
@@ -1323,12 +1307,7 @@ if __name__ == "__main__":
         logging.info("Normal build completion; build not required.")
         sys.exit(0)
 
-    if get_package_source() == "svn":
-        svn_export()
-    elif get_package_source() == "tracker":
-        extract_tarball()
-    elif get_package_source() == "github":
-        git_clone()
+    git_clone()
 
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Installing Package Dependencies:")
