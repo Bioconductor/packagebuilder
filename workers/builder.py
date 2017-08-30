@@ -866,22 +866,6 @@ def build_package(source_build):
 
     return (retcode)
 
-def svn_info():
-    logging.debug("svn_info() svn_url is %s" % manifest['svn_url'])
-    svn_info = subprocess.Popen([
-        "svn", "info", manifest['svn_url']
-    ], stdout=subprocess.PIPE).communicate()[0]
-    logging.debug("svn_info() svn_info is:\n%s" % svn_info)
-    dcf_records = dcf.DcfRecordParser(svn_info.rstrip().split("\n"))
-    keys = ['Path', 'URL', 'Repository Root', 'Repository UUID', 'Revision',
-            'Node Kind', 'Last Changed Author', 'Last Changed Rev',
-            'Last Changed Date']
-    svn_hash = {}
-    for key in keys:
-        svn_hash[key] = dcf_records.getValue(key)
-    svn_hash['status'] = "svn_info"
-    svn_hash['body'] = "svn info"
-    send_message(svn_hash)
 
 def git_info():
     logging.info("git_info():")
