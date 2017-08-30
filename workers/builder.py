@@ -211,7 +211,7 @@ def is_build_required(manifest):
     except:
         logging.error("ERROR: is_build_required() failed\n  Could not open ",
                       github_url)
-        sys.exit("Exiting is_build_required check failed") 
+        sys.exit("Exiting is_build_required check failed")
 
     if ("force" in manifest.keys()):
         if (manifest['force'] is True):
@@ -613,6 +613,11 @@ def win_multiarch_check():
     cmdMessage = cmd + "  &&  " + cmdCheck +  "  &&  " + cmdBiocCheck
 
     send_message({"status": "check_cmd", "body": cmdMessage})
+    send_message({
+        "body": "Starting Check package. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
     logging.info("R Install Command:\n" + cmd)
     logging.info("R Check Command:\n" + cmdCheck)
     logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
@@ -623,6 +628,11 @@ def win_multiarch_check():
     })
     logging.info("Installing package prior to check...\n\n")
     retcode = win_multiarch_buildbin("checking")
+    send_message({
+        "body": "Checking Package status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
     if (retcode == 0):
            send_message({"status": "clear_check_console"})
 
@@ -954,11 +964,6 @@ def propagate_package():
     package_name = manifest['job_id'].split("_")[0]
     files_to_delete = "%s/%s_*.%s" % (repos, package_name, ext)
 
-#    send_message({
-#        "body": "Pruning older packages from repository. ",
-#        "status": "preprocessing",
-#        "retcode": retcode
-#    })
     if (platform.system() == "Windows"):
         command = "c:/cygwin/bin/ssh.exe -qi %s -o StrictHostKeyChecking=no biocadmin@%s 'rm -f %s/%s_*.zip'"
         command = command % (ENVIR['spb_RSA_key'], ENVIR['spb_staging_url'], repos, package_name)
@@ -969,11 +974,11 @@ def propagate_package():
         retcode = ssh("rm -f %s" % files_to_delete)
 
     logging.info("Finished propagate_package().\n Result of deleting files: %d." % retcode)
-#    send_message({
-#        "body": "Pruning older packages from repository status:" + retcode + ". ",
-#        "status": "post_processing",
-#        "retcode": retcode
-#    })
+    send_message({
+        "body": "Pruning older packages from repository status. ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
     if retcode != 0:
         logging.error("propagate_package() Failed to prune repos.")
         sys.exit("repos prune failed")
