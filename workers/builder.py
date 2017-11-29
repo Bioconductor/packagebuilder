@@ -174,6 +174,7 @@ def send_message(msg, status=None):
                headers={"persistent": "true"})
     logging.debug(u"send_message(): Message sent.")
 
+
 def send_dcf_info(dcf_file):
     try:
         maintainer = dcf_file.getValue("Maintainer")
@@ -186,71 +187,6 @@ def send_dcf_info(dcf_file):
         "version": dcf_file.getValue("Version")
     })
 
-def is_build_required(manifest):
-    global svn_url_global
-    svn_url_global = manifest['svn_url']
-    package_name = manifest['job_id'].split("_")[0]
-    logging.info("Starting is_build_required() '%s'." % package_name)
-
-    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
-    if not github_url.endswith("/"):
-        github_url += "/"
-        # We only build the master branch. There had better be one.
-        # (technically we build whatever the default branch is, but
-        # this step looks at master because to find out what the
-        # default branch is at this point we would need octokit here).
-    github_url += "master/DESCRIPTION"
-    github_url = github_url.replace("https://github.com",
-      "https://raw.githubusercontent.com")
-    try:
-        f = urllib2.urlopen(github_url)
-        dcf_text = f.read()
-        dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
-        send_dcf_info(dcf_file)
-        svn_version = dcf_file.getValue("Version")
-    except:
-        logging.error("ERROR: is_build_required() failed\n  Could not open ",
-                      github_url)
-        sys.exit("Exiting is_build_required check failed")
-
-    if ("force" in manifest.keys()):
-        if (manifest['force'] is True):
-            return(True)
-
-    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
-    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
-
-    cran_repo_map = {
-        'source': "src/contrib",
-        'win.binary': "bin/windows/contrib/" + r_version,
-        'win64.binary': "bin/windows64/contrib/" + r_version,
-        'mac.binary': "bin/macosx/contrib/" + r_version,
-        'mac.binary.mavericks': "bin/macosx/mavericks/contrib/" + r_version
-    }
-    base_repo_url = HOSTS['bioc']
-    if (manifest['repository'] == 'course'):
-        base_repo_url += '/course-packages'
-    elif (manifest['repository'] == 'scratch'):
-        base_repo_url += '/scratch_repos/' + manifest['bioc_version']
-
-    repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
-    # What if there is no file at this url?
-    packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
-        stdout=subprocess.PIPE).communicate()[0]
-    inpackage = False
-    repository_version = False
-    for line in packages.split("\n"):
-        if line == "Package: %s" % package_name:
-            inpackage = True
-        if (line.startswith("Version: ") and inpackage):
-            repository_version = line.split(": ")[1]
-            break
-    if not repository_version:
-        return True # package hasn't been pushed to repo before
-    logging.debug("is_build_required()" +
-                  "\n  [%s] svn version is %s, repository version is %s" %
-                  (package_name, svn_version, repository_version))
-    return svn_version != repository_version
 
 def setup():
     global manifest
@@ -335,6 +271,7 @@ def setup():
     logging.debug("Working dir = %s" % working_dir)
     logging.info("Finished setup().")
 
+
 def setup_stomp():
     global stomp
     logging.info("Getting Stomp Connection:")
@@ -343,6 +280,159 @@ def setup_stomp():
     except:
         logging.error("setup_stomp(): Cannot connect.")
         raise
+
+
+def is_valid_url():
+
+    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
+    logging.info("Checking valid github_url: " + github_url)
+    if not github_url.endswith("/"):
+        github_url += "/"
+    github_url += "master/DESCRIPTION"
+    github_url = github_url.replace("https://github.com",
+    "https://raw.githubusercontent.com")
+    logging.debug("Checking valid github_url: " + github_url)
+    response = requests.get(github_url)
+    # 1xx info 2xx success 3xx redirect 4xx client error 5xx server error
+    return response.status_code < 400
+
+
+def get_node_info():
+    logging.info("Node Info:")
+    r_version = get_r_version()
+    osys = BBScorevars.getNodeSpec(BUILDER_ID, "OS")
+    arch = BBScorevars.getNodeSpec(BUILDER_ID, "Arch")
+    plat = BBScorevars.getNodeSpec(BUILDER_ID, "Platform")
+    send_message({
+        "status": "node_info",
+        "r_version": r_version,
+        "os": osys,
+        "arch": arch,
+        "platform": plat,
+        "body": "node_info",
+        "bioc_version": ENVIR['bbs_Bioc_version']})
+    logging.info("\n os: " + osys +  "\n r_version: " + r_version +
+                 "\n bioc_version: " + ENVIR['bbs_Bioc_version'])
+
+
+def get_r_version():
+    logging.info("BBS_R_CMD = %s" % ENVIR['bbs_R_cmd'])
+    r_version_raw, stderr = subprocess.Popen([
+        ENVIR['bbs_R_cmd'],"--version"
+    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
+    lines = r_version_raw.split("\n")
+    r_version_line = lines[0]
+    return r_version_line.replace("R version ", "")
+
+
+def git_info():
+    logging.info("git_info():")
+    logging.info("git_url is %s" % manifest['svn_url'])
+    url_name = manifest['svn_url'].split("/")
+    url_user = url_name[3]
+    url_pkg = url_name[4]
+    cmd = "/".join(["https://api.github.com/repos",url_user,
+                       url_pkg, "commits/HEAD"])
+    request = Request(cmd)
+    send_message({
+        "body": "Accessing git_info. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
+    try:
+        response = urlopen(request)
+        res = response.read()
+        git_dir = json.loads(res)
+        sha = git_dir['sha']
+        last_auth = git_dir['commit']['author']['name']
+        last_date = git_dir['commit']['author']['date']
+        commit_msg = git_dir['commit']['message']
+        files_mod = ''
+        for dic in git_dir['files']:
+            files_mod = files_mod + " "  + dic['filename']
+        logging.info("\n Commit ID: " + sha + "\n Last Change Author: " +
+                      last_auth + "\n Last Chage Date: " + last_date +
+                      "\n Last Commit Message: \n" + commit_msg +
+                      "\n Files Changes: " + files_mod)
+        send_message({
+        "body": "Accessing git_info complete. ",
+        "status": "post_processing",
+        "retcode": 0
+        })
+    except URLError, err_url:
+        logging.info('Cannot access github log: %s', err_url)
+        send_message({
+            "body": "Accessing git_info failed. ",
+            "status": "post_processing",
+            "retcode": -1
+        })
+
+
+def is_build_required(manifest):
+    global svn_url_global
+    svn_url_global = manifest['svn_url']
+    package_name = manifest['job_id'].split("_")[0]
+    logging.info("Starting is_build_required() '%s'." % package_name)
+
+    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
+    if not github_url.endswith("/"):
+        github_url += "/"
+        # We only build the master branch. There had better be one.
+        # (technically we build whatever the default branch is, but
+        # this step looks at master because to find out what the
+        # default branch is at this point we would need octokit here).
+    github_url += "master/DESCRIPTION"
+    github_url = github_url.replace("https://github.com",
+      "https://raw.githubusercontent.com")
+    try:
+        f = urllib2.urlopen(github_url)
+        dcf_text = f.read()
+        dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
+        send_dcf_info(dcf_file)
+        svn_version = dcf_file.getValue("Version")
+    except:
+        logging.error("ERROR: is_build_required() failed\n  Could not open ",
+                      github_url)
+        sys.exit("Exiting is_build_required check failed")
+
+    if ("force" in manifest.keys()):
+        if (manifest['force'] is True):
+            return(True)
+
+    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
+
+    cran_repo_map = {
+        'source': "src/contrib",
+        'win.binary': "bin/windows/contrib/" + r_version,
+        'win64.binary': "bin/windows64/contrib/" + r_version,
+        'mac.binary': "bin/macosx/contrib/" + r_version,
+        'mac.binary.mavericks': "bin/macosx/mavericks/contrib/" + r_version
+    }
+    base_repo_url = HOSTS['bioc']
+    if (manifest['repository'] == 'course'):
+        base_repo_url += '/course-packages'
+    elif (manifest['repository'] == 'scratch'):
+        base_repo_url += '/scratch_repos/' + manifest['bioc_version']
+
+    repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
+    # What if there is no file at this url?
+    packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
+        stdout=subprocess.PIPE).communicate()[0]
+    inpackage = False
+    repository_version = False
+    for line in packages.split("\n"):
+        if line == "Package: %s" % package_name:
+            inpackage = True
+        if (line.startswith("Version: ") and inpackage):
+            repository_version = line.split(": ")[1]
+            break
+    if not repository_version:
+        return True # package hasn't been pushed to repo before
+    logging.debug("is_build_required()" +
+                  "\n  [%s] svn version is %s, repository version is %s" %
+                  (package_name, svn_version, repository_version))
+    return svn_version != repository_version
 
 
 def git_clone():
@@ -426,6 +516,7 @@ def install_pkg_deps():
     logging.info("Finished Installing Dependencies.\n completed with status: " + str(retcode))
     return retcode
 
+
 def install_pkg():
     package_name = manifest['job_id'].split("_")[0]
     package_dir = os.path.dirname(working_dir)
@@ -451,6 +542,7 @@ def install_pkg():
     logging.info("Finished Installing Package.\n completed with status: " + str(retcode))
     return retcode
 
+
 def get_source_tarball_name():
     pkgname = manifest['job_id'].split("_")[0]
     # if tarball name does not have version:
@@ -462,6 +554,225 @@ def get_source_tarball_name():
             tarball = file
             break
     return(tarball)
+
+
+def build_package(source_build):
+    global pkg_type
+    global workflow
+
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
+
+    buildmsg = None
+    if (source_build):
+        buildmsg = "building"
+    else:
+        buildmsg = "buildingbin"
+
+    if ((not source_build) and (pkg_type == "source")):
+        send_message({"status": "skip_buildbin", "body": "skipped"})
+        logging.info("Skip buildbin")
+        return(0)
+
+    if (not source_build):
+        if platform.system() == "Darwin":
+            pkg_type = "mac.binary.mavericks"
+        elif platform.system() == "Linux":
+            pkg_type = "source"
+        elif platform.system() == "Windows":
+            pkg_type = "win.binary"
+        else:
+            pkg_type = "source"
+        send_message({"status": "starting_buildbin", "body": ""})
+        logging.info("Start buildbin")
+
+    global message_sequence
+    global warnings
+    message_sequence = 1
+    flags = "--keep-empty-dirs --no-resave-data"
+
+    if (source_build):
+        package_name = manifest['job_id'].split("_")[0]
+        r_cmd = "%s CMD build %s %s" % \
+                (ENVIR['bbs_R_cmd'], flags, package_name)
+    else:
+        if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
+            libdir = "libdir"
+            if os.path.exists(libdir):
+                _call("rm -rf %s" % libdir, False)
+            if (not (os.path.exists(libdir))):
+                os.mkdir(libdir)
+            r_cmd = os.environ['SPB_HOME'] + "/build-universal.sh %s %s" % (
+                get_source_tarball_name(), libdir)
+
+    status = None
+    if (source_build):
+        status = "r_cmd"
+        outfile = "R.out"
+    else:
+        status = "r_buildbin_cmd"
+        outfile = "Rbuildbin.out"
+    logging.debug("Before build, working dir is %s." %
+                  working_dir)
+
+    send_message({
+        "body": "Starting Build package. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
+    start_time = datetime.datetime.now()
+    if ((not source_build) and pkg_type == "win.binary"):
+        retcode = win_multiarch_buildbin(buildmsg)
+    else:
+        send_message({"status": status, "body": r_cmd})
+        retcode = do_build(r_cmd, buildmsg, source_build)
+
+    stop_time = datetime.datetime.now()
+    time_dif = stop_time - start_time
+    min_time, sec_time = divmod(time_dif.seconds,60)
+    sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
+    elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
+    send_message({
+        "body": "Build Package status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
+
+    # check for warnings
+    out_fh = open(outfile)
+    warnings = False
+    for line in out_fh:
+        if line.lower().startswith("warning:"):
+            warnings = True
+        if line.lower().startswith("error:"):
+            retcode = 1
+    out_fh.close()
+
+    complete_status = None
+    if (source_build):
+        complete_status = "build_complete"
+    else:
+        complete_status = "buildbin_complete"
+
+    # to catch windows timeout
+    timeout_limit = int(ENVIR['timeout_limit'])
+    if workflow:
+        timeout_limit = timeout_limit*3
+    if (timeout_limit <= time_dif.seconds):
+        logging.info("Build time indicates TIMEOUT")
+        retcode = -9
+
+    send_message({
+        "status": complete_status,
+        "retcode": retcode,
+        "warnings": warnings,
+        "body": "Build completed with status %d" % retcode,
+        "elapsed_time": elapsed_time})
+    logging.info(complete_status + "\n Build completed with status: " +
+                 str(retcode) + " Elapsed time: " + elapsed_time)
+
+    return (retcode)
+
+
+def do_build(cmd, message_stream, source):
+    global workflow
+    if source:
+        outfile = "R.out"
+    else:
+        outfile = "Rbuildbin.out"
+    if (os.path.exists(outfile)):
+        os.remove(outfile)
+    out_fh = open(outfile, "w")
+    logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
+    logging.info("The working directory: {wd}".format(wd=os.getcwd()))
+    logging.debug("The current environment variables: \n {envVars}".format(envVars=os.environ))
+    logging.info("Build command: '{cmd}'.".format(cmd= cmd))
+    background = Tailer(outfile, message_stream)
+    background.start()
+
+    timeout_limit = int(ENVIR['timeout_limit'])
+    if workflow:
+        timeout_limit = timeout_limit*3
+    min_time, sec_time = divmod(timeout_limit, 60)
+
+    kill = lambda process: process.kill()
+    pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
+                             shell=True)
+    my_timer = Timer(timeout_limit, kill, [pope])
+    try:
+        my_timer.start()
+        retcode = pope.wait()
+    finally:
+        my_timer.cancel()
+
+    if (retcode == -9):
+        out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + "mins\n\n\n")
+
+    out_fh.close()
+    background.stop()
+    logging.debug("do_build() Before joining background thread.")
+    background.join()
+    logging.debug("do_build() After joining background thread.")
+    logging.info("Done do_build().")
+    return(retcode)
+
+
+def win_multiarch_buildbin(message_stream):
+    logging.info("Starting win_multiarch_buildbin")
+    tarball = get_source_tarball_name()
+    pkg = tarball.split("_")[0]
+    libdir = "%s.buildbin-libdir" % pkg
+    if (os.path.exists(libdir)):
+        _call("rm -rf %s" % libdir, False)
+    logging.debug("win_multiarch_buildbin() Does %s exist? %s." %
+                  (libdir, os.path.exists(libdir)))
+    if not (os.path.exists(libdir)):
+        os.mkdir(libdir)
+    logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
+                  (libdir, os.path.exists(libdir)))
+    time.sleep(1)
+    cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
+        R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
+
+    send_message({"status": "r_buildbin_cmd", "body": cmd})
+
+    return do_build(cmd, message_stream, False)
+
+
+def check_package():
+    send_message({"status": "starting_check", "body": ""})
+
+    if (platform.system() == "Windows"):
+        return(win_multiarch_check())
+
+    tarball = get_source_tarball_name()
+
+    extra_flags = ""
+    if (platform.system() == "Darwin"):
+        extra_flags = " --no-multiarch "
+
+    cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
+
+    cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
+
+    cmdMessage = cmdCheck + "  &&  " + cmdBiocCheck
+
+    send_message({"status": "check_cmd", "body": cmdMessage})
+    logging.info("R Check Command:\n" + cmdCheck)
+    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
+    send_message({
+        "body": "Starting Check package. ",
+        "status": "preprocessing",
+        "retcode": 0
+    })
+    retcode = do_check(cmdCheck, cmdBiocCheck)
+    send_message({
+        "body": "Checking Package status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
+
+    return (retcode)
+
 
 def do_check(cmdCheck, cmdBiocCheck):
 #
@@ -590,6 +901,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     return (retcode)
 
+
 def win_multiarch_check():
     tarball = get_source_tarball_name()
     pkg = tarball.split("_")[0]
@@ -661,262 +973,6 @@ def win_multiarch_check():
         })
     return (retcode)
 
-def win_multiarch_buildbin(message_stream):
-    logging.info("Starting win_multiarch_buildbin")
-    tarball = get_source_tarball_name()
-    pkg = tarball.split("_")[0]
-    libdir = "%s.buildbin-libdir" % pkg
-    if (os.path.exists(libdir)):
-        _call("rm -rf %s" % libdir, False)
-    logging.debug("win_multiarch_buildbin() Does %s exist? %s." %
-                  (libdir, os.path.exists(libdir)))
-    if not (os.path.exists(libdir)):
-        os.mkdir(libdir)
-    logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
-                  (libdir, os.path.exists(libdir)))
-    time.sleep(1)
-    cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
-        R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
-
-    send_message({"status": "r_buildbin_cmd", "body": cmd})
-
-    return do_build(cmd, message_stream, False)
-
-def check_package():
-    send_message({"status": "starting_check", "body": ""})
-
-    if (platform.system() == "Windows"):
-        return(win_multiarch_check())
-
-    tarball = get_source_tarball_name()
-
-    extra_flags = ""
-    if (platform.system() == "Darwin"):
-        extra_flags = " --no-multiarch "
-
-    cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
-
-    cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
-
-    cmdMessage = cmdCheck + "  &&  " + cmdBiocCheck
-
-    send_message({"status": "check_cmd", "body": cmdMessage})
-    logging.info("R Check Command:\n" + cmdCheck)
-    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
-    send_message({
-        "body": "Starting Check package. ",
-        "status": "preprocessing",
-        "retcode": 0
-    })
-    retcode = do_check(cmdCheck, cmdBiocCheck)
-    send_message({
-        "body": "Checking Package status: " + str(retcode) + ". ",
-        "status": "post_processing",
-        "retcode": retcode
-    })
-
-    return (retcode)
-
-def do_build(cmd, message_stream, source):
-    global workflow
-    if source:
-        outfile = "R.out"
-    else:
-        outfile = "Rbuildbin.out"
-    if (os.path.exists(outfile)):
-        os.remove(outfile)
-    out_fh = open(outfile, "w")
-    logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
-    logging.info("The working directory: {wd}".format(wd=os.getcwd()))
-    logging.debug("The current environment variables: \n {envVars}".format(envVars=os.environ))
-    logging.info("Build command: '{cmd}'.".format(cmd= cmd))
-    background = Tailer(outfile, message_stream)
-    background.start()
-
-    timeout_limit = int(ENVIR['timeout_limit'])
-    if workflow:
-        timeout_limit = timeout_limit*3
-    min_time, sec_time = divmod(timeout_limit, 60)
-
-    kill = lambda process: process.kill()
-    pope  = subprocess.Popen(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
-                             shell=True)
-    my_timer = Timer(timeout_limit, kill, [pope])
-    try:
-        my_timer.start()
-        retcode = pope.wait()
-    finally:
-        my_timer.cancel()
-
-    if (retcode == -9):
-        out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + "mins\n\n\n")
-
-    out_fh.close()
-    background.stop()
-    logging.debug("do_build() Before joining background thread.")
-    background.join()
-    logging.debug("do_build() After joining background thread.")
-    logging.info("Done do_build().")
-    return(retcode)
-
-def build_package(source_build):
-    global pkg_type
-    global workflow
-
-    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
-
-    buildmsg = None
-    if (source_build):
-        buildmsg = "building"
-    else:
-        buildmsg = "buildingbin"
-
-    if ((not source_build) and (pkg_type == "source")):
-        send_message({"status": "skip_buildbin", "body": "skipped"})
-        logging.info("Skip buildbin")
-        return(0)
-
-    if (not source_build):
-        if platform.system() == "Darwin":
-            pkg_type = "mac.binary.mavericks"
-        elif platform.system() == "Linux":
-            pkg_type = "source"
-        elif platform.system() == "Windows":
-            pkg_type = "win.binary"
-        else:
-            pkg_type = "source"
-        send_message({"status": "starting_buildbin", "body": ""})
-        logging.info("Start buildbin")
-
-    global message_sequence
-    global warnings
-    message_sequence = 1
-    flags = "--keep-empty-dirs --no-resave-data"
-
-    if (source_build):
-        package_name = manifest['job_id'].split("_")[0]
-        r_cmd = "%s CMD build %s %s" % \
-                (ENVIR['bbs_R_cmd'], flags, package_name)
-    else:
-        if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
-            libdir = "libdir"
-            if os.path.exists(libdir):
-                _call("rm -rf %s" % libdir, False)
-            if (not (os.path.exists(libdir))):
-                os.mkdir(libdir)
-            r_cmd = os.environ['SPB_HOME'] + "/build-universal.sh %s %s" % (
-                get_source_tarball_name(), libdir)
-
-    status = None
-    if (source_build):
-        status = "r_cmd"
-        outfile = "R.out"
-    else:
-        status = "r_buildbin_cmd"
-        outfile = "Rbuildbin.out"
-    logging.debug("Before build, working dir is %s." %
-                  working_dir)
-
-    send_message({
-        "body": "Starting Build package. ",
-        "status": "preprocessing",
-        "retcode": 0
-    })
-    start_time = datetime.datetime.now()
-    if ((not source_build) and pkg_type == "win.binary"):
-        retcode = win_multiarch_buildbin(buildmsg)
-    else:
-        send_message({"status": status, "body": r_cmd})
-        retcode = do_build(r_cmd, buildmsg, source_build)
-
-    stop_time = datetime.datetime.now()
-    time_dif = stop_time - start_time
-    min_time, sec_time = divmod(time_dif.seconds,60)
-    sec_time = str(format(float(str(time_dif).split(":")[2]), '.2f'))
-    elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
-    send_message({
-        "body": "Build Package status: " + str(retcode) + ". ",
-        "status": "post_processing",
-        "retcode": retcode
-    })
-
-    # check for warnings
-    out_fh = open(outfile)
-    warnings = False
-    for line in out_fh:
-        if line.lower().startswith("warning:"):
-            warnings = True
-        if line.lower().startswith("error:"):
-            retcode = 1
-    out_fh.close()
-
-    complete_status = None
-    if (source_build):
-        complete_status = "build_complete"
-    else:
-        complete_status = "buildbin_complete"
-
-    # to catch windows timeout
-    timeout_limit = int(ENVIR['timeout_limit'])
-    if workflow:
-        timeout_limit = timeout_limit*3
-    if (timeout_limit <= time_dif.seconds):
-        logging.info("Build time indicates TIMEOUT")
-        retcode = -9
-
-    send_message({
-        "status": complete_status,
-        "retcode": retcode,
-        "warnings": warnings,
-        "body": "Build completed with status %d" % retcode,
-        "elapsed_time": elapsed_time})
-    logging.info(complete_status + "\n Build completed with status: " +
-                 str(retcode) + " Elapsed time: " + elapsed_time)
-
-    return (retcode)
-
-
-def git_info():
-    logging.info("git_info():")
-    logging.info("git_url is %s" % manifest['svn_url'])
-    url_name = manifest['svn_url'].split("/")
-    url_user = url_name[3]
-    url_pkg = url_name[4]
-    cmd = "/".join(["https://api.github.com/repos",url_user,
-                       url_pkg, "commits/HEAD"])
-    request = Request(cmd)
-    send_message({
-        "body": "Accessing git_info. ",
-        "status": "preprocessing",
-        "retcode": 0
-    })
-    try:
-        response = urlopen(request)
-        res = response.read()
-        git_dir = json.loads(res)
-        sha = git_dir['sha']
-        last_auth = git_dir['commit']['author']['name']
-        last_date = git_dir['commit']['author']['date']
-        commit_msg = git_dir['commit']['message']
-        files_mod = ''
-        for dic in git_dir['files']:
-            files_mod = files_mod + " "  + dic['filename']
-        logging.info("\n Commit ID: " + sha + "\n Last Change Author: " +
-                      last_auth + "\n Last Chage Date: " + last_date +
-                      "\n Last Commit Message: \n" + commit_msg +
-                      "\n Files Changes: " + files_mod)
-        send_message({
-        "body": "Accessing git_info complete. ",
-        "status": "post_processing",
-        "retcode": 0
-        })
-    except URLError, err_url:
-        logging.info('Cannot access github log: %s', err_url)
-        send_message({
-            "body": "Accessing git_info failed. ",
-            "status": "post_processing",
-            "retcode": -1
-        })
 
 # This function does the following, acting on behalf of biocadmin on staging.bioconductor.org:
 #   1. First prune old copies of the package in a path like :
@@ -1021,35 +1077,13 @@ def propagate_package():
         logging.error("propagate_package() Failed to copy file to repository.")
         sys.exit("failed to copy file to repository")
 
-## todo - get rid of ugly workarounds
-def _call(command_str, shell):
-    global callcount
-    if (platform.system() == "Windows"):
-        stdout_fn = os.path.join(working_dir, "%dout.txt" % callcount)
-        stderr_fn = os.path.join(working_dir, "%derr.txt" % callcount)
-
-        stdout_fh = open(stdout_fn, "w")
-        stderr_fh = open(stderr_fn, "w")
-
-        callcount += 1
-        # ignore shell arg
-        command_str = str(command_str)
-        logging.debug("_call()" +
-                      "\n  command_str = %s" % command_str +
-                      "\n  len(command_str) = %d" % len(command_str))
-        retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh,
-                                  stderr=stderr_fh)
-        stdout_fh.close()
-        stderr_fh.close()
-        return(retcode)
-    else:
-        return(subprocess.call(command_str, shell=shell))
 
 def ssh(command, user='biocadmin', host=ENVIR['spb_staging_url']):
     command = "%s %s@%s \"%s\"" % (packagebuilder_ssh_cmd, user, host, command)
     logging.info("ssh() command: %s" % command)
     retcode = _call([command], shell=True)
     return(retcode)
+
 
 def scp(src, dest, srcLocal=True, user='biocadmin',
         host=ENVIR['spb_staging_url']):
@@ -1080,23 +1114,6 @@ def scp(src, dest, srcLocal=True, user='biocadmin',
 
     return(retcode)
 
-def onexit():
-    global svn_url_global
-    try:
-        svn_url_global
-    except NameError:
-        svn_url_global = "undefined"
-
-    logging.info("Cleaning Directory().")
-    clean_up_dir()
-    logging.info("Ending via onexit().")
-    send_message({
-        "body": "builder.py exited",
-        "status": "autoexit",
-        "retcode": -1,
-        "svn_url": svn_url_global
-    })
-    stomp.disconnect(receipt=None)
 
 def update_packages_file():
     global repos
@@ -1176,45 +1193,49 @@ def update_packages_file():
             "build_product": build_product,
             "url": url})
 
-def get_r_version():
-    logging.info("BBS_R_CMD = %s" % ENVIR['bbs_R_cmd'])
-    r_version_raw, stderr = subprocess.Popen([
-        ENVIR['bbs_R_cmd'],"--version"
-    ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
-    lines = r_version_raw.split("\n")
-    r_version_line = lines[0]
-    return r_version_line.replace("R version ", "")
 
-def get_node_info():
-    logging.info("Node Info:")
-    r_version = get_r_version()
-    osys = BBScorevars.getNodeSpec(BUILDER_ID, "OS")
-    arch = BBScorevars.getNodeSpec(BUILDER_ID, "Arch")
-    plat = BBScorevars.getNodeSpec(BUILDER_ID, "Platform")
+## todo - get rid of ugly workarounds
+def _call(command_str, shell):
+    global callcount
+    if (platform.system() == "Windows"):
+        stdout_fn = os.path.join(working_dir, "%dout.txt" % callcount)
+        stderr_fn = os.path.join(working_dir, "%derr.txt" % callcount)
+
+        stdout_fh = open(stdout_fn, "w")
+        stderr_fh = open(stderr_fn, "w")
+
+        callcount += 1
+        # ignore shell arg
+        command_str = str(command_str)
+        logging.debug("_call()" +
+                      "\n  command_str = %s" % command_str +
+                      "\n  len(command_str) = %d" % len(command_str))
+        retcode = subprocess.call(command_str, shell=False, stdout=stdout_fh,
+                                  stderr=stderr_fh)
+        stdout_fh.close()
+        stderr_fh.close()
+        return(retcode)
+    else:
+        return(subprocess.call(command_str, shell=shell))
+
+
+def onexit():
+    global svn_url_global
+    try:
+        svn_url_global
+    except NameError:
+        svn_url_global = "undefined"
+
+    logging.info("Cleaning Directory().")
+    clean_up_dir()
+    logging.info("Ending via onexit().")
     send_message({
-        "status": "node_info",
-        "r_version": r_version,
-        "os": osys,
-        "arch": arch,
-        "platform": plat,
-        "body": "node_info",
-        "bioc_version": ENVIR['bbs_Bioc_version']})
-    logging.info("\n os: " + osys +  "\n r_version: " + r_version +
-                 "\n bioc_version: " + ENVIR['bbs_Bioc_version'])
-
-def is_valid_url():
-
-    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
-    logging.info("Checking valid github_url: " + github_url)
-    if not github_url.endswith("/"):
-        github_url += "/"
-    github_url += "master/DESCRIPTION"
-    github_url = github_url.replace("https://github.com",
-    "https://raw.githubusercontent.com")
-    logging.debug("Checking valid github_url: " + github_url)
-    response = requests.get(github_url)
-    # 1xx info 2xx success 3xx redirect 4xx client error 5xx server error
-    return response.status_code < 400
+        "body": "builder.py exited",
+        "status": "autoexit",
+        "retcode": -1,
+        "svn_url": svn_url_global
+    })
+    stomp.disconnect(receipt=None)
 
 
 def clean_up_dir():
@@ -1252,7 +1273,6 @@ def clean_up_dir():
     cloneDir = "rm -rf " + pkgDirName
     if os.path.exists(pkgDirName):
         os.system(cloneDir)
-
 
 
 ## Main namespace. execution starts here.
