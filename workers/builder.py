@@ -1220,6 +1220,16 @@ def _call(command_str, shell):
         return(subprocess.call(command_str, shell=shell))
 
 
+def isUnsupported(mySys, key):
+    package_name = manifest['job_id'].split("_")[0]
+    unsupport = bbs.parse.getBBSoptionFromDir(package_name, 
+                                          "UnsupportedPlatforms")
+    if (unsupport is not None):
+        unsupport = [x.strip().lower() for x in unsupport.split(",")]
+        return (((platform.system() == mySys) and (key in unsupport)))
+    else:
+        return (False)
+
 def onexit():
     global svn_url_global
     try:
@@ -1336,31 +1346,24 @@ if __name__ == "__main__":
 
     git_clone()
 
-    package_name = manifest['job_id'].split("_")[0]
-    unsupport = bbs.parse.getBBSoptionFromDir(package_name, 
-                                          "UnsupportedPlatforms")
     exitOut = False
-    if (unsupport is not None):
-        unsupport = [x.strip().lower() for x in unsupport.split(",")]
-        if ((platform.system() == "Linux" and "linux" in unsupport) or
-           (platform.system() == "Darwin" and "mac" in unsupport) or
-           ((platform.system() == "Windows") and ("win" in unsupport or (("win64" in unsupport) and ("win32" in unsupport))))):
+    if ((isUnsupported("Linux","linux")) or (isUnsupported("Darwin","mac")) or
+       (isUnsupported("Windows","win")) or 
+       ((isUnsupported("Windows","win64")) and (isUnsupported("Windows","win32")))):
             exitOut = True
-        else:
-            logging.info("Initial Platform Check Passed.")
-        if (exitOut):
-            logging.info("Unsupported Platform.")
-            send_message({
-                "status": "unsupported",
-                "retcode": 0,
-                "warnings": False,
-                "body": "Unsupported Platform",
-                "elapsed_time": "NA"})
-            send_message({"status": "post_processing",
-                          "retcode": 0,
-                          "body": "Unsupported Platform. "})
 
-            sys.exit("unsupported platform")
+    if (exitOut):
+        logging.info("Unsupported Platform.")
+        send_message({
+            "status": "unsupported",
+            "retcode": 0,
+            "warnings": False,
+            "body": "Unsupported Platform",
+            "elapsed_time": "NA"})
+        send_message({"status": "post_processing",
+                      "retcode": 0,
+                      "body": "Unsupported Platform. "})
+        sys.exit("unsupported platform")
     else:
         logging.info("Initial Platform Check Passed.")
 
