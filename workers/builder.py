@@ -45,6 +45,7 @@ sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 import BBScorevars
 import dcf
+import bbs.parse
 
 stomp = None
 manifest = None
@@ -1334,6 +1335,34 @@ if __name__ == "__main__":
         sys.exit(0)
 
     git_clone()
+
+    package_name = manifest['job_id'].split("_")[0]
+    unsupport = bbs.parse.getBBSoptionFromDir(package_name, 
+                                          "UnsupportedPlatforms")
+    exitOut = False
+    if (unsupport is not None):
+        unsupport = [x.strip().lower() for x in unsupport.split(",")]
+        if ((platform.system() == "Linux" and "linux" in unsupport) or
+           (platform.system() == "Darwin" and "mac" in unsupport) or
+           ((platform.system() == "Windows") and ("win" in unsupport or (("win64" in unsupport) and ("win32" in unsupport))))):
+            exitOut = True
+        else:
+            logging.info("Initial Platform Check Passed.")
+        if (exitOut):
+            logging.info("Unsupported Platform.")
+            send_message({
+                "status": "unsupported",
+                "retcode": 0,
+                "warnings": False,
+                "body": "Unsupported Platform",
+                "elapsed_time": "NA"})
+            send_message({"status": "post_processing",
+                          "retcode": 0,
+                          "body": "Unsupported Platform. "})
+
+            sys.exit("unsupported platform")
+    else:
+        logging.info("Initial Platform Check Passed.")
 
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Installing Package Dependencies:")
