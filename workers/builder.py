@@ -1347,7 +1347,8 @@ if __name__ == "__main__":
     git_clone()
 
     exitOut = False
-    if ((isUnsupported("Linux","linux")) or (isUnsupported("Darwin","mac")) or
+    if ((isUnsupported(platform.system(), BUILDER_ID)) or
+       (isUnsupported("Linux","linux")) or (isUnsupported("Darwin","mac")) or
        (isUnsupported("Windows","win")) or 
        ((isUnsupported("Windows","win64")) and (isUnsupported("Windows","win32")))):
             exitOut = True
