@@ -407,8 +407,7 @@ def is_build_required(manifest):
         'source': "src/contrib",
         'win.binary': "bin/windows/contrib/" + r_version,
         'win64.binary': "bin/windows64/contrib/" + r_version,
-        'mac.binary': "bin/macosx/contrib/" + r_version,
-        'mac.binary.mavericks': "bin/macosx/mavericks/contrib/" + r_version
+        'mac.binary': "bin/macosx/contrib/" + r_version
     }
     base_repo_url = HOSTS['bioc']
     if (manifest['repository'] == 'course'):
@@ -576,7 +575,7 @@ def build_package(source_build):
 
     if (not source_build):
         if platform.system() == "Darwin":
-            pkg_type = "mac.binary.mavericks"
+            pkg_type = "mac.binary"
         elif platform.system() == "Linux":
             pkg_type = "source"
         elif platform.system() == "Windows":
@@ -596,7 +595,7 @@ def build_package(source_build):
         r_cmd = "%s CMD build %s %s" % \
                 (ENVIR['bbs_R_cmd'], flags, package_name)
     else:
-        if pkg_type == "mac.binary" or pkg_type == "mac.binary.mavericks":
+        if pkg_type == "mac.binary":
             libdir = "libdir"
             if os.path.exists(libdir):
                 _call("rm -rf %s" % libdir, False)
@@ -995,7 +994,7 @@ def propagate_package():
     build_product = filter(lambda x: x.endswith(ext), files)[0]
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
-        os_seg = "bin/macosx/mavericks/contrib/%s" % r_version
+        os_seg = "bin/macosx/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
@@ -1122,11 +1121,7 @@ def update_packages_file():
 
     r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
     if (platform.system() == "Darwin"):
-        pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
-        if pkg_type == "mac.binary.leopard":
-            os_seg = "bin/macosx/contrib/%s" % r_version
-        else:
-            os_seg = "bin/macosx/mavericks/contrib/%s" % r_version
+        os_seg = "bin/macosx/contrib/%s" % r_version
     elif (platform.system() == "Linux"):
         os_seg = "src/contrib"
     else:
@@ -1146,7 +1141,7 @@ def update_packages_file():
         script_loc = "/loc/www/bioconductor-test.fhcrc.org/scratch-repos/%s" % manifest['bioc_version']
 
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
-    if pkg_type == "mac.binary.leopard":
+    if "mac.binary" in pkg_type:
         pkg_type = "mac.binary"
     command = "%s biocadmin@%s 'R -f %s/update-repo.R --args %s %s'"
     command = command % (packagebuilder_ssh_cmd, ENVIR['spb_staging_url'], script_loc, repos, pkg_type)
