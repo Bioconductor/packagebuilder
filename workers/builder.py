@@ -525,7 +525,12 @@ def install_pkg():
     r_cmd = ENVIR['bbs_R_cmd']
     lib_dir = os.path.join(package_dir, "R-libs")
 
-    cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
+    if ((platform.system() == "Windows") and (isUnsupported("Windows", "win32"))):
+        cmd = "%s --arch x64 CMD INSTALL --no-multiarch --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
+    elif ((platform.system() == "Windows") and (isUnsupported("Windows", "win64"))):
+        cmd = "%s --arch i386 CMD INSTALL --no-multiarch --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
+    else:
+        cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
 
     send_message({
         "body": "Installing package: " + package_name + ". ",
@@ -592,8 +597,15 @@ def build_package(source_build):
 
     if (source_build):
         package_name = manifest['job_id'].split("_")[0]
-        r_cmd = "%s CMD build %s %s" % \
-                (ENVIR['bbs_R_cmd'], flags, package_name)
+        if ((platform.system() == "Windows") and (isUnsupported("Windows", "win32"))):
+            r_cmd = "%s --arch x64 CMD build %s %s" % \
+                    (ENVIR['bbs_R_cmd'], flags, package_name)
+        elif ((platform.system() == "Windows") and (isUnsupported("Windows", "win64"))):
+            r_cmd = "%s --arch i386 CMD build %s %s" % \
+                    (ENVIR['bbs_R_cmd'], flags, package_name)
+        else:
+            r_cmd = "%s CMD build %s %s" % \
+                    (ENVIR['bbs_R_cmd'], flags, package_name)
     else:
         if pkg_type == "mac.binary":
             libdir = "libdir"
@@ -730,8 +742,15 @@ def win_multiarch_buildbin(message_stream):
     logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
                   (libdir, os.path.exists(libdir)))
     time.sleep(1)
-    cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
-        R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
+    if (isUnsupported("Windows", "win32")):
+        cmd = "{R} --arch x64 CMD INSTALL --build --no-multiarch --library={libdir} {tarball}".format(
+            R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
+    elif (isUnsupported("Windows", "win64")):
+        cmd = "{R} --arch i386 CMD INSTALL --build --no-multiarch --library={libdir} {tarball}".format(
+            R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
+    else:
+        cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
+            R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
 
     send_message({"status": "r_buildbin_cmd", "body": cmd})
 
@@ -913,12 +932,25 @@ def win_multiarch_check():
 
     r = ENVIR['bbs_R_cmd']
 
-    cmd = ("%s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
-           " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
+    if (isUnsupported("Windows", "win32")):
+        cmd = ("%s --arch x64 CMD INSTALL --build --no-multiarch --library=%s.buildbin-libdir"
+               " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
+        cmdCheck = ('%s --arch x64 CMD check --library=%s.buildbin-libdir'
+            ' --install="check:%s-install.out" --no-multiarch --no-vignettes'
+            ' --timings %s' % (r, pkg, pkg, tarball))
+    elif (isUnsupported("Windows", "win64")):
+        cmd = ("%s --arch i386 CMD INSTALL --build --no-multiarch --library=%s.buildbin-libdir"
+               " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
+        cmdCheck = ('%s --arch i386 CMD check --library=%s.buildbin-libdir'
+            ' --install="check:%s-install.out" --no-multiarch --no-vignettes'
+            ' --timings %s' % (r, pkg, pkg, tarball))
+    else:
+        cmd = ("%s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
+               " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
+        cmdCheck = ('%s CMD check --library=%s.buildbin-libdir'
+            ' --install="check:%s-install.out" --force-multiarch --no-vignettes'
+            ' --timings %s' % (r, pkg, pkg, tarball))
 
-    cmdCheck = ('%s CMD check --library=%s.buildbin-libdir'
-        ' --install="check:%s-install.out" --force-multiarch --no-vignettes'
-        ' --timings %s' % (r, pkg, pkg, tarball))
 
     cmdBiocCheck = ("%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (r, tarball))
 
