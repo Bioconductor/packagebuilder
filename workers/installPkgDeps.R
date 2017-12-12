@@ -69,7 +69,8 @@ install.packages("BiocInstaller", repos=repos, lib=pkg_libdir)
 SPB_pkgs <- c(
    "graph", "biocViews", "knitr", "knitrBootstrap",
    "devtools", "codetools", "httr", "curl", "optparse",
-   "GenomicFeatures", "ShortRead", "VariantAnnotation")
+   "GenomicFeatures", "ShortRead", "VariantAnnotation",
+   "dplyr", "biocViews")
 pkgs_already <- dir(R_libdir)
 needed_pkgs<- SPB_pkgs[!SPB_pkgs %in% pkgs_already]
 

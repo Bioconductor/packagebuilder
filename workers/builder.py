@@ -54,7 +54,7 @@ packagebuilder_ssh_cmd = None
 packagebuilder_scp_cmd = None
 build_product = None
 callcount = None
-workflow = None
+longBuild = None
 
 log_highlighter = "***************"
 
@@ -469,21 +469,12 @@ def git_clone():
 
 
 def install_pkg_deps():
-    global workflow
     package_name = manifest['job_id'].split("_")[0]
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
     logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
-    try:
-        isWorkflow = desc.getValue("Workflow")
-    except KeyError:
-        pass
-        isWorkflow = "false"
-    if (isWorkflow.lower() == "true"):
-        workflow = True
-        logging.info("Package is a workflow.")
     fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
     args = ""
     for field in fields:
@@ -515,6 +506,36 @@ def install_pkg_deps():
     })
     logging.info("Finished Installing Dependencies.\n completed with status: " + str(retcode))
     return retcode
+
+
+def isWorkFlowOrData():
+    global longBuild
+    package_name = manifest['job_id'].split("_")[0]
+    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
+    description = f.read()
+    f.close()
+    desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    try:
+        isWorkflow = desc.getValue("Workflow")
+    except KeyError:
+        pass
+        isWorkflow = "false"
+    if (isWorkflow.lower() == "true"):
+        longBuild = True
+        logging.info("Package is a workflow.")
+    else:
+        r_script = os.path.join(ENVIR['spb_home'], "isData.R")
+        log = "%s/isData.log" % working_dir
+        rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
+        rscript_binary = os.path.join(rscript_dir, "Rscript")
+        pkgpath = "%s/%s" % (working_dir, package_name)
+        cmd = "%s --vanilla --no-save --no-restore %s" % \
+              (rscript_binary, r_script)
+        cmd = cmd + " " + pkgpath
+        result = subprocess.check_output(cmd, shell=True)
+        if (result.lower() == "true"):
+            longBuild = True
+            logging.info("Package is a Data Experiment Package.")
 
 
 def install_pkg():
@@ -563,7 +584,7 @@ def get_source_tarball_name():
 
 def build_package(source_build):
     global pkg_type
-    global workflow
+    global longBuild
 
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
 
@@ -667,8 +688,8 @@ def build_package(source_build):
 
     # to catch windows timeout
     timeout_limit = int(ENVIR['timeout_limit'])
-    if workflow:
-        timeout_limit = timeout_limit*3
+    if longBuild:
+        timeout_limit = int(4800)
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
@@ -686,7 +707,7 @@ def build_package(source_build):
 
 
 def do_build(cmd, message_stream, source):
-    global workflow
+    global longBuild
     if source:
         outfile = "R.out"
     else:
@@ -702,8 +723,8 @@ def do_build(cmd, message_stream, source):
     background.start()
 
     timeout_limit = int(ENVIR['timeout_limit'])
-    if workflow:
-        timeout_limit = timeout_limit*3
+    if longBuild:
+        timeout_limit = int(4800)
     min_time, sec_time = divmod(timeout_limit, 60)
 
     kill = lambda process: process.kill()
@@ -717,7 +738,7 @@ def do_build(cmd, message_stream, source):
         my_timer.cancel()
 
     if (retcode == -9):
-        out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + "mins\n\n\n")
+        out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + " mins\n\n\n")
 
     out_fh.close()
     background.stop()
@@ -799,7 +820,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 #   killed output of BiocCheck and wouldn't write
 #   temporary fix: only add message for unix system
 #
-    global workflow
+    global longBuild
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
@@ -810,8 +831,8 @@ def do_check(cmdCheck, cmdBiocCheck):
     background.start()
 
     timeout_limit = int(ENVIR['timeout_limit'])
-    if workflow:
-        timeout_limit = timeout_limit*3
+    if longBuild:
+        timeout_limit = int(4800)
     min_time, sec_time = divmod(timeout_limit, 60)
 
     start_time = datetime.datetime.now()
@@ -846,7 +867,7 @@ def do_check(cmdCheck, cmdBiocCheck):
         out_fh.close()
         out_fh = open(outfile, "a")
         if (retcode1 == -9):
-            out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " +  str(min_time) + "mins\n\n\n")
+            out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " + str(min_time) + " mins\n\n\n")
 
             out_fh.flush()
             out_fh.close()
@@ -1400,6 +1421,11 @@ if __name__ == "__main__":
     result = install_pkg_deps()
     if (result != 0):
         logging.error("main() Failed to install dependencies: %d." % result)
+
+    logging.info("\n\n" + log_highlighter + "\n\n")
+    logging.info("Checking if package gets longer build/check time")
+    isWorkFlowOrData()
+    logging.info("\n\n" + log_highlighter + "\n\n")
 
     result = install_pkg()
     if (result != 0):
