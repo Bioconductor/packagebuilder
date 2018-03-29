@@ -833,11 +833,19 @@ def check_package():
         "retcode": 0
     })
     retcode = do_check(cmdCheck, cmdBiocCheck)
-    send_message({
-        "body": "Checking Package status: " + str(retcode) + ". ",
-        "status": "post_processing",
-        "retcode": retcode
-    })
+    logging.info("do_check result: " + str(retcode))
+    if (retcode == -4):
+        send_message({
+            "body": "WARNING: check time exceeded 5 min. ",
+            "status": "post_processing",
+            "retcode": retcode
+        })
+    else:
+        send_message({
+            "body": "Checking Package status: " + str(retcode) + ". ",
+            "status": "post_processing",
+            "retcode": retcode
+        })
 
     return (retcode)
 
@@ -849,6 +857,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 #   temporary fix: only add message for unix system
 #
     global longBuild
+    global pkg_type_views
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
@@ -881,6 +890,10 @@ def do_check(cmdCheck, cmdBiocCheck):
     elapsed_time = str(min_time) + " minutes " + sec_time + " seconds"
 
     logging.info("The timeout_limit is: " + str(timeout_limit))
+
+    if ((300 <= time_dif.seconds) & (pkg_type_views == "Software")):
+        logging.info("Build time indicates longer than 5 min requirement")
+        retcode1 = -4
 
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
@@ -948,12 +961,19 @@ def do_check(cmdCheck, cmdBiocCheck):
             break
     out_fh.close()
 
+    logging.info("retcode1: " + str(retcode1))
+    logging.info("retcode2: " + str(retcode2))
+
     if (retcode1 == 0 and retcode2 == 0):
         retcode = 0
+    elif (retcode1 == -4 and retcode2 == 0):
+        retcode = -4
     elif (retcode1 == -9 or retcode2 == -9):
         retcode = -9
     else:
         retcode = 1
+
+    logging.info("retcode: " + str(retcode))
 
     send_message({
         "status": "check_complete",
@@ -1043,7 +1063,12 @@ def win_multiarch_check():
                logging.info("Install cmd failed")
            # run check
            retcode = do_check(cmdCheck, cmdBiocCheck)
-
+           if (retcode == -4):
+               send_message({
+                   "body": "WARNING: check time exceeded 5 min. ",
+                   "status": "post_processing",
+                   "retcode": retcode
+               })
     else:
         send_message({
             "status": "check_complete",
