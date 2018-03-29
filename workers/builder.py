@@ -55,6 +55,7 @@ packagebuilder_scp_cmd = None
 build_product = None
 callcount = None
 longBuild = None
+pkg_type_views = None
 
 log_highlighter = "***************"
 
@@ -508,8 +509,9 @@ def install_pkg_deps():
     return retcode
 
 
-def isWorkFlowOrData():
+def getPackageType():
     global longBuild
+    global pkg_type_views
     package_name = manifest['job_id'].split("_")[0]
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
@@ -522,21 +524,24 @@ def isWorkFlowOrData():
         isWorkflow = "false"
     if (isWorkflow.lower() == "true"):
         longBuild = True
+        pkg_type_views = "Workflow"
         logging.info("Package is a workflow.")
     else:
-        r_script = os.path.join(ENVIR['spb_home'], "isData.R")
-        log = "%s/isData.log" % working_dir
-        rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
-        rscript_binary = os.path.join(rscript_dir, "Rscript")
-        pkgpath = "%s/%s" % (working_dir, package_name)
-        cmd = "%s --vanilla --no-save --no-restore %s" % \
-              (rscript_binary, r_script)
-        cmd = cmd + " " + pkgpath
-        result = subprocess.check_output(cmd, shell=True)
-        if (result.lower() == "true"):
-            longBuild = True
-            logging.info("Package is a Data Experiment Package.")
+        try:
+            views = desc.getValue("biocViews")
+            r_script = os.path.join(ENVIR['spb_home'], "getPackageType.R")
+            rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
+            rscript_binary = os.path.join(rscript_dir, "Rscript")
+            cmd = "%s --vanilla --no-save --no-restore %s" % (rscript_binary, r_script)
+            cmd = cmd + " " + views
+            pkg_type_views = subprocess.check_output(cmd, shell=True)
+            if (pkg_type_views == "ExperimentData"):
+                longBuild = True
+        except KeyError:
+            pkg_type_views = "Software"
 
+    logging.info("Package is of type: " + pkg_type_views)
+    logging.info("Package gets long build: " + str(longBuild))
 
 def install_pkg():
     package_name = manifest['job_id'].split("_")[0]
@@ -583,7 +588,7 @@ def get_source_tarball_name():
 
 
 def build_package(source_build):
-    global pkg_type
+    global pkg_type_views
     global longBuild
 
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
@@ -680,6 +685,17 @@ def build_package(source_build):
             retcode = 1
     out_fh.close()
 
+    # check build product size
+    tarname = get_source_tarball_name()
+    sizeFile = os.path.getsize(tarname)/(1024*1024.0)
+
+    logging.info("Size: " + str(sizeFile))
+    logging.info("pkg_type %s" % pkg_type_views)
+
+    if ((sizeFile > 4.0) & (pkg_type_views == "Software")):
+        warnings = True
+        retcode = -4
+
     complete_status = None
     if (source_build):
         complete_status = "build_complete"
@@ -702,6 +718,18 @@ def build_package(source_build):
         "elapsed_time": elapsed_time})
     logging.info(complete_status + "\n Build completed with status: " +
                  str(retcode) + " Elapsed time: " + elapsed_time)
+
+    if (retcode == -4):
+        send_message({
+            "body": "WARNING: Product from R CMD build exceeds 4 MB requirement:" + str(sizeFile) + " MB. ",
+            "status": "post_processing",
+            "retcode": retcode
+        })
+
+    # gave specific retcode to trigger warning but
+    # still want to proceed with rest of build/check after reporting
+    if (retcode == -4):
+        retcode = 0
 
     return (retcode)
 
@@ -1270,7 +1298,7 @@ def _call(command_str, shell):
 
 def isUnsupported(mySys, key):
     package_name = manifest['job_id'].split("_")[0]
-    unsupport = bbs.parse.getBBSoptionFromDir(package_name, 
+    unsupport = bbs.parse.getBBSoptionFromDir(package_name,
                                           "UnsupportedPlatforms")
     if (unsupport is not None):
         unsupport = [x.strip().lower() for x in unsupport.split(",")]
@@ -1397,7 +1425,7 @@ if __name__ == "__main__":
     exitOut = False
     if ((isUnsupported(platform.system(), BUILDER_ID)) or
        (isUnsupported("Linux","linux")) or (isUnsupported("Darwin","mac")) or
-       (isUnsupported("Windows","win")) or 
+       (isUnsupported("Windows","win")) or
        ((isUnsupported("Windows","win64")) and (isUnsupported("Windows","win32")))):
             exitOut = True
 
@@ -1424,7 +1452,7 @@ if __name__ == "__main__":
 
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Checking if package gets longer build/check time")
-    isWorkFlowOrData()
+    getPackageType()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
     result = install_pkg()
