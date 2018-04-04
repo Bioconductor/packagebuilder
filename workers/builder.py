@@ -540,6 +540,11 @@ def getPackageType():
         except KeyError:
             pkg_type_views = "Software"
 
+    send_message({
+        "body": "Package type: " + pkg_type_views + ". ",
+        "status": "post_processing",
+        "retcode": 0
+    })
     logging.info("Package is of type: " + pkg_type_views)
     logging.info("Package gets long build: " + str(longBuild))
 
@@ -696,6 +701,18 @@ def build_package(source_build):
         warnings = True
         retcode = -4
 
+    # build output printed entirely here
+    # changed from interactively during build
+    background = Tailer(outfile, buildmsg)
+    background.start()
+    if (retcode == -4):
+        out_fh = open(outfile, "a")
+        out_fh.write("\nWARNING: Product from R CMD build exceeds 4 MB requirement:" + str(sizeFile) + " MB.\n\n")
+        out_fh.flush()
+        out_fh.close()
+
+    background.stop()
+
     complete_status = None
     if (source_build):
         complete_status = "build_complete"
@@ -747,8 +764,6 @@ def do_build(cmd, message_stream, source):
     logging.info("The working directory: {wd}".format(wd=os.getcwd()))
     logging.debug("The current environment variables: \n {envVars}".format(envVars=os.environ))
     logging.info("Build command: '{cmd}'.".format(cmd= cmd))
-    background = Tailer(outfile, message_stream)
-    background.start()
 
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
@@ -769,11 +784,6 @@ def do_build(cmd, message_stream, source):
         out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + " mins\n\n\n")
 
     out_fh.close()
-    background.stop()
-    logging.debug("do_build() Before joining background thread.")
-    background.join()
-    logging.debug("do_build() After joining background thread.")
-    logging.info("Done do_build().")
     return(retcode)
 
 
@@ -909,6 +919,14 @@ def do_check(cmdCheck, cmdBiocCheck):
         out_fh = open(outfile, "a")
         if (retcode1 == -9):
             out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " + str(min_time) + " mins\n\n\n")
+
+            out_fh.flush()
+            out_fh.close()
+
+            out_fh = open(outfile, "a")
+
+        if (retcode1 == -4):
+            out_fh.write(" WARNING: R CMD check exceeded 5 min requirement\n\n\n")
 
             out_fh.flush()
             out_fh.close()
