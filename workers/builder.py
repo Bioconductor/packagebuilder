@@ -528,12 +528,13 @@ def getPackageType():
         logging.info("Package is a workflow.")
     else:
         try:
-            views = desc.getValue("biocViews")
+            views = desc.getValue("biocViews").replace(",", "")
             r_script = os.path.join(ENVIR['spb_home'], "getPackageType.R")
             rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
             rscript_binary = os.path.join(rscript_dir, "Rscript")
             cmd = "%s --vanilla --no-save --no-restore %s" % (rscript_binary, r_script)
             cmd = cmd + " " + views
+            logging.info("Get Package Type command:\n" + cmd)
             pkg_type_views = subprocess.check_output(cmd, shell=True)
             if (pkg_type_views == "ExperimentData"):
                 longBuild = True
