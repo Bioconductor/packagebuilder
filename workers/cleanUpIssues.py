@@ -5,6 +5,7 @@
 import os
 import json
 from urllib2 import Request, urlopen, URLError
+import requests
 from bioconductor.config import ENVIR
 import logging
 import datetime
@@ -15,10 +16,11 @@ logging.basicConfig(filename='cleanUpIssues.log',level=logging.INFO)
 # max item limit of 100 - so must run fairly frequently
 cmd = "https://api.github.com/repos/Bioconductor/Contributions/issues?state=closed&per_page=100"
 
-request = Request(cmd)
-response = urlopen(request)
-res = response.read()
-git_dir = json.loads(res)
+#request = Request(cmd)
+#response = urlopen(request)
+#res = response.read()
+res = requests.get(cmd)
+git_dir = json.loads(res.text)
 
 issue_nums = set()
 
