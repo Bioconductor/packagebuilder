@@ -691,35 +691,6 @@ def build_package(source_build):
             retcode = 1
     out_fh.close()
 
-    # check build product size
-    tarname = get_source_tarball_name()
-    sizeFile = os.path.getsize(tarname)/(1024*1024.0)
-
-    logging.info("Size: " + str(sizeFile))
-    logging.info("pkg_type %s" % pkg_type_views)
-
-    if ((sizeFile > 4.0) & (pkg_type_views == "Software")):
-        warnings = True
-        retcode = -4
-
-    # build output printed entirely here
-    # changed from interactively during build
-    background = Tailer(outfile, buildmsg)
-    background.start()
-    if (retcode == -4):
-        out_fh = open(outfile, "a")
-        out_fh.write("\nWARNING: Product from R CMD build exceeds 4 MB requirement:" + str(sizeFile) + " MB.\n\n")
-        out_fh.flush()
-        out_fh.close()
-
-    background.stop()
-
-    complete_status = None
-    if (source_build):
-        complete_status = "build_complete"
-    else:
-        complete_status = "buildbin_complete"
-
     # to catch windows timeout
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
@@ -727,6 +698,40 @@ def build_package(source_build):
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
+
+    # check build product size
+    tarname = get_source_tarball_name()
+    # need to see if file exists
+    # will crash if timeout and build product never created
+    if retcode != -9:
+        sizeFile = os.path.getsize(tarname)/(1024*1024.0)
+
+        logging.info("Size: " + str(sizeFile))
+        logging.info("pkg_type %s" % pkg_type_views)
+
+        if ((sizeFile > 4.0) & (pkg_type_views == "Software")):
+            warnings = True
+            retcode = -4
+
+        # build output printed entirely here
+        # changed from interactively during build
+        background = Tailer(outfile, buildmsg)
+        background.start()
+        if (retcode == -4):
+            out_fh = open(outfile, "a")
+            out_fh.write("\nWARNING: Product from R CMD build exceeds 4 MB requirement:" + format(sizeFile, '.4f') + " MB.\n\n")
+            out_fh.flush()
+            out_fh.close()
+
+        background.stop()
+
+
+    complete_status = None
+    if (source_build):
+        complete_status = "build_complete"
+    else:
+        complete_status = "buildbin_complete"
+
 
     send_message({
         "status": complete_status,
