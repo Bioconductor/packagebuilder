@@ -335,15 +335,17 @@ def git_info():
     url_pkg = url_name[4]
     cmd = "/".join(["https://api.github.com/repos",url_user,
                        url_pkg, "commits/HEAD"])
-    request = Request(cmd)
+    #request = Request(cmd)
     send_message({
         "body": "Accessing git_info. ",
         "status": "preprocessing",
         "retcode": 0
     })
     try:
-        response = urlopen(request)
-        res = response.read()
+        request = requests.get(cmd)
+        res = request.text
+        #response = urlopen(request)
+        #res = response.read()
         git_dir = json.loads(res)
         sha = git_dir['sha']
         last_auth = git_dir['commit']['author']['name']
