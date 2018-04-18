@@ -706,7 +706,11 @@ def build_package(source_build):
     # need to see if file exists
     # will crash if timeout and build product never created
     if retcode != -9:
-        sizeFile = os.path.getsize(tarname)/(1024*1024.0)
+        rawsize = os.path.getsize(tarname)
+        sizeFile = rawsize/(1024*1024.0)
+        # size for build report
+        kib = rawsize / float(1024)
+        filesize = "%.2f" % kib
 
         logging.info("Size: " + str(sizeFile))
         logging.info("pkg_type %s" % pkg_type_views)
@@ -719,6 +723,7 @@ def build_package(source_build):
         # changed from interactively during build
         background = Tailer(outfile, buildmsg)
         background.start()
+
         if (retcode == -4):
             out_fh = open(outfile, "a")
             out_fh.write("\nWARNING: Product from R CMD build exceeds 4 MB requirement:" + format(sizeFile, '.4f') + " MB.\n\n")
@@ -727,6 +732,12 @@ def build_package(source_build):
 
         background.stop()
 
+        send_message({
+            "body": "Determining package size complete: " + format(sizeFile,'.4f') + "MB. ",
+            "status": "post_processing",
+            "retcode": retcode,
+            "filesize": filesize
+        })
 
     complete_status = None
     if (source_build):
@@ -746,7 +757,7 @@ def build_package(source_build):
 
     if (retcode == -4):
         send_message({
-            "body": "WARNING: Product from R CMD build exceeds 4 MB requirement:" + str(sizeFile) + " MB. ",
+            "body": "WARNING: Product from R CMD build exceeds 4 MB requirement: " + str(sizeFile) + " MB. ",
             "status": "post_processing",
             "retcode": retcode
         })
