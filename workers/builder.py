@@ -719,18 +719,12 @@ def build_package(source_build):
             warnings = True
             retcode = -4
 
-        # build output printed entirely here
-        # changed from interactively during build
-        background = Tailer(outfile, buildmsg)
-        background.start()
 
         if (retcode == -4):
             out_fh = open(outfile, "a")
             out_fh.write("\nWARNING: Product from R CMD build exceeds 4 MB requirement:" + format(sizeFile, '.4f') + " MB.\n\n")
             out_fh.flush()
             out_fh.close()
-
-        background.stop()
 
         send_message({
             "body": "Determining package size complete: " + format(sizeFile,'.4f') + "MB. ",
@@ -745,6 +739,50 @@ def build_package(source_build):
     else:
         complete_status = "buildbin_complete"
 
+    # taken from
+    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/build.R#L462
+    # and 
+    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4025
+
+    hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
+          ".rhistory", ".rapp.history",
+	  ".o", ".sl", ".so", ".dylib",
+	  ".a", ".dll", ".def",
+	  ".ds_store",
+          ".log", ".aux", 
+          ".backups", ".cproject", ".directory",
+          ".dropbox", ".exrc", ".gdb.history",
+          ".gitattributes", ".gitmodules",
+          ".hgtags",
+          ".project", ".seed", ".settings", ".tm_properties")
+    badFiles = []
+    for root, dirs, files in os.walk(package_name):
+        for name in files:
+            if name.lower().endswith(hidden_file_ext):
+               badFiles.append(name)
+    if (len(badFiles) != 0):
+        if retcode != -9: 
+            retcode = -6
+        warnings = True
+        logging.info("ERROR: Bad Files found:\n  " +  "\n  ".join(badFiles))
+        out_fh = open(outfile, "a")
+        out_fh.write("\nERROR: System Files found that should not be git tracked:\n  " + "\n  ".join(badFiles) + "\n\n")
+        out_fh.flush()
+        out_fh.close()
+        send_message({
+            "body": "ERROR: System Files found that should not be git tracked. ",
+            "status": "post_processing",
+            "retcode": retcode
+        })
+
+    # build output printed entirely here
+    # changed from interactively during build
+    background = Tailer(outfile, buildmsg)
+    background.start()
+    out_fh = open(outfile, "r")
+    out_fh.flush()
+    out_fh.close()
+    background.stop()
 
     send_message({
         "status": complete_status,
@@ -764,7 +802,7 @@ def build_package(source_build):
 
     # gave specific retcode to trigger warning but
     # still want to proceed with rest of build/check after reporting
-    if (retcode == -4):
+    if (retcode == -4 or retcode == -6):
         retcode = 0
 
     return (retcode)
