@@ -705,7 +705,7 @@ def build_package(source_build):
     tarname = get_source_tarball_name()
     # need to see if file exists
     # will crash if timeout and build product never created
-    if retcode != -9:
+    if retcode == 0:
         rawsize = os.path.getsize(tarname)
         sizeFile = rawsize/(1024*1024.0)
         # size for build report
