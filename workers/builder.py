@@ -705,7 +705,7 @@ def build_package(source_build):
     tarname = get_source_tarball_name()
     # need to see if file exists
     # will crash if timeout and build product never created
-    if retcode == 0:
+    if ((retcode == 0) and (not source_build)):
         rawsize = os.path.getsize(tarname)
         sizeFile = rawsize/(1024*1024.0)
         # size for build report
@@ -744,7 +744,8 @@ def build_package(source_build):
     # and 
     #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4025
 
-    hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
+    if ((not source_build)):
+        hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
           ".rhistory", ".rapp.history",
 	  ".o", ".sl", ".so", ".dylib",
 	  ".a", ".dll", ".def",
@@ -755,25 +756,26 @@ def build_package(source_build):
           ".gitattributes", ".gitmodules",
           ".hgtags",
           ".project", ".seed", ".settings", ".tm_properties")
-    badFiles = []
-    for root, dirs, files in os.walk(package_name):
-        for name in files:
-            if name.lower().endswith(hidden_file_ext):
-               badFiles.append(name)
-    if (len(badFiles) != 0):
-        if retcode != -9: 
-            retcode = -6
-        warnings = True
-        logging.info("ERROR: Bad Files found:\n  " +  "\n  ".join(badFiles))
-        out_fh = open(outfile, "a")
-        out_fh.write("\nERROR: System Files found that should not be git tracked:\n  " + "\n  ".join(badFiles) + "\n\n")
-        out_fh.flush()
-        out_fh.close()
-        send_message({
-            "body": "ERROR: System Files found that should not be git tracked. ",
-            "status": "post_processing",
-            "retcode": retcode
-        })
+        package_name = manifest['job_id'].split("_")[0]
+        badFiles = []
+        for root, dirs, files in os.walk(package_name):
+            for name in files:
+                if name.lower().endswith(hidden_file_ext):
+                    badFiles.append(name)
+        if (len(badFiles) != 0):
+            if retcode != -9: 
+                retcode = -6
+            warnings = True
+            logging.info("ERROR: Bad Files found:\n  " +  "\n  ".join(badFiles))
+            out_fh = open(outfile, "a")
+            out_fh.write("\nERROR: System Files found that should not be git tracked:\n  " + "\n  ".join(badFiles) + "\n\n")
+            out_fh.flush()
+            out_fh.close()
+            send_message({
+                "body": "ERROR: System Files found that should not be git tracked. ",
+                "status": "post_processing",
+                "retcode": retcode
+               })
 
     # build output printed entirely here
     # changed from interactively during build
