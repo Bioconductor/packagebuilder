@@ -747,8 +747,8 @@ def build_package(source_build):
     if ((source_build)):
         hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
           ".rhistory", ".rapp.history",
-	  ".o", ".sl", ".so", ".dylib",
-	  ".a", ".dll", ".def",
+#	  ".o", ".sl", ".so", ".dylib",
+#	  ".a", ".dll", ".def",
 	  ".ds_store",
           ".log", ".aux", 
           ".backups", ".cproject", ".directory",
