@@ -705,7 +705,7 @@ def build_package(source_build):
     tarname = get_source_tarball_name()
     # need to see if file exists
     # will crash if timeout and build product never created
-    if ((retcode == 0) and (not source_build)):
+    if ((retcode == 0) and (source_build)):
         rawsize = os.path.getsize(tarname)
         sizeFile = rawsize/(1024*1024.0)
         # size for build report
@@ -744,7 +744,7 @@ def build_package(source_build):
     # and 
     #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4025
 
-    if ((not source_build)):
+    if ((source_build)):
         hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
           ".rhistory", ".rapp.history",
 	  ".o", ".sl", ".so", ".dylib",
