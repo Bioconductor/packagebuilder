@@ -204,7 +204,6 @@ def do_work(body):
             os.environ['LANG'] = ENVIR['bbs_lang']
             # R CMD check variables
             os.environ['_R_CHECK_LENGTH_1_CONDITION_']=ENVIR['length1_condition']
-            os.environ['_R_CHECK_TIMINGS_']="0"
             os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
             os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
             # R CMD BiocCheck variable
