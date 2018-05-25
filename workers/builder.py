@@ -31,7 +31,7 @@ import urllib2
 import requests
 #from stomp.listener import PrintingListener
 from stomp.listener import StatsListener
-from urllib2 import Request, urlopen, URLError
+from urllib2 import URLError
 from threading import Timer
 
 # Modules created by Bioconductor

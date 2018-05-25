@@ -12,7 +12,7 @@ import threading
 import socket
 import requests
 from datetime import datetime
-from urllib2 import Request, urlopen, URLError
+from urllib2 import URLError
 # Modules created by Bioconductor
 from bioconductor.config import ENVIR
 from bioconductor.config import TOPICS
