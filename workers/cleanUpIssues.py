@@ -62,6 +62,7 @@ for issue_name in list(close_nums):
         for subdir in order_list:
             newpath = os.path.join(pkg_rm, subdir)
             cmd = "rm -rf " + newpath
+            logging.info("Removing " + newpath)
             try:
                 retcode = subprocess.call(cmd, shell=True)
             except:
