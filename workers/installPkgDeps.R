@@ -66,6 +66,7 @@ install.packages("BiocInstaller", repos=repos, lib=pkg_libdir)
 ## check that needed packages to run SPB are installed
 ##
 
+print("Checking needed SPB packages are installed")
 SPB_pkgs <- c(
    "graph", "biocViews", "knitr", "knitrBootstrap",
    "devtools", "codetools", "httr", "curl", "optparse",
@@ -104,9 +105,6 @@ validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
 ## repository and options setup
 ##
 
-siteRepos <- sprintf(
-    "http://bioconductor.org/scratch-repos/%s",
-    as.character(BiocInstaller::biocVersion()))
 options(install.packages.compile.from.source="always")
 
 ##
@@ -119,23 +117,26 @@ blacklist <- c("R", rownames(ip),
 deps <- sub(" *\\((.*?)\\)", "", deps)  # strip version
 
 ## install missing dependencies
+print("Installing Dependencies:")
 pkg_deps <- deps <- deps[!deps %in% blacklist]
 if (getOption("pkgType") != "source")
     ## try to install binaries...
     BiocInstaller::biocLite(deps, lib.loc=pkg_libdir,
-                            siteRepos=siteRepos, dependencies=TRUE)
+                            dependencies=TRUE)
 deps <- deps[!deps %in% rownames(installed.packages())]
 if (length(deps))
     ## source (e.g., linux) or failed binary installations
     BiocInstaller::biocLite(deps, lib.loc=pkg_libdir,
-                            siteRepos=siteRepos, dependencies=TRUE,
+                            dependencies=TRUE,
                             type="source")
 
 validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 
+print("Checking Package Updates:")
 ## update pkg_libdir
 tryCatch(update.packages(lib.loc=pkg_libdir, ask=FALSE,
-                         repos=BiocInstaller::biocinstallRepos(siteRepos)),
-         error=function(e) conditionMessage(e))
+                         repos=BiocInstaller::biocinstallRepos()),
+          error=function(e) conditionMessage(e))
 
+print("SessionInfo:")
 sessionInfo()
