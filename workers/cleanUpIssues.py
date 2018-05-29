@@ -23,14 +23,15 @@ res = requests.get(cmd)
 git_dir = json.loads(res.text)
 
 issue_nums = set()
+close_nums = set()
 
 for k in git_dir:
-    # only issues closed for more than 30 days
     closing_date = k['closed_at']
     diff_date = datetime.datetime.today() - datetime.datetime.strptime(closing_date, '%Y-%m-%dT%H:%M:%SZ')
     if diff_date.days > 30:
         issue_nums.add(k['number'])
-
+    else:
+        close_nums.add(k['number'])
 
 job_dir = os.path.join(ENVIR['spb_home'], "jobs")
 for issue_name in list(issue_nums):
@@ -43,5 +44,27 @@ for issue_name in list(issue_nums):
             retcode = subprocess.call(cmd, shell=True)
         except:
             logging.error("Remove of package " + pkg_rm + " Failed")
+    else:
+        logging.debug("Issue " + pkg_rm + " Not Found")
+
+
+def sorted_ls(path):
+    mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
+    return list(sorted(os.listdir(path), key=mtime))
+
+job_dir = os.path.join(ENVIR['spb_home'], "jobs")
+for issue_name in list(close_nums):
+    pkg_rm = os.path.join(job_dir, str(issue_name))
+    if os.path.exists(pkg_rm):
+        order_list = sorted_ls(pkg_rm)
+        order_list = filter(lambda a: a != 'R-libs', order_list)
+        temp = order_list.pop()
+        for subdir in order_list:
+            newpath = os.path.join(pkg_rm, subdir)
+            cmd = "rm -rf " + newpath
+            try:
+                retcode = subprocess.call(cmd, shell=True)
+            except:
+                logging.error("Remove of package " + newpath + " Failed")
     else:
         logging.debug("Issue " + pkg_rm + " Not Found")
