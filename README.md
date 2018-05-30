@@ -15,7 +15,7 @@ Code for the SPB is stored in [GitHub](https://github.com/Bioconductor/packagebu
 
 Currently, the SPB consists of 2 components in this git repo, in top-level directories:
   * spb_history - A Django web app to track build history.
-  Accessible at http://staging.bioconductor.org:4000
+  Accessible at http://staging.bioconductor.org:8000
   * workers - Python scripts that run on each build machine
 
 Options to start a build
