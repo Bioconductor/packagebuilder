@@ -56,6 +56,7 @@ build_product = None
 callcount = None
 longBuild = None
 pkg_type_views = None
+bad_files_found = None
 
 log_highlighter = "***************"
 
@@ -421,7 +422,7 @@ def is_build_required(manifest):
     repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
     # What if there is no file at this url?
     packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
-        stdout=subprocess.PIPE).communicate()[0]
+       stdout=subprocess.PIPE).communicate()[0]
     inpackage = False
     repository_version = False
     for line in packages.split("\n"):
@@ -469,6 +470,34 @@ def git_clone():
         send_message({"status": "git_result",
                       "result": retcode, "body": \
                       "git clone completed with status %d" % retcode})
+
+
+def check_bad_files():
+    global bad_files_found
+
+    # taken from
+    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/build.R#L462
+    # and
+    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4025
+    logging.info("Checking bad files.")
+    hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
+                       ".rhistory", ".rapp.history",
+                       ".o", ".sl", ".so", ".dylib",
+                       ".a", ".dll", ".def",
+                       ".ds_store", "unsrturl.bst",
+                       ".log", ".aux",
+                       ".backups", ".cproject", ".directory",
+                       ".dropbox", ".exrc", ".gdb.history",
+                       ".gitattributes", ".gitmodules",
+                       ".hgtags",
+                       ".project", ".seed", ".settings", ".tm_properties")
+    package_name = manifest['job_id'].split("_")[0]
+    bad_files_found = []
+    for root, dirs, files in os.walk(package_name):
+        for name in files:
+            if name.lower().endswith(hidden_file_ext):
+                bad_files_found.append(name)
+
 
 
 def install_pkg_deps():
@@ -598,6 +627,7 @@ def get_source_tarball_name():
 def build_package(source_build):
     global pkg_type_views
     global longBuild
+    global bad_files_found
 
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
 
@@ -739,36 +769,13 @@ def build_package(source_build):
     else:
         complete_status = "buildbin_complete"
 
-    # taken from
-    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/build.R#L462
-    # and 
-    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4025
-
-    if ((source_build)):
-        hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
-          ".rhistory", ".rapp.history",
-#	  ".o", ".sl", ".so", ".dylib",
-#	  ".a", ".dll", ".def",
-	  ".ds_store",
-          ".log", ".aux", 
-          ".backups", ".cproject", ".directory",
-          ".dropbox", ".exrc", ".gdb.history",
-          ".gitattributes", ".gitmodules",
-          ".hgtags",
-          ".project", ".seed", ".settings", ".tm_properties")
-        package_name = manifest['job_id'].split("_")[0]
-        badFiles = []
-        for root, dirs, files in os.walk(package_name):
-            for name in files:
-                if name.lower().endswith(hidden_file_ext):
-                    badFiles.append(name)
-        if (len(badFiles) != 0):
-            if retcode != -9: 
+    if (len(bad_files_found) != 0):
+            if retcode != -9:
                 retcode = -6
             warnings = True
-            logging.info("ERROR: Bad Files found:\n  " +  "\n  ".join(badFiles))
+            logging.info("ERROR: Bad Files found:\n  " +  "\n  ".join(bad_files_found))
             out_fh = open(outfile, "a")
-            out_fh.write("\nERROR: System Files found that should not be git tracked:\n  " + "\n  ".join(badFiles) + "\n\n")
+            out_fh.write("\nERROR: System Files found that should not be git tracked:\n  " + "\n  ".join(bad_files_found) + "\n\n")
             out_fh.flush()
             out_fh.close()
             send_message({
@@ -1305,8 +1312,10 @@ if __name__ == "__main__":
         })
         logging.info("Normal build completion; build not required.")
         sys.exit(0)
+    logging.info("\n\n" + log_highlighter + "\n\n")
 
     git_clone()
+    check_bad_files()
 
     exitOut = False
     if ((isUnsupported(platform.system(), BUILDER_ID)) or
