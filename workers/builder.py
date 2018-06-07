@@ -395,9 +395,33 @@ def get_dcf_info(manifest):
         dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
         send_dcf_info(dcf_file)
         svn_version = dcf_file.getValue("Version")
+        desc_name = dcf_file.getValue("Package")
     except:
         logging.error("ERROR: get_dcf_info() failed\n  Could not open ",
                       github_url)
+        send_message({
+            "status": "build_complete",
+            "retcode": 1,
+            "warnings": False,
+            "body": "get_dcf_info failed; could not open. ",
+            "elapsed_time": "NA"})
+        send_message({"status": "post_processing",
+                      "retcode": 1,
+                      "body": "get_dcf_info failed; could not open. "})
+        sys.exit("Exiting get_dcf_info check failed")
+    if package_name != desc_name:
+        msg = "ERROR: Repository name: '" + package_name + \
+        "' and DESCRIPTION Package: '" + desc_name + \
+        "' do not match. "
+        send_message({
+            "status": "build_complete",
+            "retcode": 1,
+            "warnings": False,
+            "body": msg,
+            "elapsed_time": "NA"})
+        send_message({"status": "post_processing",
+                      "retcode": 1,
+                      "body": msg})
         sys.exit("Exiting get_dcf_info check failed")
 
 
