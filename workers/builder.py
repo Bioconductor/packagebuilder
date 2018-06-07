@@ -373,7 +373,7 @@ def git_info():
         })
 
 
-def get_dcf_info(manifest):
+def is_build_required(manifest):
     global svn_url_global
     svn_url_global = manifest['svn_url']
     package_name = manifest['job_id'].split("_")[0]
@@ -396,10 +396,47 @@ def get_dcf_info(manifest):
         send_dcf_info(dcf_file)
         svn_version = dcf_file.getValue("Version")
     except:
-        logging.error("ERROR: get_dcf_info() failed\n  Could not open ",
+        logging.error("ERROR: is_build_required() failed\n  Could not open ",
                       github_url)
-        sys.exit("Exiting get_dcf_info check failed")
+        sys.exit("Exiting is_build_required check failed")
 
+    if ("force" in manifest.keys()):
+        if (manifest['force'] is True):
+            return(True)
+
+    r_version = BIOC_R_MAP[ENVIR['bbs_Bioc_version']]
+    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
+
+    cran_repo_map = {
+        'source': "src/contrib",
+        'win.binary': "bin/windows/contrib/" + r_version,
+        'win64.binary': "bin/windows64/contrib/" + r_version,
+        'mac.binary': "bin/macosx/contrib/" + r_version
+    }
+    base_repo_url = HOSTS['bioc']
+    if (manifest['repository'] == 'course'):
+        base_repo_url += '/course-packages'
+    elif (manifest['repository'] == 'scratch'):
+        base_repo_url += '/scratch_repos/' + manifest['bioc_version']
+
+    repository_url = "%s/%s/PACKAGES" % (base_repo_url, cran_repo_map[pkg_type])
+    # What if there is no file at this url?
+    packages = subprocess.Popen(["curl", "-k", "-s", repository_url],
+       stdout=subprocess.PIPE).communicate()[0]
+    inpackage = False
+    repository_version = False
+    for line in packages.split("\n"):
+        if line == "Package: %s" % package_name:
+            inpackage = True
+        if (line.startswith("Version: ") and inpackage):
+            repository_version = line.split(": ")[1]
+            break
+    if not repository_version:
+        return True # package hasn't been pushed to repo before
+    logging.debug("is_build_required()" +
+                  "\n  [%s] svn version is %s, repository version is %s" %
+                  (package_name, svn_version, repository_version))
+    return svn_version != repository_version
 
 
 def git_clone():
@@ -1259,10 +1296,26 @@ if __name__ == "__main__":
     git_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
-    get_dcf_info(manifest)
+    is_build_required = is_build_required(manifest)
+    if not (is_build_required):
+        send_message({
+            "status": "build_not_required",
+            "body": "Identical versions."
+        })
+        send_message({"status": "preprocessing",
+            "retcode": 0,
+            "body": "Identical versions. "
+        })
+        send_message({
+            "status": "normal_end",
+            "body": "Build not required."
+        })
+        logging.info("Normal build completion; build not required.")
+        sys.exit(0)
+    logging.info("\n\n" + log_highlighter + "\n\n")
+
     git_clone()
     check_bad_files()
-    logging.info("\n\n" + log_highlighter + "\n\n")
 
     exitOut = False
     if ((isUnsupported(platform.system(), BUILDER_ID)) or
