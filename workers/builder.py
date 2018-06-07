@@ -36,9 +36,7 @@ from threading import Timer
 
 # Modules created by Bioconductor
 from bioconductor.communication import getNewStompConnection
-from bioconductor.config import BIOC_R_MAP
 from bioconductor.config import BUILDER_ID
-from bioconductor.config import HOSTS
 from bioconductor.config import TOPICS
 
 sys.path.append(ENVIR['bbs_home'])
@@ -394,7 +392,6 @@ def get_dcf_info(manifest):
         dcf_text = f.read()
         dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
         send_dcf_info(dcf_file)
-        svn_version = dcf_file.getValue("Version")
         desc_name = dcf_file.getValue("Package")
     except:
         logging.error("ERROR: get_dcf_info() failed\n  Could not open ",
