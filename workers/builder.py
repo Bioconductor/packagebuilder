@@ -377,7 +377,7 @@ def get_dcf_info(manifest):
     global svn_url_global
     svn_url_global = manifest['svn_url']
     package_name = manifest['job_id'].split("_")[0]
-    logging.info("Starting is_build_required() '%s'." % package_name)
+    logging.info("Starting get_dcf_info() '%s'." % package_name)
 
     github_url = re.sub(r'\.git$', '', manifest['svn_url'])
     if not github_url.endswith("/"):
