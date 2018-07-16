@@ -60,6 +60,34 @@ docker pull resilva87/docker-rabbitmq-stomp
 docker run -d -e RABBITMQ_NODENAME=my-rabbit --name rabbitmq -p 61613:61613 resilva87/docker-rabbitmq-stomp
 ```
 
+* Auto-start docker on boot
+
+In production, we want the docker on the rabbitmq.bioconductor.org EC2
+instance to start-up on boot. This step is probably not necessary for
+a test enviornment.
+
+Get the container ID:
+```
+sudo docker ps
+```
+
+Stop the docker service:
+```
+sudo docker stop
+```
+
+Modify /var/lib/docker/containers/CONTAINER_ID/hostconfig.json such that
+`RestartPolicy` is set to "always" and `MaximumRetryCount` is set to "3".
+`CONTAINER_ID` is the ID you saw in the `docker ps` command.
+```
+sudo vim /var/lib/docker/containers/CONTAINER_ID/hostconfig.json
+```
+
+Reboot the machine and confirm the docker auto-starts:
+```
+sudo docker ps
+```
+
 <a name="python"></a>
 Setting up the Python environment
 ---------------------------------
