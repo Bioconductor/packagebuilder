@@ -612,7 +612,6 @@ def get_source_tarball_name():
 def build_package(source_build):
     global pkg_type_views
     global longBuild
-    global bad_files_found
 
     pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
 
@@ -716,38 +715,6 @@ def build_package(source_build):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
 
-    # check build product size
-    tarname = get_source_tarball_name()
-    # need to see if file exists
-    # will crash if timeout and build product never created
-    if ((retcode == 0) and (source_build)):
-        rawsize = os.path.getsize(tarname)
-        sizeFile = rawsize/(1024*1024.0)
-        # size for build report
-        kib = rawsize / float(1024)
-        filesize = "%.2f" % kib
-
-        logging.info("Size: " + str(sizeFile))
-        logging.info("pkg_type %s" % pkg_type_views)
-
-        if ((sizeFile > 4.0) & (pkg_type_views == "Software")):
-            warnings = True
-            retcode = -4
-
-
-        if (retcode == -4):
-            out_fh = open(outfile, "a")
-            out_fh.write("\nWARNING: Product from R CMD build exceeds 4 MB requirement:" + format(sizeFile, '.4f') + " MB.\n\n")
-            out_fh.flush()
-            out_fh.close()
-
-        send_message({
-            "body": "Determining package size complete: " + format(sizeFile,'.4f') + "MB. ",
-            "status": "post_processing",
-            "retcode": retcode,
-            "filesize": filesize
-        })
-
     complete_status = None
     if (source_build):
         complete_status = "build_complete"
@@ -772,13 +739,6 @@ def build_package(source_build):
         "elapsed_time": elapsed_time})
     logging.info(complete_status + "\n Build completed with status: " +
                  str(retcode) + " Elapsed time: " + elapsed_time)
-
-    if (retcode == -4):
-        send_message({
-            "body": "WARNING: Product from R CMD build exceeds 4 MB requirement: " + str(sizeFile) + " MB. ",
-            "status": "post_processing",
-            "retcode": retcode
-        })
 
     # gave specific retcode to trigger warning but
     # still want to proceed with rest of build/check after reporting
