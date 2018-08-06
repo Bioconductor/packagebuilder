@@ -54,7 +54,7 @@ build_product = None
 callcount = None
 longBuild = None
 pkg_type_views = None
-bad_files_found = None
+gitclone_retcode = None
 
 log_highlighter = "***************"
 
@@ -456,33 +456,34 @@ def git_clone():
                       "git clone completed with status %d" % retcode})
 
 
-def check_bad_files():
-    global bad_files_found
-
-    # taken from
-    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/build.R#L462
-    # and
-    #https://github.com/wch/r-source/blob/trunk/src/library/tools/R/check.R#L4025
-    logging.info("Checking bad files.")
-    hidden_file_ext = (".renviron", ".rprofile", ".rproj", ".rproj.user",
-                       ".rhistory", ".rapp.history",
-                       ".o", ".sl", ".so", ".dylib",
-                       ".a", ".dll", ".def",
-                       ".ds_store", "unsrturl.bst",
-                       ".log", ".aux",
-                       ".backups", ".cproject", ".directory",
-                       ".dropbox", ".exrc", ".gdb.history",
-                       ".gitattributes", ".gitmodules",
-                       ".hgtags",
-                       ".project", ".seed", ".settings", ".tm_properties")
+def checkgitclone():
     package_name = manifest['job_id'].split("_")[0]
-    bad_files_found = []
-    for root, dirs, files in os.walk(package_name):
-        for name in files:
-            if name.lower().endswith(hidden_file_ext):
-                bad_files_found.append(name)
+    pkg_git_clone = os.path.join(working_dir, package_name)
 
+    r_cmd = ENVIR['bbs_R_cmd']
 
+    cmd = "%s CMD BiocCheckGitClone %s" % (r_cmd, pkg_git_clone)
+    send_message({
+        "body": "Checking Git Clone.",
+        "status": "preprocessing",
+        "retcode": 0
+    })
+    logging.info("Command to check git clone:" + "\n  %s" % cmd)
+    outfile = "CheckGitClone.out"
+    if (os.path.exists(outfile)):
+        os.remove(outfile)
+    out_fh = open(outfile, "w")
+    retcode = subprocess.call(cmd, stdout=out_fh, stderr=subprocess.STDOUT,
+                               shell=True)
+    out_fh.flush()
+    out_fh.close()
+    send_message({
+        "body": "Checking git clone status: " + str(retcode) + ". ",
+        "status": "post_processing",
+        "retcode": retcode
+    })
+    logging.info("Finished Checking Git Clone of Package.\n completed with status: " + str(retcode))
+    return retcode
 
 def install_pkg_deps():
     package_name = manifest['job_id'].split("_")[0]
@@ -753,20 +754,6 @@ def build_package(source_build):
     else:
         complete_status = "buildbin_complete"
 
-    if (len(bad_files_found) != 0):
-            if retcode != -9:
-                retcode = -6
-            warnings = True
-            logging.info("ERROR: Bad Files found:\n  " +  "\n  ".join(bad_files_found))
-            out_fh = open(outfile, "a")
-            out_fh.write("\nERROR: System Files found that should not be git tracked:\n  " + "\n  ".join(bad_files_found) + "\n\n")
-            out_fh.flush()
-            out_fh.close()
-            send_message({
-                "body": "ERROR: System Files found that should not be git tracked. ",
-                "status": "post_processing",
-                "retcode": retcode
-               })
 
     # build output printed entirely here
     # changed from interactively during build
@@ -918,6 +905,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 #
     global longBuild
     global pkg_type_views
+    global gitclone_retcode
     outfile = "Rcheck.out"
     if (os.path.exists(outfile)):
         os.remove(outfile)
@@ -1013,6 +1001,12 @@ def do_check(cmdCheck, cmdBiocCheck):
         if (retcode2 == -9):
             out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time2) + "mins\n\n\n")
 
+    out_fh.write("\n\n")
+    # copy BiocCheckGitClone results
+    gitcheckfile = open("CheckGitClone.out")
+    for line in gitcheckfile:
+        out_fh.write(line)
+    gitcheckfile.close()
 
     out_fh.flush()
     out_fh.close()
@@ -1032,9 +1026,9 @@ def do_check(cmdCheck, cmdBiocCheck):
     logging.info("retcode1: " + str(retcode1))
     logging.info("retcode2: " + str(retcode2))
 
-    if (retcode1 == 0 and retcode2 == 0):
+    if (retcode1 == 0 and retcode2 == 0 and gitclone_retcode == 0):
         retcode = 0
-    elif (retcode1 == -4 and retcode2 == 0):
+    elif (retcode1 == -4 and retcode2 == 0 and gitclone_retcode == 0):
         retcode = -4
     elif (retcode1 == -9 or retcode2 == -9):
         retcode = -9
@@ -1282,7 +1276,6 @@ if __name__ == "__main__":
 
     get_dcf_info(manifest)
     git_clone()
-    check_bad_files()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
     exitOut = False
@@ -1316,6 +1309,8 @@ if __name__ == "__main__":
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Checking if package gets longer build/check time")
     getPackageType()
+    logging.info("\n\n" + log_highlighter + "\n\n")
+    gitclone_retcode = checkgitclone()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
     result = install_pkg()
