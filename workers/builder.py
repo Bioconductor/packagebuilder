@@ -464,7 +464,7 @@ def checkgitclone():
 
     cmd = "%s CMD BiocCheckGitClone %s" % (r_cmd, pkg_git_clone)
     send_message({
-        "body": "Checking Git Clone.",
+        "body": "Checking Git Clone. ",
         "status": "preprocessing",
         "retcode": 0
     })
@@ -757,6 +757,11 @@ def do_build(cmd, message_stream, source):
     if (os.path.exists(outfile)):
         os.remove(outfile)
     out_fh = open(outfile, "w")
+    out_fh.write("\n===============================\n\n R CMD BUILD\n\n===============================\n\n")
+    out_fh.flush()
+    out_fh.close()
+    out_fh = open(outfile, "a")
+
     logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
     logging.info("The working directory: {wd}".format(wd=os.getcwd()))
     logging.debug("The current environment variables: \n {envVars}".format(envVars=os.environ))
@@ -780,6 +785,7 @@ def do_build(cmd, message_stream, source):
     if (retcode == -9):
         out_fh.write(" ERROR\nTIMEOUT: R CMD build exceeded " +  str(min_time) + " mins\n\n\n")
 
+    out_fh.flush()
     out_fh.close()
     return(retcode)
 
@@ -871,6 +877,17 @@ def do_check(cmdCheck, cmdBiocCheck):
         os.remove(outfile)
 
     out_fh = open(outfile, "w")
+    out_fh.write("\n===============================\n\n R CMD BiocCheckGitClone\n\n===============================\n\n")
+    # copy BiocCheckGitClone results
+    gitcheckfile = open("CheckGitClone.out")
+    for line in gitcheckfile:
+        out_fh.write(line)
+    gitcheckfile.close()
+    out_fh.write("\n\n\n")
+    out_fh.write("\n===============================\n\n R CMD CHECK\n\n===============================\n\n")
+    out_fh.flush()
+    out_fh.close()
+    out_fh = open(outfile, "a")
 
     background = Tailer(outfile, "checking")
     background.start()
@@ -931,6 +948,13 @@ def do_check(cmdCheck, cmdBiocCheck):
 
             out_fh = open(outfile, "a")
 
+
+    out_fh.write("\n\n\n")
+    out_fh.write("\n===============================\n\n R CMD BiocCheck\n\n===============================\n\n")
+    out_fh.flush()
+    out_fh.close()
+    out_fh = open(outfile, "a")
+
     start_time2 = datetime.datetime.now()
     pope2 = subprocess.Popen(cmdBiocCheck, stdout=out_fh,
                              stderr=subprocess.STDOUT, shell=True)
@@ -960,13 +984,6 @@ def do_check(cmdCheck, cmdBiocCheck):
         out_fh = open(outfile, "a")
         if (retcode2 == -9):
             out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time2) + "mins\n\n\n")
-
-    out_fh.write("\n\n")
-    # copy BiocCheckGitClone results
-    gitcheckfile = open("CheckGitClone.out")
-    for line in gitcheckfile:
-        out_fh.write(line)
-    gitcheckfile.close()
 
     out_fh.flush()
     out_fh.close()
