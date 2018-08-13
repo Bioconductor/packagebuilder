@@ -759,8 +759,6 @@ def do_build(cmd, message_stream, source):
     out_fh = open(outfile, "w")
     out_fh.write("\n===============================\n\n R CMD BUILD\n\n===============================\n\n")
     out_fh.flush()
-    out_fh.close()
-    out_fh = open(outfile, "a")
 
     logging.info("Starting do_build(); message {msgStream}.".format(msgStream= message_stream))
     logging.info("The working directory: {wd}".format(wd=os.getcwd()))
@@ -864,11 +862,6 @@ def check_package():
 
 
 def do_check(cmdCheck, cmdBiocCheck):
-#
-# TODO: how to get TIMEOUT in message stream of windows
-#   killed output of BiocCheck and wouldn't write
-#   temporary fix: only add message for unix system
-#
     global longBuild
     global pkg_type_views
     global gitclone_retcode
@@ -886,8 +879,6 @@ def do_check(cmdCheck, cmdBiocCheck):
     out_fh.write("\n\n\n")
     out_fh.write("\n===============================\n\n R CMD CHECK\n\n===============================\n\n")
     out_fh.flush()
-    out_fh.close()
-    out_fh = open(outfile, "a")
 
     background = Tailer(outfile, "checking")
     background.start()
@@ -924,36 +915,20 @@ def do_check(cmdCheck, cmdBiocCheck):
         logging.info("Build time indicates TIMEOUT")
         retcode1 = -9
 
-    if (platform.system() != "Windows"):
-        # in testing, had to close and reopen with append
-        # in order to have ERROR message occur in middle of pipe/check
-        # if not the message would be at the bottom of BiocCheck and checks would
-        # not format correctly
+    out_fh.flush()
+    if (retcode1 == -9):
+        out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " + str(min_time) + " mins\n\n\n")
         out_fh.flush()
-        out_fh.close()
-        out_fh = open(outfile, "a")
-        if (retcode1 == -9):
-            out_fh.write(" ERROR\nTIMEOUT: R CMD check exceeded " + str(min_time) + " mins\n\n\n")
 
-            out_fh.flush()
-            out_fh.close()
-
-            out_fh = open(outfile, "a")
-
-        if (retcode1 == -4):
-            out_fh.write(" WARNING: R CMD check exceeded 5 min requirement\n\n\n")
-
-            out_fh.flush()
-            out_fh.close()
-
-            out_fh = open(outfile, "a")
+    if (retcode1 == -4):
+        out_fh.write(" WARNING: R CMD check exceeded 5 min requirement\n\n\n")
+        out_fh.flush()
 
 
+    out_fh.flush()
     out_fh.write("\n\n\n")
     out_fh.write("\n===============================\n\n R CMD BiocCheck\n\n===============================\n\n")
     out_fh.flush()
-    out_fh.close()
-    out_fh = open(outfile, "a")
 
     start_time2 = datetime.datetime.now()
     pope2 = subprocess.Popen(cmdBiocCheck, stdout=out_fh,
@@ -974,16 +949,9 @@ def do_check(cmdCheck, cmdBiocCheck):
         logging.info("Build time indicates TIMEOUT")
         retcode2 = -9
 
-    if (platform.system() != "Windows"):
-        # in testing, had to close and reopen with append
-        # in order to have ERROR message occur in middle of pipe/check
-        # if not the message would be at the bottom of BiocCheck and checks would
-        # not format correctly
-        out_fh.flush()
-        out_fh.close()
-        out_fh = open(outfile, "a")
-        if (retcode2 == -9):
-            out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time2) + "mins\n\n\n")
+    out_fh.flush()
+    if (retcode2 == -9):
+        out_fh.write(" ERROR\nTIMEOUT: R CMD BiocCheck exceeded " +  str(min_time2) + "mins\n\n\n")
 
     out_fh.flush()
     out_fh.close()
