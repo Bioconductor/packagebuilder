@@ -715,6 +715,22 @@ def build_package(source_build):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
 
+    tarname = get_source_tarball_name()
+    if ((retcode == 0) and (source_build)):
+        rawsize = os.path.getsize(tarname)
+        sizeFile = rawsize/(1024*1024.0)
+        # size for build report
+        kib = rawsize / float(1024)
+        filesize = "%.2f" % kib
+        logging.info("Size: " + str(sizeFile))
+        send_message({
+            "body": "Determining package size complete: " + format(sizeFile,'.4f') + "MB. ",
+            "status": "post_processing",
+            "retcode": retcode,
+            "filesize": filesize
+        })
+
+
     complete_status = None
     if (source_build):
         complete_status = "build_complete"
