@@ -55,12 +55,11 @@ R_libdir <- .libPaths()[2]
 # shouldn't cause issues with daily builder as +w only to owner
 #
 
-## load BiocInstaller
-repos <- paste0("https://bioconductor.org/packages/",
-                Sys.getenv("BBS_BIOC_VERSION"),
-                "/bioc")
-install.packages("BiocInstaller", repos=repos, lib=pkg_libdir)
-
+## load BiocManager
+install.packages("BiocManager", repos="https://cran.rstudio.com",
+                 lib=pkg_libdir)
+if (BiocManager::version() != BiocManager:::.version_bioc("devel"))
+    BiocManager::install(version=BiocManager:::.version_bioc("devel"), ask=FALSE)
 
 ##
 ## check that needed packages to run SPB are installed
@@ -82,7 +81,7 @@ if(length(needed_pkgs) != 0L){
     ## install other needed packages in pkg_libdir
     ## pkgbuild doesn't have write access to R_libdir
     if(length(needed_pkgs2) != 0L)
-        BiocInstaller::biocLite(needed_pkgs2, lib=pkg_libdir)
+        BiocManager::install(needed_pkgs2, lib=pkg_libdir)
     validateInstallation(needed_pkgs, pkg_libdir, "SPB_pkgs")
     
     # if some were found in R_lib check validInstall
@@ -121,12 +120,12 @@ print("Installing Dependencies:")
 pkg_deps <- deps <- deps[!deps %in% blacklist]
 if (getOption("pkgType") != "source")
     ## try to install binaries...
-    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir,
+    BiocManager::install(deps, lib.loc=pkg_libdir,
                             dependencies=TRUE)
 deps <- deps[!deps %in% rownames(installed.packages())]
 if (length(deps))
     ## source (e.g., linux) or failed binary installations
-    BiocInstaller::biocLite(deps, lib.loc=pkg_libdir,
+    BiocManager::install(deps, lib.loc=pkg_libdir,
                             dependencies=TRUE,
                             type="source")
 
@@ -135,7 +134,7 @@ validateInstallation(pkg_deps, pkg_libdir, "pkg_deps")
 print("Checking Package Updates:")
 ## update pkg_libdir
 tryCatch(update.packages(lib.loc=pkg_libdir, ask=FALSE,
-                         repos=BiocInstaller::biocinstallRepos()),
+                         repos=BiocManager::repositories()),
           error=function(e) conditionMessage(e))
 
 print("SessionInfo:")
