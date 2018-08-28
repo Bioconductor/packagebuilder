@@ -94,7 +94,8 @@ if(length(needed_pkgs) != 0L){
 
 opaths <- .libPaths()
 .libPaths(pkg_libdir) # FIXME: source() & devtools don't obey lib=
-devtools::install_github("Bioconductor/BiocCheck", lib=pkg_libdir)
+#devtools::install_github("Bioconductor/BiocCheck", lib=pkg_libdir, force=TRUE)
+BiocManager::install("Bioconductor/BiocCheck", lib=pkg_libdir, force=TRUE)
 .libPaths(opaths)
 
 validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
