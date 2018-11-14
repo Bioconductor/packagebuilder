@@ -2,13 +2,16 @@ Update After Release
 ====================
 ### Bioc-common-python (Deploy on all build nodes and staging)
 
-Update BIOC_R_MAP in bioconductor/config.py file.
+Update BIOC_R_MAP in bioconductor/config.py file and push to github~ don't forget to push!
 
 To initilize this change on all nodes and staging
 
 1. git pull
 2. initialize virtual environment
-3. python setup.py install
+3. pip install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
+4. python setup.py install
+5. cd ../packagebuilder
+6. pip install --upgrade -r ./PIP-DEPENDENCIES--spb_history.txt
 
 ### Packagebuilder (build nodes)
 
