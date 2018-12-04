@@ -203,10 +203,7 @@ def do_work(body):
             os.environ['BBS_CURL_CMD'] =  ENVIR['bbs_curl_cmd']
             os.environ['LANG'] = ENVIR['bbs_lang']
             # R CMD check variables
-            os.environ['_R_CHECK_LENGTH_1_CONDITION_']=ENVIR['length1_condition']
-            os.environ['_R_CHECK_EXECUTABLES_']="FALSE"
-            os.environ['_R_CHECK_EXECUTABLES_EXCLUSIONS_']="FALSE"
-            # R CMD BiocCheck variable
+            os.environ['R_CHECK_ENVIRON']=ENVIR['r_check_environ']
             os.environ['BIOC_DEVEL_PASSWORD'] = ENVIR['bioc_devel_password']
 
             shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
