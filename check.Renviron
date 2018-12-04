@@ -1,5 +1,6 @@
 # https://www.rdocumentation.org/packages/base/versions/3.5.1/topics/Startup
-# https://www.rdocumentation.org/packages/base/versions/3.5.1/topics/Startup
+# https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Checking-and-building-packages
+# https://cran.r-project.org/doc/manuals/r-devel/R-ints.html#Tools
 
 _R_CHECK_FORCE_SUGGESTS_=TRUE
 _R_CHECK_RD_LINE_WIDTHS_=TRUE
