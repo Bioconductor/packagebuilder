@@ -427,7 +427,7 @@ def git_clone():
     git_url = re.sub(r'\/$', '', manifest['svn_url'])
     if not git_url.endswith(".git"):
         git_url += ".git"
-    git_cmd = "git clone %s" % git_url
+    git_cmd = "git clone %s --branch master --single-branch" % git_url
     send_message({"status": "git_cmd", "body": git_cmd})
     logging.info("git_clone command: " + git_cmd)
     send_message({"status": "preprocessing",
