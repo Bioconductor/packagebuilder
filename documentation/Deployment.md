@@ -92,7 +92,8 @@ github.token=
     variable should match  `<host name>` and update the BioC version
     accordingly
     
-3. **NOTE:** For Bioconductor Nodes, you may need to create new private/public key information and add the key to known hosts on staging.bioconductor.org (.packagebuilder.prive_key.rsa / .packagebuilder.prive_key.rsa.pub)
+3. **NOTE:** For Bioconductor Nodes, we standardized the private/public key
+information copy over the key from existing builder (see properties file)
 
 #### Start server
 Kick off the server 
