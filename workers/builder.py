@@ -863,7 +863,7 @@ def check_package():
     logging.info("do_check result: " + str(retcode))
     if (retcode == -4):
         send_message({
-            "body": "WARNING: check time exceeded 5 min. ",
+            "body": "WARNING: check time exceeded 10 min. ",
             "status": "post_processing",
             "retcode": retcode
         })
@@ -923,9 +923,16 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     logging.info("The timeout_limit is: " + str(timeout_limit))
 
-    if ((300 <= time_dif.seconds) & (pkg_type_views == "Software")):
-        logging.info("Build time indicates longer than 5 min requirement")
-        retcode1 = -4
+    if ("multiarch" in cmdCheck):
+        if ((1200 <= time_dif.seconds) & (pkg_type_views == "Software")):
+            logging.info("Build time indicates longer than 20 min requirement")
+            warntime = 20
+            retcode1 = -4
+    else:
+        if ((600 <= time_dif.seconds) & (pkg_type_views == "Software")):
+            logging.info("Build time indicates longer than 10 min requirement")
+            warntime = 10
+            retcode1 = -4
 
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
@@ -937,7 +944,7 @@ def do_check(cmdCheck, cmdBiocCheck):
         out_fh.flush()
 
     if (retcode1 == -4):
-        out_fh.write(" WARNING: R CMD check exceeded 5 min requirement\n\n\n")
+        out_fh.write(" WARNING: R CMD check exceeded " + str(warntime) +" min requirement\n\n\n")
         out_fh.flush()
 
 
@@ -1088,7 +1095,7 @@ def win_multiarch_check():
            retcode = do_check(cmdCheck, cmdBiocCheck)
            if (retcode == -4):
                send_message({
-                   "body": "WARNING: check time exceeded 5 min. ",
+                   "body": "WARNING: check time exceeded 20 min. ",
                    "status": "post_processing",
                    "retcode": retcode
                })
