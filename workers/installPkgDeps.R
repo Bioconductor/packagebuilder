@@ -56,7 +56,7 @@ R_libdir <- .libPaths()[2]
 #
 
 # install yaml to read config.yaml
-install.packages("yaml", lib=pkg_libdir)
+install.packages("yaml", repos="https://cran.rstudio.com", lib=pkg_libdir)
 config <- yaml::read_yaml("https://bioconductor.org/config.yaml")
 bioc_ver <- config$single_package_builder$bioc_version
 
