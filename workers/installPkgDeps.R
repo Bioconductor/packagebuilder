@@ -55,11 +55,16 @@ R_libdir <- .libPaths()[2]
 # shouldn't cause issues with daily builder as +w only to owner
 #
 
+# install yaml to read config.yaml
+install.packages("yaml", lib=pkg_libdir)
+config <- yaml::read_yaml("https://bioconductor.org/config.yaml")
+bioc_ver <- config$single_package_builder$bioc_version
+
 ## load BiocManager
 install.packages("BiocManager", repos="https://cran.rstudio.com",
                  lib=pkg_libdir)
-if (BiocManager::version() != BiocManager:::.version_bioc("devel"))
-    BiocManager::install(version=BiocManager:::.version_bioc("devel"), ask=FALSE)
+if (BiocManager::version() != bioc_ver)
+    BiocManager::install(version=bioc_ver, ask=FALSE)
 
 ##
 ## check that needed packages to run SPB are installed
