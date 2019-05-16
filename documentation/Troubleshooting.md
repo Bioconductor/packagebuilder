@@ -11,7 +11,7 @@ stomp (rabbitmq) issues.
 
 # Determining if the SPB is stuck
 
-If you are working with a particular package you may already
+ps aux | grep pkgbuildIf you are working with a particular package you may already
 suspect that the SPB is stuck because you are awaiting a
 build report and it has not shown up.
 
@@ -50,7 +50,11 @@ the various components of the SPB.
  activate the virtual environment as well `source env/bin/activate`.
  Then do this to see if the `server.py` script is running:
 
-     ps aux|grep server.py|grep -v grep
+     ps aux|grep server.py
+
+Or look at all pkgbuild processes
+
+    ps aux | grep pkgbuild
 
  If it is not running, then you can examine the server.log
  which may tell you why the server is not running.
@@ -81,6 +85,12 @@ Alternatively, you can start all relevant scripts for the spb
 **Note** that `pkgbuild`'s crontab has entries that will
 start the server when the node is rebooted.
 
+Sometimes if the builder was in the middle of a build, there could be random
+R processes running that may or may not complete.  similarly to above you could 
+killall R process 
+
+    killall R 
+
 ### Windows Nodes
 
 On windows the server.py script is managed by
@@ -110,6 +120,11 @@ Then back in the task scheduler, right-click on `loggon_pkgbuild_at_startup`
 again, and choose `Run`, the "Status" should change to "Running". The select
 `spb-server`, and choose `Run`, the "Status" should change to "Running"; if it
 does not repeat the process.
+
+**Note:** Like on linux, if the SPB stopped suddenly or there is some issue that
+required a hard stop, sometime there are rogue R processes running.  When in the 
+Task Manager, any R process that is labelled as pkgbuild owned should be stopped before
+restarting the server.
 
 
 # Scripts on staging.bioconuctor.org
