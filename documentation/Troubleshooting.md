@@ -90,7 +90,12 @@ R processes running that may or may not complete.  similarly to above you could
 killall R process 
 
     killall R 
+    
+And sometimes still other random processes kicked off by packages 
 
+    ps aux | grep pkgbuild
+    killall -u pkgbuild
+    
 ### Windows Nodes
 
 On windows the server.py script is managed by
