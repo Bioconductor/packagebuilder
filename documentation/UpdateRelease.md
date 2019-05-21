@@ -1,5 +1,14 @@
 Update After Release
 ====================
+
+### Website Config File
+
+1. Update the website config.yaml file `http://bioconductor.org/config.yaml`
+There is a section for `Single Package Builder:` ; change the BioC and R
+versions accordingly.
+
+**Note:** We used to do this last but the code in the single package builder uses the config file to determine the version of R packages to download. This has to be updated before testing builds on the nodes or all packages will be redownloaded in individual R-libs directory
+
 ### Bioc-common-python (Deploy on all build nodes and staging)
 
 Update BIOC_R_MAP in bioconductor/config.py file and push to github~ don't forget to push!
@@ -37,8 +46,3 @@ for new mac binary (if necessary)
 
 (**Best Practice:** After these changes and the one below restart spb on staging)
 
-### Website Config File
-
-1. Update the website config.yaml file `http://bioconductor.org/config.yaml`
-There is a section for `Single Package Builder:` ; change the BioC and R
-versions accordingly.
