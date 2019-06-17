@@ -227,6 +227,11 @@ You can then monitor the build by going to
 and then navigating to the package and latest build. You can
 periodically refresh the page to see progress.
 
+There is a helper script IssuesToRerun.py.  Run this in python to get a list of
+potential candidate issues to rerun after the SPB crashes and needs a
+restart. You should look on their contributions submission page to see if it
+really needs to be rerun or not.  
+
 You might wonder why you have to ssh to staging.biooconductor.org
 to run this script. Seemingly you should be able to check out
 and run the rerun_build.py script on your own machine.
