@@ -68,33 +68,33 @@ Or look at all pkgbuild processes
  of the file. If it does not seem to be receiving messages
  that you know it should have received, then the server needs
  to be restarted. The `ps` command above should have
- given you a process id (in the second column).
+ given you a process id (in the second column). It may be better to kill off all
+ python or R process - see further comments before killing single process. 
 
  You can kill that process with `kill -9`.
 
-Then to start or re-start the server, do this:
+Depdending on what other processes are running under the pkgbuild account you
+could also do any of the following to group kill all python, all R, or all
+pkgbuild process. 
+
+    killall python
+    killall R
+    killall -u pkgbuild
+
+Then to start or re-start the server, do this (although better to use the below
+call do run-build-server script):
 
     nohup python server.py > server.log 2>&1 &
 
 Alternatively, you can start all relevant scripts for the spb
 
     source env/bin/activate
-    killall python
+    (kill any stuck processes)
     ./run-build-server.sh
 
 **Note** that `pkgbuild`'s crontab has entries that will
 start the server when the node is rebooted.
 
-Sometimes if the builder was in the middle of a build, there could be random
-R processes running that may or may not complete.  similarly to above you could 
-killall R process 
-
-    killall R 
-    
-And sometimes still other random processes kicked off by packages 
-
-    ps aux | grep pkgbuild
-    killall -u pkgbuild
     
 ### Windows Nodes
 
@@ -135,6 +135,9 @@ restarting the server.
 # Scripts on staging.bioconuctor.org
 
 ### Archiver and Track\_build\_completion
+
+**Note:** 
+Before checking and restarting individually the archive and track build completion scripts,  see later section on restarting all scripts! More often than not restarting all scripts is better and cleaner process.
 
 It is essential that the scripts `track_build_completion.py`
 and `archiver.py` be running on staging.bioconductor.org.
@@ -180,10 +183,12 @@ manage and `kill -9` both. To restart use the following command:
 ### Restart all spb scripts on staging 
 
 Alternatively, if all scripts were down or a manual reboot is necessary, the 
-following will restart all scripts relevant to the spb
+following will restart all scripts relevant to the spb. **Note** unlike the
+builders **do not** do a `-u biocadmin` as there is not a different account for
+the pkgbuild on staging.  
 
     source env/bin/activate
-    killall python
+    killall python 
     ./all.sh
 
 To see if all the servers (build nodes) and staging scripts are running, while 
