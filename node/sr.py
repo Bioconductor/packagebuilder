@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import pika
 import sys
 import json
@@ -18,7 +18,7 @@ from_web_queue_name = from_web_queue.queue
 
 channel.queue_bind(exchange='from_web_exchange', queue=from_web_queue_name)
 
-print ' [*] Waiting for messages. To exit press CTRL+C'
+print(' [*] Waiting for messages. To exit press CTRL+C')
 
 builder_id = "No-arg"
 #print len(sys.argv)
@@ -27,7 +27,7 @@ if (len(sys.argv) == 2):
 
 
 def callback(ch, method, properties, body):
-    print " [x] Received %r" % (body,)
+    print((" [x] Received %r" % (body,)))
     msg_obj = {}
     msg_obj['builder_id'] = builder_id
     msg_obj['body'] = "Build starting..."

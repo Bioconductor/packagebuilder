@@ -1,9 +1,10 @@
+#!/usr/bin/env python3
+
 # coding=utf-8
 
 import json
-from urllib2 import Request, urlopen, URLError
-import requests
-import datetime
+from urllib.request import Request, urlopen
+from urllib.error import URLError
 
 
 # change date to a date close to (before) the SPB crashed
@@ -26,7 +27,7 @@ issue_rerun = []
 
 request = Request(cmd)
 response = urlopen(request)
-res = response.read()
+res = response.read().decode()
 git_dir = json.loads(res)
 for k in git_dir:
     issue_rerun.append(k['html_url'])

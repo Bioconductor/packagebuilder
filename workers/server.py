@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import time
 import sys
@@ -12,7 +12,7 @@ import threading
 import socket
 import requests
 from datetime import datetime
-from urllib2 import URLError
+from urllib.error import URLError
 # Modules created by Bioconductor
 from bioconductor.config import ENVIR
 from bioconductor.config import TOPICS
@@ -43,7 +43,7 @@ BUILDER_ID = BUILDER_ID.replace(".bioconductor.org", "")
 ## Temporary hack
 if (BUILDER_ID.lower().startswith("dhcp") or \
   BUILDER_ID == 'PHS-ITs-Lion-Test-MacBook.local'):
-    if ("PACKAGEBUILDER_HOST" in os.environ.keys()):
+    if ("PACKAGEBUILDER_HOST" in list(os.environ.keys())):
         BUILDER_ID = os.environ["PACKAGEBUILDER_HOST"]
     else:
         logging.error("main() Cannot determine who I am")
@@ -130,7 +130,7 @@ def do_work(body):
     except ValueError:
         logging.error("on_message() ValueError: invalid JSON?")
         return()
-    if ('job_id' in received_obj.keys()): # ignore malformed messages
+    if ('job_id' in list(received_obj.keys())): # ignore malformed messages
         try:
             job_id = received_obj['job_id']
             # job_base = job_id.rsplit("_", 1)[0]
@@ -162,7 +162,7 @@ def do_work(body):
                 request = requests.get(cmd)
                 res = request.text
                 run_dir = json.loads(res)['sha'][0:7]
-            except URLError, err_url:
+            except URLError as err_url:
                 logging.info('Cannot access github log: %s', err_url)
                 logging.debug('URL: %s', cmd)
                 run_dir = job_id

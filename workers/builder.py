@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ## Assume this script is started by a shell script which has read
 ## BBS variables and also changed to the correct directory.
@@ -27,11 +27,11 @@ import platform
 import unicodedata
 import atexit
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import requests
 #from stomp.listener import PrintingListener
 from stomp.listener import StatsListener
-from urllib2 import URLError
+from urllib.error import URLError
 from threading import Timer
 
 # Modules created by Bioconductor
@@ -136,7 +136,7 @@ class Tailer(threading.Thread):
 def send_message(msg, status=None):
     global stomp
     global manifest
-    logging.debug(u"Attempting to send message: '{msg}'".format(msg=msg))
+    logging.debug("Attempting to send message: '{msg}'".format(msg=msg))
     merged_dict = {}
     merged_dict['builder_id'] = BUILDER_ID
     merged_dict['client_id'] = manifest['client_id']
@@ -144,13 +144,13 @@ def send_message(msg, status=None):
     now = datetime.datetime.now()
     merged_dict['time'] = str(now)
     if type(msg) is dict:
-        logging.debug(u"msg is dict")
+        logging.debug("msg is dict")
         merged_dict.update(msg)
-        if not ('status' in merged_dict.keys()):
+        if not ('status' in list(merged_dict.keys())):
             if not (status == None):
                 merged_dict['status'] = status
     else:
-        logging.debug(u"msg is NOT dict")
+        logging.debug("msg is NOT dict")
         merged_dict['body'] = msg
         if not (status == None):
             merged_dict['status'] = status
@@ -158,22 +158,22 @@ def send_message(msg, status=None):
     if("body" in merged_dict):
         body = None
         try:
-            body = unicode(merged_dict['body'], errors='replace')
+            body = str(merged_dict['body'], errors='replace')
         except TypeError:
             body = merged_dict['body']
-        logging.debug(u"Final modified body: '{body}'".format(body=body))
+        logging.debug("Final modified body: '{body}'".format(body=body))
         merged_dict['body'] = \
                 unicodedata.normalize('NFKD', body).encode('ascii','ignore')
-        logging.debug(u"Ascii encoded body: '{body}'".format(body=merged_dict['body']))
+        logging.debug("Ascii encoded body: '{body}'".format(body=merged_dict['body']))
 
-    logging.debug(u"Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
+    logging.debug("Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
     json_str = json.dumps(merged_dict)
-    logging.debug(u"JSON json_str: '{json_str}'".format(json_str=json_str))
+    logging.debug("JSON json_str: '{json_str}'".format(json_str=json_str))
 
-    logging.debug(u"Sending message: %s" % json_str)
+    logging.debug("Sending message: %s" % json_str)
     stomp.send(destination=TOPICS['events'], body=json_str,
                headers={"persistent": "true"})
-    logging.debug(u"send_message(): Message sent.")
+    logging.debug("send_message(): Message sent.")
 
 
 def send_dcf_info(dcf_file):
@@ -362,7 +362,7 @@ def git_info():
         "status": "post_processing",
         "retcode": 0
         })
-    except URLError, err_url:
+    except URLError as err_url:
         logging.info('Cannot access github log: %s', err_url)
         send_message({
             "body": "Accessing git_info failed. ",
@@ -388,7 +388,7 @@ def get_dcf_info(manifest):
     github_url = github_url.replace("https://github.com",
       "https://raw.githubusercontent.com")
     try:
-        f = urllib2.urlopen(github_url)
+        f = urllib.request.urlopen(github_url)
         dcf_text = f.read()
         dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
         send_dcf_info(dcf_file)

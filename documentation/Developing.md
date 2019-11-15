@@ -23,19 +23,19 @@ To run the Single Package Builder (SPB) locally, you will need to clone the foll
 
 * packagebuilder  
     ```
-    git clone git@github.com:Bioconductor/spb_history.git
+    git clone https://github.com/Bioconductor/spb_history.git
     ```
 * spb\_history  
     ```
-    git clone git@github.com:Bioconductor/packagebuilder.git
+    git clone https://github.com/Bioconductor/packagebuilder.git
     ```
 * BBS  
     ```
-    git clone git@github.com:Bioconductor/BBS.git
+    git clone https://github.com/Bioconductor/BBS.git
     ```
 * bioc-common-python  
     ```
-    git clone git@github.com:Bioconductor/bioc-common-python.git
+    git clone https://github.com/Bioconductor/bioc-common-python.git
     ```
     
 <a name="rabbitmq"></a>

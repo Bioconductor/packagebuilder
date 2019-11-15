@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 A simple twisted STOMP message sender.
 
@@ -76,7 +76,7 @@ class StompProtocol(Protocol, stomper.Engine):
     def send(self):
         """Send out a hello message periodically.
         """
-        counter = self.counter.next()
+        counter = next(self.counter)
         
         self.log.info("senderID:%s Saying hello (%d)." % (self.senderID, counter))
 
@@ -128,13 +128,13 @@ class StompClientFactory(ReconnectingClientFactory):
     def clientConnectionLost(self, connector, reason):
         """Lost connection
         """
-        print 'Lost connection.  Reason:', reason
+        print(('Lost connection.  Reason:', reason))
     
     
     def clientConnectionFailed(self, connector, reason):
         """Connection failed
         """
-        print 'Connection failed. Reason:', reason        
+        print(('Connection failed. Reason:', reason))        
         ReconnectingClientFactory.clientConnectionFailed(self, connector, reason)
 
 

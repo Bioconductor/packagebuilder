@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
 #
 # make cron job to run once a day.
 #
 
 import os
 import json
-from urllib2 import Request, urlopen, URLError
+from urllib.request import Request, urlopen
+from urllib.error import URLError
 import requests
 from bioconductor.config import ENVIR
 import logging
@@ -57,7 +59,7 @@ for issue_name in list(close_nums):
     pkg_rm = os.path.join(job_dir, str(issue_name))
     if os.path.exists(pkg_rm):
         order_list = sorted_ls(pkg_rm)
-        order_list = filter(lambda a: a != 'R-libs', order_list)
+        order_list = [a for a in order_list if a != 'R-libs']
         temp = order_list.pop()
         for subdir in order_list:
             newpath = os.path.join(pkg_rm, subdir)
