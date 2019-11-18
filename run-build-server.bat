@@ -10,7 +10,7 @@ echo "Activating virtual environment"
 .\env\Scripts\activate
 
 @rem ALL OF THESE ARE SET IN PROPERTIES FILES/SERVER.py
-set BBS_PYTHON_CMD=C:\Python27\python.exe
+set BBS_PYTHON_CMD=C:\Python37\python.exe
 @rem set BBS_RSYNC_CMD=C:\cygwin\bin\rsync.exe
 @rem With StrictHostKeyChecking=no, ssh will automatically add new host keys
 @rem to the user known hosts files (so it doesn't get stalled waiting for an

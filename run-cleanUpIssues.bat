@@ -6,6 +6,6 @@ cd /d "%~dp0"
 @rem when run interactively used the following
 .\env\Scripts\activate
 
-set BBS_PYTHON_CMD=C:\Python27\python.exe
+set BBS_PYTHON_CMD=C:\Python37\python.exe
 
 python workers\cleanUpIssues.py
