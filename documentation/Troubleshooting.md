@@ -69,22 +69,22 @@ Or look at all pkgbuild processes
  that you know it should have received, then the server needs
  to be restarted. The `ps` command above should have
  given you a process id (in the second column). It may be better to kill off all
- python or R process - see further comments before killing single process. 
+ python3 or R process - see further comments before killing single process. 
 
  You can kill that process with `kill -9`.
 
 Depdending on what other processes are running under the pkgbuild account you
-could also do any of the following to group kill all python, all R, or all
+could also do any of the following to group kill all python3, all R, or all
 pkgbuild process. 
 
-    killall python
+    killall python3
     killall R
     killall -u pkgbuild
 
 Then to start or re-start the server, do this (although better to use the below
 call do run-build-server script):
 
-    nohup python server.py > server.log 2>&1 &
+    nohup python3 server.py > server.log 2>&1 &
 
 Alternatively, you can start all relevant scripts for the spb
 
@@ -151,13 +151,13 @@ environment as well `source env/bin/activate`.
 
 You can determine if the scripts are running as follows:
 
-    ps aux | grep python 
+    ps aux | grep python3
 
 You should see an entry for archiver and track\_build\_completion. If either 
 script is not running you can restart it with one of the following commands:
 
-    nohup python track_build_completion.py > track_build_completion.log 2>&1 &
-    nohup python archiver.py > archiver.log 2>&1 &
+    nohup python3 track_build_completion.py > track_build_completion.log 2>&1 &
+    nohup python3 archiver.py > archiver.log 2>&1 &
     
 or 
 
@@ -188,13 +188,13 @@ builders **do not** do a `-u biocadmin` as there is not a different account for
 the pkgbuild on staging.  
 
     source env/bin/activate
-    killall python 
+    killall python3
     ./all.sh
 
 To see if all the servers (build nodes) and staging scripts are running, while 
 logged in as `biocadmin` on staging.bioconductor.org, in `~/packagebuilder`, 
 activate the virtual environment with `source env/bin/activate`, and then run 
-the `python pinger.py`.  This script will show all the active scripts talking to 
+the `python3 pinger.py`.  This script will show all the active scripts talking to 
 the rabbitmq messaging service. (**NOTE:** Django/manager will not have an entry.)
 If the stomp connection cannot be connected rabbitmq might not be running and 
 may need to be restarted (see section Reactivating Rabbitmq)
@@ -220,14 +220,14 @@ It's issue number is 51 and it's URL is:
 
 So now with these two pieces of information you can restart an SPB build as follows:
 
-    python rerun_build.py 51 https://github.com/Bioconductor/spbtest3
+    python3 rerun_build.py 51 https://github.com/Bioconductor/spbtest3
 
 You can then monitor the build by going to
 [http://staging.bioconductor.org:8000/](http://staging.bioconductor.org:8000/)
 and then navigating to the package and latest build. You can
 periodically refresh the page to see progress.
 
-There is a helper script IssuesToRerun.py.  Run this in python to get a list of
+There is a helper script IssuesToRerun.py.  Run this in python3 to get a list of
 potential candidate issues to rerun after the SPB crashes and needs a
 restart. You should look on their contributions submission page to see if it
 really needs to be rerun or not.  

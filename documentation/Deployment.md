@@ -14,9 +14,17 @@ All steps should be performed as user `pkgbuild` unless otherwise noted.
 
 #### Clone Repositories
 
+**Note**: For now (Nov 2019) you need to use the `python3` branch
+of `packagebuilder` and `bioc-common-python`. This is until the `python3`
+branch of these 2 repositories gets merged into their `master` branch.
+
 ```
 git clone https://github.com/Bioconductor/packagebuilder.git
-git clone git@github.com:Bioconductor/bioc-common-python.git
+git -C packagebuilder checkout python3      # temporarily needed
+
+git clone https://github.com/Bioconductor/bioc-common-python.git
+git -C bioc-common-python checkout python3  # temporarily needed
+
 cd packagebuilder
 ```
 
@@ -29,32 +37,38 @@ on the same server), you'll need to create a virtual environment.
    [install it](http://virtualenv.readthedocs.org/en/latest/installation.html).  
    Afterwards, create an environment called "env":   
   ```
-  virtualenv env
+  virtualenv -p /usr/bin/python3 env
   ```
+
 2. Next, activate the environment:
   ```
   source env/bin/activate
   ```
 
 3. You should see your shell change with the environment activated.  Next
-   install the the dependencies:
+   install the dependencies:
    
 ```
-   pip install stomp.py pytz stompy
-   
+   pip3 install stomp.py pytz stompy
+
    cd ../bioc-common-python
-   
-   pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
-   
-   python setup.py install
+   pip3 install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
+   python3 setup.py install
 
    cd ../packagebuilder
-
-   pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
-   
+   pip3 install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
 ```
-   
-  **Note:** If there is trouble with a particular version of a dependency
+
+   **Note:** The `stompy` module doesn't seem to be available for Python 3
+   at the moment (Nov 2019) so skip it. It doesn't seem to be needed anyway.
+
+   **Note**: For now (Nov 2019), the first line in
+   `packagebuilder/PIP-DEPENDENCIES--packagebuilder.txt` has been modified
+   to install the `python3` branch of bioc-common-python from GitHub.
+   Remove `@python3` from this line once the `python3` branch of
+   bioc-common-python gets merged into its `master` branch.
+
+   **Note:** If there is trouble with a particular version of a dependency
    you can update the versions in these files. These versions were stable 
    and working on our systems. 
    
@@ -63,7 +77,10 @@ on the same server), you'll need to create a virtual environment.
    are: libffi-dev, build-essential, libssl-dev, python-dev, openssl. These 
    generally would be installed with [sudo] apt-get install \<name\>
    
-   **Note:** Sometimes the 'egg' doesn't install properly when installing the above      from bioc-common-python and there is an ERROR when installing the packagebuilder     dependencies. If this is the case go back and redo the bioc-common-python            commands above.
+   **Note:** Sometimes the 'egg' doesn't install properly when installing the
+   above from bioc-common-python and there is an ERROR when installing the
+   packagebuilder dependencies. If this is the case go back and redo the
+   bioc-common-python commands above.
 
 #### Configuration 
 
@@ -98,7 +115,7 @@ information copy over the key from existing builder (see properties file)
 #### Start server
 Kick off the server 
 ```
-killall python
+killall python3
 ./run-build-server.sh
 ```
 
@@ -118,13 +135,25 @@ If the new node is a new version of MAC OS, the following script on staging.bioc
 # Windows Install: 
 
 All steps should be performed as user `pkgbuild` unless otherwise noted.
+Make sure Python 3 is installed on the machine (check that you can start
+`python` at the command line and that this starts Python 3).
+Also `pip` should be available (equivalent of `pip3` on Linux or Mac).
 
 #### Clone Repositories
 
+**Note**: For now (Nov 2019) you need to use the `python3` branch
+of `packagebuilder` and `bioc-common-python`. This is until the `python3`
+branch of these 2 repositories gets merged into their `master` branch.
+
 ```
 git clone https://github.com/Bioconductor/packagebuilder.git
-git clone git@github.com/Bioconductor/bioc-common-python.git
-git clone git@github.com/Bioconductor/BBS.git
+git -C packagebuilder checkout python3      # temporarily needed
+
+git clone https://github.com/Bioconductor/bioc-common-python.git
+git -C bioc-common-python checkout python3  # temporarily needed
+
+git clone https://github.com/Bioconductor/BBS.git
+
 cd packagebuilder
 ```
 
@@ -151,17 +180,22 @@ on the same server), you'll need to create a virtual environment.
    pip install stomp.py pytz stompy
    
    cd ../bioc-common-python
-   
    pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
-   
    python setup.py install
 
    cd ../packagebuilder
-
    pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
-
 ```
    
+   **Note:** The `stompy` module doesn't seem to be available for Python 3
+   at the moment (Nov 2019) so skip it. It doesn't seem to be needed anyway.
+
+   **Note**: For now (Nov 2019), the first line in
+   `packagebuilder/PIP-DEPENDENCIES--packagebuilder.txt` has been modified
+   to install the `python3` branch of bioc-common-python from GitHub.
+   Remove `@python3` from this line once the `python3` branch of
+   bioc-common-python gets merged into its `master` branch.
+
   **Note:** If there is trouble with a particular version of a dependency
    you can update the versions in these files. These versions were stable 
    and working on our systems. 
@@ -259,7 +293,7 @@ If the server is communicating correctly, on
 ```
 cd packagebuilder
 . env/bin/activate
-python pinger.py
+python3 pinger.py
 ```
 There should be an entry for the new server provided it is running either 
 interactively or automatically. 
@@ -311,10 +345,10 @@ the node `ifconfig |grep inet`
 
 1. Pull bioc-common-python and packagebuilder
 2. source env/bin/activate
-3. killall python
+3. killall python3
 4. cd ../bioc-common-python
-5. pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
-6. python setup.py install
+5. pip3 install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
+6. python3 setup.py install
 7. cd ../packagebuilder
-8. pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
-9. restart node 
+8. pip3 install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
+9. restart node

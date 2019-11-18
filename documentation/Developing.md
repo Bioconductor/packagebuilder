@@ -23,21 +23,26 @@ To run the Single Package Builder (SPB) locally, you will need to clone the foll
 
 * packagebuilder  
     ```
-    git clone https://github.com/Bioconductor/spb_history.git
+    git clone https://github.com/Bioconductor/packagebuilder.git
     ```
 * spb\_history  
     ```
-    git clone https://github.com/Bioconductor/packagebuilder.git
-    ```
-* BBS  
-    ```
-    git clone https://github.com/Bioconductor/BBS.git
+    git clone https://github.com/Bioconductor/spb_history.git
     ```
 * bioc-common-python  
     ```
     git clone https://github.com/Bioconductor/bioc-common-python.git
     ```
-    
+* BBS  
+    ```
+    git clone https://github.com/Bioconductor/BBS.git
+    ```
+
+**Note**: For now (Nov 2019) you need to use the `python3` branch
+of `packagebuilder`, `spb\_history`, and `bioc-common-python` (e.g.
+`cd packagebuilder; git checkout python3`). This is until the `python3`
+branch for these 3 repositories gets merged into the `master` branch.
+
 <a name="rabbitmq"></a>
 Set up RabbitMQ messaging client
 --------------------------------
@@ -104,6 +109,9 @@ be used in production.
   ```
   virtualenv env
   ```
+  **Note:** Make sure Python3 is used to create the environment. On the Linux
+  and Mac builders, you'll need to specify the path to the `python3` command
+  with `virtualenv -p /usr/bin/python3 env`.
 
   This virtual environment is important, as we do not want to pollute the
   global Python package space.  Assume other python services are running
@@ -117,7 +125,7 @@ be used in production.
   install the required modules.  Since the virtualenv is active, the packages
   are kept in isolation.  For example, the
   [stomp.py](https://github.com/jasonrbriggs/stomp.py) module will be installed
-  at `./env/lib/python2.7/site-packages/stomp`.  There are two **important**
+  at `./env/lib/python3.5/site-packages/stomp`.  There are two **important**
   notes about the next command (1), yes right now, we need both `stomp.py`
   and `stompy`.  We'll migrate off `stompy` soon.  (2) It's very important
   that you install **version 1.8.4** of Django, as newer versions have caused
@@ -125,30 +133,51 @@ be used in production.
 
     Install the dependencies :
 
-    ```pip install stomp.py pytz stompy django==1.8.4```
+    ```pip3 install stomp.py pytz stompy django==1.8.4```
+
+    **Note:** Use `pip` instead of `pip3` on the Windows builder.
+
+    **Note:** The `stompy` module doesn't seem to be available for Python 3
+    at the moment (Nov 2019) so skip it. It doesn't seem to be needed anyway.
 
 4. Install additional dependencies:
 
     Install the necessary PIP-DEPENDENCIES and global variable environment.
     ```
     cd packagebuilder
-    pip install --upgrade -r ./PIP-DEPENDENCIES--packagebuilder.txt
+    pip3 install --upgrade -r ./PIP-DEPENDENCIES--packagebuilder.txt
+
     cd ../spb_history
-    pip install --upgrade -r ./PIP-DEPENDENCIES--spb_history.txt
+    pip3 install --upgrade -r ./PIP-DEPENDENCIES--spb_history.txt
+
     cd ../bioc-common-python
-    pip install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
-    python setup.py install
+    pip3 install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
+    python3 setup.py install
     ```
-  **Note:** If there is trouble with a particular version of a dependency
+
+   **Note:** Use `pip` and `python` instead of `pip3` and `python3` on the
+   Windows builder.
+
+   **Note**: For now (Nov 2019), the first line in
+   `packagebuilder/PIP-DEPENDENCIES--packagebuilder.txt` and
+   `spb_history/PIP-DEPENDENCIES--spb_history.txt` has been modified
+   to install the `python3` branch of bioc-common-python from GitHub.
+   Remove `@python3` from these 2 lines once the `python3` branch of
+   bioc-common-python gets merged into its `master` branch.
+
+   **Note:** If there is trouble with a particular version of a dependency
    you can update the versions in these files. These versions were stable 
    and working on our systems. 
-   
+ 
    **Note:** There are several system dependecies that may need to be 
    installed. Some common ones that have been needed if not already installed 
    are: libffi-dev, build-essential, libssl-dev, python-dev, openssl. These 
    generally would be installed with [sudo] apt-get install \<name\>
-   
-   **Note:** Sometimes the 'egg' doesn't install properly when installing the above      from bioc-common-python and there is an ERROR when installing the packagebuilder     dependencies. If this is the case go back and redo the bioc-common-python            commands above.
+
+   **Note:** Sometimes the 'egg' doesn't install properly when installing the
+   above from bioc-common-python and there is an ERROR when installing the
+   packagebuilder  dependencies. If this is the case go back and redo the
+   bioc-common-python commands above.
 
 
 <a name="configuration"></a>
@@ -196,8 +225,10 @@ There are several pieces to the SPB. To see each piece run interactively, open n
 
     The main builder server is in the packagebuilder directory and will store it's data in the `workers` subdirectory.  To start the builder service, run the following in the packagebuilder top directory:
     ```
-    python -m workers.server
+    python3 -m workers.server
     ```
+
+    **Note:** Use `python` instead of `python3` on the Windows builder.
 
     You should see some output similar to the follow which indicates the server is up and running and your rabbitmq was initialized properly:
     ```
@@ -211,22 +242,28 @@ There are several pieces to the SPB. To see each piece run interactively, open n
 
     The archiver shows logging/progress messages while the package is being built and checked. This is in the spb\_history directory. To start the archiver, run the following in the spb\_history top directory:
     ```
-    python -m archiver
+    python3 -m archiver
     ```
+
+    **Note:** Use `python` instead of `python3` on the Windows builder.
 
 3. (optional) spb_history: track build completion
 
     The track build completion shows logging/progress messages while the package is being built and checked as well as when the process finishes and the completed output is available for view on the web page. This is in the spb\_history directory. To start the track\_build\_completion, run the following in the spb\_history top directory:
     ```
-    python -m track_build_completion
+    python3 -m track_build_completion
     ```
+
+    **Note:** Use `python` instead of `python3` on the Windows builder.
 
 4. (optional) spb_history: Django web app - this allows a local web view of build report
 
     The Django web application allows for a local web view of the build report. Once the report is generated you can open the following `http://0.0.0.0:8000/` to view in web browser. To start Django, run the following in the spb\_history top directory:
     ```
-    python -m manage runserver 0.0.0.0:8000
+    python3 -m manage runserver 0.0.0.0:8000
     ```
+
+    **Note:** Use `python` instead of `python3` on the Windows builder.
     
 <a name="communications"></a>
 #### Test communications
@@ -234,8 +271,11 @@ There are several pieces to the SPB. To see each piece run interactively, open n
 To test the connections, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
 
 ```
-python pinger.py
+python3 pinger.py
 ```
+
+**Note:** Use `python` instead of `python3` on the Windows builder.
+
 You should see responses from any of the activated pieces above.
 An example with only the packagebuilder main server activated with no optional pieces:
 
@@ -251,7 +291,9 @@ INFO: 09/26/2016 01:08:53 PM {"host": "lori-HP-ZBook-15-G2", "script": "server.p
 To kick off a job, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
 
 ```
-python rerun_build.py 51 https://github.com/Bioconductor/spbtest3
+python3 rerun_build.py 51 https://github.com/Bioconductor/spbtest3
 ```
+
+**Note:** Use `python` instead of `python3` on the Windows builder.
 
 The output directory and log files for the build are created in the `spb_home` directory specified in the `<your machine name>.properties` file in subdirectory: jobs/51/
