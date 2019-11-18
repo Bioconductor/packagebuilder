@@ -259,7 +259,7 @@ logging.info('Waiting for messages; CTRL-C to exit.')
 
 
 while True:
-    if logging.getLogger().isEnabledFor("debug"):
+    if logging.getLogger().isEnabledFor(logging.DEBUG):
         logging.debug("main() Waiting to do work.")
     time.sleep(60 * 5)
 
