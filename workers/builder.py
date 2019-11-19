@@ -42,7 +42,7 @@ from bioconductor.config import TOPICS
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 import BBScorevars
-import dcf
+from bbs.dcf.dcfrecordsparser import DcfRecordParser
 import bbs.parse
 
 stomp = None
@@ -162,8 +162,7 @@ def send_message(msg, status=None):
         except TypeError:
             body = merged_dict['body']
         logging.debug("Final modified body: '{body}'".format(body=body))
-        merged_dict['body'] = \
-                unicodedata.normalize('NFKD', body).encode('ascii','ignore')
+        merged_dict['body'] = unicodedata.normalize('NFKD', body)
         logging.debug("Ascii encoded body: '{body}'".format(body=merged_dict['body']))
 
     logging.debug("Final merged_dict: '{merged_dict}'".format(merged_dict=merged_dict))
@@ -192,7 +191,6 @@ def send_dcf_info(dcf_file):
 def setup():
     global manifest
     global working_dir
-    global dcf
     global packagebuilder_ssh_cmd, packagebuilder_rsync_cmd, \
         packagebuilder_rsync_rsh_cmd, packagebuilder_scp_cmd
     global callcount
@@ -321,6 +319,7 @@ def get_r_version():
     r_version_raw, stderr = subprocess.Popen([
         ENVIR['bbs_R_cmd'],"--version"
     ], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
+    r_version_raw = bbs.parse.bytes2str(r_version_raw)
     lines = r_version_raw.split("\n")
     r_version_line = lines[0]
     return r_version_line.replace("R version ", "")
@@ -388,9 +387,10 @@ def get_dcf_info(manifest):
     github_url = github_url.replace("https://github.com",
       "https://raw.githubusercontent.com")
     try:
-        f = urllib.request.urlopen(github_url)
-        dcf_text = f.read()
-        dcf_file = dcf.DcfRecordParser(dcf_text.rstrip().split("\n"))
+        f = urllib.request.urlopen(github_url)  # open URL in binary mode
+        dcf_text = bbs.parse.bytes2str(f.read())
+        f.close()
+        dcf_file = DcfRecordParser(dcf_text.rstrip().split("\n"))
         send_dcf_info(dcf_file)
         desc_name = dcf_file.getValue("Package")
     except:
@@ -491,7 +491,7 @@ def install_pkg_deps():
     description = f.read()
     logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
-    desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    desc = DcfRecordParser(description.rstrip().split("\n"))
     fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
     args = ""
     for field in fields:
@@ -532,7 +532,7 @@ def getPackageType():
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
     description = f.read()
     f.close()
-    desc = dcf.DcfRecordParser(description.rstrip().split("\n"))
+    desc = DcfRecordParser(description.rstrip().split("\n"))
     try:
         isWorkflow = desc.getValue("Workflow")
     except KeyError:
