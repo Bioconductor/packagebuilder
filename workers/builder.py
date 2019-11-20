@@ -551,7 +551,7 @@ def getPackageType():
             cmd = "%s --vanilla --no-save --no-restore %s" % (rscript_binary, r_script)
             cmd = cmd + " " + views
             logging.info("Get Package Type command:\n" + cmd)
-            pkg_type_views = subprocess.check_output(cmd, shell=True)
+            pkg_type_views = subprocess.check_output(cmd, shell=True).decode()
             if (pkg_type_views == "ExperimentData"):
                 longBuild = True
         except KeyError:
