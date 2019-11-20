@@ -70,11 +70,11 @@ class Tailer(threading.Thread):
         self.filename = filename
         self.status = status
         self.message_sequence = 1
-        self._stop = threading.Event()
+        self._stopper = threading.Event()
     def stop(self):
-        self._stop.set()
+        self._stopper.set()
     def stopped(self):
-        return self._stop.isSet()
+        return self._stopper.is_set()
     def run(self):
         prevsize = 0
         while True:
