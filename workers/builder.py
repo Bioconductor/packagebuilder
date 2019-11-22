@@ -529,8 +529,8 @@ def getPackageType():
     global longBuild
     global pkg_type_views
     package_name = manifest['job_id'].split("_")[0]
-    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
-    description = f.read()
+    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
+    description =bbs.parse.bytes2str(f.read())
     f.close()
     desc = DcfRecordParser(description.rstrip().split("\n"))
     try:
