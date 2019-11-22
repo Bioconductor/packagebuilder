@@ -487,8 +487,8 @@ def checkgitclone():
 
 def install_pkg_deps():
     package_name = manifest['job_id'].split("_")[0]
-    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name))
-    description = f.read()
+    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
+    description = bbs.parse.bytes2str(f.read())
     logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
     desc = DcfRecordParser(description.rstrip().split("\n"))
