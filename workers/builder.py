@@ -177,7 +177,7 @@ def send_message(msg, status=None):
 
 def send_dcf_info(dcf_file):
     try:
-        maintainer = dcf_file.getValue("Maintainer")
+        maintainer = dcf_file.getValue("Maintainer", full_line=True)
     except:
         maintainer = "unknown"
     send_message({
@@ -496,7 +496,7 @@ def install_pkg_deps():
     args = ""
     for field in fields:
         try:
-            args += '%s=@@%s@@; ' % (field, desc.getValue(field))
+            args += '%s=@@%s@@; ' % (field, desc.getValue(field, full_line=True))
         except KeyError:
             pass
     r_script = os.path.join(ENVIR['spb_home'], "installPkgDeps.R")
@@ -544,7 +544,7 @@ def getPackageType():
         logging.info("Package is a workflow.")
     else:
         try:
-            views = desc.getValue("biocViews").replace(",", "")
+            views = desc.getValue("biocViews", full_line=True).replace(",", "")
             r_script = os.path.join(ENVIR['spb_home'], "getPackageType.R")
             rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
             rscript_binary = os.path.join(rscript_dir, "Rscript")
