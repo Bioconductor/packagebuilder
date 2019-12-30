@@ -1268,6 +1268,21 @@ if __name__ == "__main__":
     else:
         logging.info("Initial Platform Check Passed.")
 
+    package_name = manifest['job_id'].split("_")[0]
+    docker_path = os.path.join(working_dir, package_name, "Dockerfile")
+    if (os.path.exists(docker_path)):
+        logging.info("Package is a docker container.")
+        send_message({
+            "status": "unsupported",
+            "retcode": 0,
+            "warnings": False,
+            "body": "Docker Container",
+            "elapsed_time": "NA"})
+        send_message({"status": "post_processing",
+                      "retcode": 0,
+                      "body": "Docker Container. "})
+        sys.exit("docker container")
+
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Installing Package Dependencies:")
     result = install_pkg_deps()
