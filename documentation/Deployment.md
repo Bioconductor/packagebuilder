@@ -38,6 +38,11 @@ on the same server), you'll need to create a virtual environment.
    Afterwards, create an environment called "env":   
   ```
   virtualenv -p /usr/bin/python3 env
+  
+  or 
+  
+  python3 -m venv env  # for mac
+  
   ```
 
 2. Next, activate the environment:
