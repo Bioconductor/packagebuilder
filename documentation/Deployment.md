@@ -166,7 +166,7 @@ on the same server), you'll need to create a virtual environment.
    [install it](http://virtualenv.readthedocs.org/en/latest/installation.html).  
    Afterwards, create an environment called "env":   
 ```
-    virtualenv env
+    python -m venv env
 ```
 2. Next, activate the environment:
 ```
