@@ -171,8 +171,10 @@ on the same server), you'll need to create a virtual environment.
    [install it](http://virtualenv.readthedocs.org/en/latest/installation.html).  
    Afterwards, create an environment called "env":   
 ```
-    python -m venv env
+    virtualenv env
 ```
+**Note:** It was suggested to use venv that is shipped with python3. Do NOT use this. We need to use virtualenv
+
 2. Next, activate the environment:
 ```
     .\env\Scripts\activate
