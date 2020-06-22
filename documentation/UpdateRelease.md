@@ -20,7 +20,7 @@ To initilize this change on all nodes and staging
 3. pip3 install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
 4. python3 setup.py install
 5. cd ../packagebuilder
-6. pip3 install --upgrade -r ./PIP-DEPENDENCIES--spb_history.txt
+6. pip3 install --upgrade -r ./PIP-DEPENDENCIES--packagebuilder.txt
 
 **Note:** Use `pip` and `python` instead of `pip3` and `python3` on the
 Windows builder.

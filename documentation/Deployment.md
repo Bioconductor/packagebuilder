@@ -38,6 +38,11 @@ on the same server), you'll need to create a virtual environment.
    Afterwards, create an environment called "env":   
   ```
   virtualenv -p /usr/bin/python3 env
+  
+  or 
+  
+  python3 -m venv env  # for mac
+  
   ```
 
 2. Next, activate the environment:
@@ -168,6 +173,8 @@ on the same server), you'll need to create a virtual environment.
 ```
     virtualenv env
 ```
+**Note:** It was suggested to use venv that is shipped with python3. Do NOT use this. We need to use virtualenv
+
 2. Next, activate the environment:
 ```
     .\env\Scripts\activate
