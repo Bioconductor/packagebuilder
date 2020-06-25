@@ -153,18 +153,10 @@ def do_work(body):
             url_name = received_obj['svn_url'].split("/")
             url_user = url_name[3]
             url_pkg = url_name[4]
-            cmd = "/".join(["https://api.github.com/repos",url_user,
-                               url_pkg, "commits/HEAD"])
-            #request = Request(cmd)
-            try:
-                #response = urlopen(request)
-                #res = response.read()
-                request = requests.get(cmd)
-                res = request.text
-                run_dir = json.loads(res)['sha'][0:7]
-            except URLError as err_url:
-                logging.info('Cannot access github log: %s', err_url)
-                logging.debug('URL: %s', cmd)
+
+            if ('commit_id' in list(received_obj.keys())):
+                run_dir = received_obj['commit_id']
+            else:
                 run_dir = job_id
 
             job_dir = os.path.join(job_dir_main, run_dir)

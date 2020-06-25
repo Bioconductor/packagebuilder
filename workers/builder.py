@@ -370,24 +370,15 @@ def git_info():
         })
 
 
-def get_dcf_info(manifest):
+def get_dcf_info():
     global svn_url_global
     svn_url_global = manifest['svn_url']
     package_name = manifest['job_id'].split("_")[0]
     logging.info("Starting get_dcf_info() '%s'." % package_name)
 
-    github_url = re.sub(r'\.git$', '', manifest['svn_url'])
-    if not github_url.endswith("/"):
-        github_url += "/"
-        # We only build the master branch. There had better be one.
-        # (technically we build whatever the default branch is, but
-        # this step looks at master because to find out what the
-        # default branch is at this point we would need octokit here).
-    github_url += "master/DESCRIPTION"
-    github_url = github_url.replace("https://github.com",
-      "https://raw.githubusercontent.com")
+    github_url = package_name + "/DESCRIPTION"
     try:
-        f = urllib.request.urlopen(github_url)  # open URL in binary mode
+        f = open(github_url, "r")  # open URL in binary mode
         dcf_text = bbs.parse.bytes2str(f.read())
         f.close()
         dcf_file = DcfRecordParser(dcf_text.rstrip().split("\n"))
@@ -427,7 +418,7 @@ def git_clone():
     git_url = re.sub(r'\/$', '', manifest['svn_url'])
     if not git_url.endswith(".git"):
         git_url += ".git"
-    git_cmd = "git clone %s --branch master --single-branch" % git_url
+    git_cmd = "git clone %s --branch master --single-branch --depth 1" % git_url
     send_message({"status": "git_cmd", "body": git_cmd})
     logging.info("git_clone command: " + git_cmd)
     send_message({"status": "preprocessing",
@@ -1239,11 +1230,11 @@ if __name__ == "__main__":
     get_node_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
-    git_info()
-    logging.info("\n\n" + log_highlighter + "\n\n")
+#    git_info()
+#    logging.info("\n\n" + log_highlighter + "\n\n")
 
-    get_dcf_info(manifest)
     git_clone()
+    get_dcf_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
     exitOut = False
