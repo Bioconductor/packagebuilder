@@ -116,6 +116,8 @@ be used in production.
   This virtual environment is important, as we do not want to pollute the
   global Python package space.  Assume other python services are running
   on this host and require different versions of various modules.
+  
+  **Note:** SPB last tested with Python 3.7.3
 
 2. Next, activate the environment in **every shell** you'll be working in :
   ```
@@ -125,20 +127,14 @@ be used in production.
   install the required modules.  Since the virtualenv is active, the packages
   are kept in isolation.  For example, the
   [stomp.py](https://github.com/jasonrbriggs/stomp.py) module will be installed
-  at `./env/lib/python3.5/site-packages/stomp`.  There are two **important**
-  notes about the next command (1), yes right now, we need both `stomp.py`
-  and `stompy`.  We'll migrate off `stompy` soon.  (2) It's very important
-  that you install **version 1.8.4** of Django, as newer versions have caused
-  problems.
+  at `./env/lib/python3.5/site-packages/stomp`. 
 
     Install the dependencies :
 
-    ```pip3 install stomp.py pytz stompy django==1.8.4```
+    ```pip3 install stomp.py==4.1.9 pytz==2015.7 django==3.0.3```
 
     **Note:** Use `pip` instead of `pip3` on the Windows builder.
 
-    **Note:** The `stompy` module doesn't seem to be available for Python 3
-    at the moment (Nov 2019) so skip it. It doesn't seem to be needed anyway.
 
 4. Install additional dependencies:
 
@@ -153,7 +149,10 @@ be used in production.
     cd ../bioc-common-python
     pip3 install --upgrade -r ./PIP-DEPENDENCIES--bioc-common-python.txt
     python3 setup.py install
-    ```
+    
+    cd packagebuilder
+    pip3 install --upgrade -r ./PIP-DEPENDENCIES--packagebuilder.txt
+   ```
 
    **Note:** Use `pip` and `python` instead of `pip3` and `python3` on the
    Windows builder.
@@ -179,6 +178,9 @@ be used in production.
    packagebuilder  dependencies. If this is the case go back and redo the
    bioc-common-python commands above.
 
+    **Note:** We upgraded to python3 June 2020.  At that time a new PIP dependency
+   file was generate.  It can't hurt to also check the dependency versions vs
+   newlyGeneratedPIP3dependencies.txt in spb_history.
 
 <a name="configuration"></a>
 Configuration
