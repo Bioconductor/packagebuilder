@@ -838,7 +838,14 @@ def check_package():
 
     cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
 
-    cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
+    newpackage = True
+    if ('newpackage' in manifest.keys()):
+        newpackage = manifest['newpackage']
+
+    if newpackage:
+      cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
+    else:
+      cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out %s" % (ENVIR['bbs_R_cmd'], tarball)
 
     cmdMessage = cmdCheck + "  &&  " + cmdBiocCheck
 
