@@ -152,7 +152,7 @@ be used in production.
     
     cd packagebuilder
     pip3 install --upgrade -r ./PIP-DEPENDENCIES--packagebuilder.txt
-   ```
+    ```
 
    **Note:** Use `pip` and `python` instead of `pip3` and `python3` on the
    Windows builder.
