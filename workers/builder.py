@@ -476,6 +476,63 @@ def checkgitclone():
     logging.info("Finished Checking Git Clone of Package.\n completed with status: " + str(retcode))
     return retcode
 
+
+
+def getPackageType():
+    global longBuild
+    global pkg_type_views
+    package_name = manifest['job_id'].split("_")[0]
+    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
+    description =bbs.parse.bytes2str(f.read())
+    f.close()
+    desc = DcfRecordParser(description.rstrip().split("\n"))
+    try:
+       BiocType = desc.getValue("BiocType")
+    except KeyError:
+        pass
+        BiocType = "Software"
+    pkg_type_views = BiocType
+    if (BiocType == "Workflow"):
+        longBuild = True
+        pkg_type_views = "Workflow"
+        logging.info("Package is a workflow.")
+    elif (BiocType == "Docker"):
+        logging.info("Package is a docker container.")
+        send_message({
+            "status": "unsupported",
+            "retcode": 0,
+            "warnings": False,
+            "body": "Docker Container",
+            "elapsed_time": "NA"})
+        send_message({"status": "post_processing",
+                      "retcode": 0,
+                      "body": "Docker Container. "})
+        sys.exit("docker container")
+    else:
+        try:
+            views = desc.getValue("biocViews", full_line=True).replace(",", "")
+            r_script = os.path.join(ENVIR['spb_home'], "getPackageType.R")
+            rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
+            rscript_binary = os.path.join(rscript_dir, "Rscript")
+            cmd = "%s --vanilla --no-save --no-restore %s" % (rscript_binary, r_script)
+            cmd = cmd + " " + views
+            logging.info("Get Package Type command:\n" + cmd)
+            pkg_type_views = subprocess.check_output(cmd, shell=True).decode()
+            if (pkg_type_views == "ExperimentData"):
+                longBuild = True
+        except KeyError:
+            pkg_type_views = "Software"
+
+    send_message({
+        "body": "Package type: " + pkg_type_views + ". ",
+        "status": "post_processing",
+        "retcode": 0
+    })
+    logging.info("Package is of type: " + pkg_type_views)
+    logging.info("Package gets long build: " + str(longBuild))
+
+
+
 def install_pkg_deps():
     package_name = manifest['job_id'].split("_")[0]
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
@@ -515,46 +572,6 @@ def install_pkg_deps():
     logging.info("Finished Installing Dependencies.\n completed with status: " + str(retcode))
     return retcode
 
-
-def getPackageType():
-    global longBuild
-    global pkg_type_views
-    package_name = manifest['job_id'].split("_")[0]
-    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
-    description =bbs.parse.bytes2str(f.read())
-    f.close()
-    desc = DcfRecordParser(description.rstrip().split("\n"))
-    try:
-        isWorkflow = desc.getValue("Workflow")
-    except KeyError:
-        pass
-        isWorkflow = "false"
-    if (isWorkflow.lower() == "true"):
-        longBuild = True
-        pkg_type_views = "Workflow"
-        logging.info("Package is a workflow.")
-    else:
-        try:
-            views = desc.getValue("biocViews", full_line=True).replace(",", "")
-            r_script = os.path.join(ENVIR['spb_home'], "getPackageType.R")
-            rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
-            rscript_binary = os.path.join(rscript_dir, "Rscript")
-            cmd = "%s --vanilla --no-save --no-restore %s" % (rscript_binary, r_script)
-            cmd = cmd + " " + views
-            logging.info("Get Package Type command:\n" + cmd)
-            pkg_type_views = subprocess.check_output(cmd, shell=True).decode()
-            if (pkg_type_views == "ExperimentData"):
-                longBuild = True
-        except KeyError:
-            pkg_type_views = "Software"
-
-    send_message({
-        "body": "Package type: " + pkg_type_views + ". ",
-        "status": "post_processing",
-        "retcode": 0
-    })
-    logging.info("Package is of type: " + pkg_type_views)
-    logging.info("Package gets long build: " + str(longBuild))
 
 def install_pkg():
     package_name = manifest['job_id'].split("_")[0]
@@ -1266,20 +1283,11 @@ if __name__ == "__main__":
     else:
         logging.info("Initial Platform Check Passed.")
 
-    package_name = manifest['job_id'].split("_")[0]
-    docker_path = os.path.join(working_dir, package_name, "Dockerfile")
-    if (os.path.exists(docker_path)):
-        logging.info("Package is a docker container.")
-        send_message({
-            "status": "unsupported",
-            "retcode": 0,
-            "warnings": False,
-            "body": "Docker Container",
-            "elapsed_time": "NA"})
-        send_message({"status": "post_processing",
-                      "retcode": 0,
-                      "body": "Docker Container. "})
-        sys.exit("docker container")
+
+    logging.info("\n\n" + log_highlighter + "\n\n")
+    logging.info("Checking package type")
+    getPackageType()
+    logging.info("\n\n" + log_highlighter + "\n\n")
 
     logging.info("\n\n" + log_highlighter + "\n\n")
     logging.info("Installing Package Dependencies:")
@@ -1288,9 +1296,7 @@ if __name__ == "__main__":
         logging.error("main() Failed to install dependencies: %d." % result)
 
     logging.info("\n\n" + log_highlighter + "\n\n")
-    logging.info("Checking if package gets longer build/check time")
-    getPackageType()
-    logging.info("\n\n" + log_highlighter + "\n\n")
+    logging.info("Checking Git Clone of Package")
     gitclone_retcode = checkgitclone()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
