@@ -293,6 +293,13 @@ INFO: 09/26/2016 01:08:53 PM {"host": "lori-HP-ZBook-15-G2", "script": "server.p
 To kick off a job, run the command below in the spb\_history directory.  Be sure you're in a terminal with the appropriate virtualenv activated.
 
 ```
+# new way assumes on git.bioconductor.org
+# this will fail because on on git.bioconductor
+python3 rerun_build_git.py 51 https://git.bioconductor.org/packages/spbtest3 true
+# this should work
+python3 rerun_build_git.py 51 https://github.com/Bioconductor/spbtest3 true
+
+# old way
 python3 rerun_build.py 51 https://github.com/Bioconductor/spbtest3
 ```
 
