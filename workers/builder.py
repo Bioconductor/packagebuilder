@@ -492,11 +492,16 @@ def getPackageType():
         pass
         BiocType = "Software"
     pkg_type_views = BiocType
-    if (BiocType == "Workflow"):
+    BiocType = BiocType.lower()
+    if (BiocType == "workflow"):
         longBuild = True
         pkg_type_views = "Workflow"
         logging.info("Package is a workflow.")
-    elif (BiocType == "Docker"):
+    elif (BiocType == "book"):
+        longBuild = True
+        pkg_type_views = "Book"
+        logging.info("Package is a book.")
+    elif (BiocType == "docker"):
         logging.info("Package is a docker container.")
         send_message({
             "status": "unsupported",
@@ -718,7 +723,7 @@ def build_package(source_build):
     # to catch windows timeout
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
-        timeout_limit = int(4800)
+        timeout_limit = int(7200)
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
@@ -791,7 +796,7 @@ def do_build(cmd, message_stream, source):
 
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
-        timeout_limit = int(4800)
+        timeout_limit = int(7200)
     min_time, sec_time = divmod(timeout_limit, 60)
 
     kill = lambda process: process.kill()
@@ -916,7 +921,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
-        timeout_limit = int(4800)
+        timeout_limit = int(7200)
     min_time, sec_time = divmod(timeout_limit, 60)
 
     start_time = datetime.datetime.now()
