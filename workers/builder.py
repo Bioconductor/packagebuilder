@@ -1157,7 +1157,7 @@ def _call(command_str, shell):
 
 def isUnsupported(mySys, key):
     package_name = manifest['job_id'].split("_")[0]
-    unsupport = bbs.parse.getBBSoptionFromDir(package_name,
+    unsupport = bbs.parse.get_BBSoption_from_pkgsrctree(package_name,
                                           "UnsupportedPlatforms")
     if (unsupport is not None):
         unsupport = [x.strip().lower() for x in unsupport.split(",")]
