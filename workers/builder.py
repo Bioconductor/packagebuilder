@@ -42,7 +42,6 @@ from bioconductor.config import TOPICS
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 import BBScorevars
-from bbs.dcf.dcfrecordsparser import DcfRecordParser
 import bbs.parse
 
 stomp = None
@@ -175,16 +174,16 @@ def send_message(msg, status=None):
     logging.debug("send_message(): Message sent.")
 
 
-def send_dcf_info(dcf_file):
+def send_dcf_info(DESCRIPTION):
     try:
-        maintainer = dcf_file.getValue("Maintainer", full_line=True)
-    except:
+        maintainer = DESCRIPTION["Maintainer"]
+    except KeyError:
         maintainer = "unknown"
     send_message({
         "status": "dcf_info",
-        "package_name": dcf_file.getValue("Package"),
+        "package_name": DESCRIPTION["Package"],
         "maintainer": maintainer,
-        "version": dcf_file.getValue("Version")
+        "version": DESCRIPTION["Version"]
     })
 
 
@@ -378,12 +377,9 @@ def get_dcf_info():
 
     github_url = package_name + "/DESCRIPTION"
     try:
-        f = open(github_url, "r")  # open URL in binary mode
-        dcf_text = bbs.parse.bytes2str(f.read())
-        f.close()
-        dcf_file = DcfRecordParser(dcf_text.rstrip().split("\n"))
-        send_dcf_info(dcf_file)
-        desc_name = dcf_file.getValue("Package")
+        DESCRIPTION = bbs.parse.parse_DCF(github_url, merge_records=True)
+        send_dcf_info(DESCRIPTION)
+        desc_name = DESCRIPTION["Package"]
     except:
         logging.error("ERROR: get_dcf_info() failed\n  Could not open ",
                       github_url)
@@ -482,12 +478,10 @@ def getPackageType():
     global longBuild
     global pkg_type_views
     package_name = manifest['job_id'].split("_")[0]
-    f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
-    description =bbs.parse.bytes2str(f.read())
-    f.close()
-    desc = DcfRecordParser(description.rstrip().split("\n"))
+    DESCRIPTION_path = "%s/%s/DESCRIPTION" % (working_dir, package_name)
+    DESCRIPTION = bbs.parse.parse_DCF(DESCRIPTION_path, merge_records=True)
     try:
-       BiocType = desc.getValue("BiocType")
+        BiocType = DESCRIPTION["BiocType"]
     except KeyError:
         pass
         BiocType = "Software"
@@ -515,7 +509,7 @@ def getPackageType():
         sys.exit("docker container")
     else:
         try:
-            views = desc.getValue("biocViews", full_line=True).replace(",", "")
+            views = DESCRIPTION["biocViews"].replace(",", "")
             r_script = os.path.join(ENVIR['spb_home'], "getPackageType.R")
             rscript_dir = os.path.dirname(ENVIR['bbs_R_cmd'])
             rscript_binary = os.path.join(rscript_dir, "Rscript")
@@ -540,16 +534,17 @@ def getPackageType():
 
 def install_pkg_deps():
     package_name = manifest['job_id'].split("_")[0]
+    DESCRIPTION_path = "%s/%s/DESCRIPTION" % (working_dir, package_name)
+    DESCRIPTION = bbs.parse.parse_DCF(DESCRIPTION_path, merge_records=True)
     f = open("%s/%s/DESCRIPTION" % (working_dir, package_name), 'rb')
     description = bbs.parse.bytes2str(f.read())
     logging.info("DESCRIPTION file loaded for package '%s': \n%s", package_name, description)
     f.close()
-    desc = DcfRecordParser(description.rstrip().split("\n"))
     fields = ["Depends", "Imports", "Suggests", "Enhances", "LinkingTo"]
     args = ""
     for field in fields:
         try:
-            args += '%s=@@%s@@; ' % (field, desc.getValue(field, full_line=True))
+            args += '%s=@@%s@@; ' % (field, DESCRIPTION[field])
         except KeyError:
             pass
     r_script = os.path.join(ENVIR['spb_home'], "installPkgDeps.R")
