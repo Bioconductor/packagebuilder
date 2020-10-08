@@ -41,7 +41,8 @@ from bioconductor.config import TOPICS
 
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
-import BBScorevars
+import BBSutils
+import BBSvars
 import bbs.parse
 
 stomp = None
@@ -199,11 +200,11 @@ def setup():
 
     callcount = 1
 
-    packagebuilder_ssh_cmd = BBScorevars.ssh_cmd.replace(
+    packagebuilder_ssh_cmd = BBSvars.ssh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
-    packagebuilder_rsync_cmd = BBScorevars.rsync_cmd.replace(
+    packagebuilder_rsync_cmd = BBSvars.rsync_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
-    packagebuilder_rsync_rsh_cmd = BBScorevars.rsync_rsh_cmd.replace(
+    packagebuilder_rsync_rsh_cmd = BBSvars.rsync_rsh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
 
@@ -298,9 +299,9 @@ def is_valid_url():
 def get_node_info():
     logging.info("Node Info:")
     r_version = get_r_version()
-    osys = BBScorevars.getNodeSpec(BUILDER_ID, "OS")
-    arch = BBScorevars.getNodeSpec(BUILDER_ID, "Arch")
-    plat = BBScorevars.getNodeSpec(BUILDER_ID, "Platform")
+    osys = BBSutils.getNodeSpec(BUILDER_ID, "OS")
+    arch = BBSutils.getNodeSpec(BUILDER_ID, "Arch")
+    plat = BBSutils.getNodeSpec(BUILDER_ID, "Platform")
     send_message({
         "status": "node_info",
         "r_version": r_version,
@@ -621,7 +622,7 @@ def build_package(source_build):
     global pkg_type_views
     global longBuild
 
-    pkg_type = BBScorevars.getNodeSpec(BUILDER_ID, "pkgType")
+    pkg_type = BBSutils.getNodeSpec(BUILDER_ID, "pkgType")
 
     buildmsg = None
     if (source_build):
