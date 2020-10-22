@@ -38,9 +38,7 @@ on the same server), you'll need to create a virtual environment.
    Afterwards, create an environment called "env":   
   ```
   virtualenv -p python3 env
-  
-  virtualenv -p python3 env
-  
+    
   # python3 is indicator of executable path location: 
   which python3
   ```
