@@ -1067,9 +1067,15 @@ def win_multiarch_check():
             ' --timings %s' % (r, pkg, pkg, tarball))
 
 
-    cmdBiocCheck = ("%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (r, tarball))
+    newpackage = True
+    if ('newpackage' in manifest.keys()):
+        newpackage = manifest['newpackage']
 
-    cmdMessage = cmd + "  &&  " + cmdCheck +  "  &&  " + cmdBiocCheck
+    r_cmd = os.path.join(os.path.dirname(ENVIR['bbs_R_cmd']), "Rscript")
+    r_script = os.path.join(ENVIR['spb_home'], "BiocCheckScript.R")
+    cmdBiocCheck = "%s %s %s %s" % (r_cmd, r_script, tarball, newpackage)
+
+    cmdMessage = cmd + "  &&  " + cmdCheck +  "  &&  BiocCheck('" + tarball + "',  `new-package`=TRUE)"
 
     send_message({"status": "check_cmd", "body": cmdMessage})
     send_message({
