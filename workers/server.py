@@ -198,6 +198,16 @@ def do_work(body):
             os.environ['R_CHECK_ENVIRON']=ENVIR['r_check_environ']
             os.environ['BIOC_DEVEL_PASSWORD'] = ENVIR['bioc_devel_password']
 
+            # mock variables needed by BBSutils
+            os.environ['BBS_MEAT0_RDIR'] = os.environ.get('BBS_HOME')
+            os.environ['BBS_MEAT_PATH'] = os.environ.get('BBS_HOME')
+            os.environ['BBS_WORK_TOPDIR'] = os.environ.get('BBS_HOME')
+            os.environ['BBS_MEAT0_TYPE'] = "1"
+            os.environ['BBS_BIOC_MANIFEST_FILE'] = os.environ.get('BBS_HOME')
+            os.environ['BBS_GITLOG_RDIR'] = os.environ.get('BBS_HOME')
+
+
+
             shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
