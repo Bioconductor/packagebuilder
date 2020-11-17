@@ -42,7 +42,6 @@ from bioconductor.config import TOPICS
 sys.path.append(ENVIR['bbs_home'])
 sys.path.append(os.path.join(ENVIR['bbs_home'], "test", "python"))
 import BBSutils
-import BBSvars
 import bbs.parse
 
 stomp = None
@@ -200,12 +199,17 @@ def setup():
 
     callcount = 1
 
-    packagebuilder_ssh_cmd = BBSvars.ssh_cmd.replace(
+    bbs_ssh_cmd = BBSutils.getenv('BBS_SSH_CMD')
+    bbs_rsync_cmd = BBSutils.getenv('BBS_RSYNC_CMD')
+    bbs_rsync_rsh_cmd = BBSutils.getenv('BBS_RSYNC_RSH_CMD')
+    packagebuilder_ssh_cmd = bbs_ssh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
-    packagebuilder_rsync_cmd = BBSvars.rsync_cmd.replace(
+    packagebuilder_rsync_cmd = bbs_rsync_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
-    packagebuilder_rsync_rsh_cmd = BBSvars.rsync_rsh_cmd.replace(
+    packagebuilder_rsync_rsh_cmd = bbs_rsync_rsh_cmd.replace(
         ENVIR['bbs_RSA_key'], ENVIR['spb_RSA_key'])
+
+
     packagebuilder_scp_cmd = packagebuilder_ssh_cmd.replace("ssh", "scp", 1)
 
     if (platform.system() == "Windows"):
@@ -257,7 +261,7 @@ def setup():
 
     # system-lib
     sysLib = os.path.join(os.environ['BBS_R_HOME'], "library")
-
+    
     AllLibs = expectedRLibsUser + os.pathsep + sysLib
 
     os.environ['R_LIBS_USER'] = AllLibs
