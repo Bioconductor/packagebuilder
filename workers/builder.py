@@ -462,7 +462,7 @@ def checkgitclone():
 
     r_cmd = ENVIR['bbs_R_cmd']
 
-    cmd = "%s CMD BiocCheckGitClone %s" % (r_cmd, pkg_git_clone)
+    cmd = "%s -e 'BiocCheck::BiocCheckGitClone(\"%s\")'" % (r_cmd, pkg_git_clone)
     send_message({
         "body": "Checking Git Clone. ",
         "status": "preprocessing",
@@ -847,7 +847,7 @@ def check_package():
 
     cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
 
-    cmdBiocCheck = "%s CMD BiocCheck --build-output-file=R.out --new-package %s" % (ENVIR['bbs_R_cmd'], tarball)
+    cmdBiocCheck = "%s -e \"BiocCheck('%s', build-output-file='R.out', new-package=TRUE)\"" % (ENVIR['bbs_R_cmd'], tarball)
 
     cmdMessage = cmdCheck + "  &&  " + cmdBiocCheck
 
@@ -886,7 +886,7 @@ def do_check(cmdCheck, cmdBiocCheck):
         os.remove(outfile)
 
     out_fh = open(outfile, "w")
-    out_fh.write("\n===============================\n\n R CMD BiocCheckGitClone\n\n===============================\n\n")
+    out_fh.write("\n===============================\n\n R -e BiocCheck::BiocCheckGitClone()\n\n===============================\n\n")
     # copy BiocCheckGitClone results
     gitcheckfile = open("CheckGitClone.out")
     for line in gitcheckfile:
@@ -950,7 +950,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     out_fh.flush()
     out_fh.write("\n\n\n")
-    out_fh.write("\n===============================\n\n R CMD BiocCheck\n\n===============================\n\n")
+    out_fh.write("\n===============================\n\n R -e BiocCheck::BiocCheck()\n\n===============================\n\n")
     out_fh.flush()
 
     start_time2 = datetime.datetime.now()
