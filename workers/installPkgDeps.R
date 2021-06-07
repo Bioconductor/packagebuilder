@@ -59,12 +59,13 @@ R_libdir <- .libPaths()[2]
 install.packages("yaml", repos="https://cran.rstudio.com", lib=pkg_libdir)
 config <- yaml::read_yaml("https://bioconductor.org/config.yaml")
 bioc_ver <- config$single_package_builder$bioc_version
+bioc_ver = "3.14"
 
 ## load BiocManager
 install.packages("BiocManager", repos="https://cran.rstudio.com",
                  lib=pkg_libdir)
 if (BiocManager::version() != bioc_ver)
-    BiocManager::install(version=bioc_ver, ask=FALSE)
+    BiocManager::install(version=bioc_ver, ask=FALSE, force=TRUE)
 
 ##
 ## check that needed packages to run SPB are installed

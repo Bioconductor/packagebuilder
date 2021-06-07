@@ -1,6 +1,7 @@
 # Bioconductor .gitignore
 development.properties
 lori-HP-ZBook-15-G2.properties
+jbcj433.properties
 workers/jobs
 .packagebuilder.private_key.rsa
 R/
