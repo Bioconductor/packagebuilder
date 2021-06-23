@@ -139,11 +139,16 @@ If the new node is a new version of MAC OS, the following script on staging.bioc
 # Windows Install: 
 
 All steps should be performed as user `pkgbuild` unless otherwise noted.
-Make sure Python 3 is installed on the machine (check that you can start
+Ensure that the pkgbuild account is set up following the [BBS
+directions](https://github.com/Bioconductor/BBS/blob/master/Doc/Prepare-Windows-Server-2019-HOWTO.md#7-single-package-builder-requirements). It
+is important that the pkgbuild account has access to the BBS of the biocbuild
+account. Make sure Python 3 is installed on the machine (check that you can start
 `python` at the command line and that this starts Python 3).
 Also `pip` should be available (equivalent of `pip3` on Linux or Mac).
 
-#### Clone Repositories
+
+
+#### Clone Repositories and Make Log Directory
 
 **Note**: For now (Nov 2019) you need to use the `python3` branch
 of `packagebuilder` and `bioc-common-python`. This is until the `python3`
@@ -156,7 +161,7 @@ git -C packagebuilder checkout python3      # temporarily needed
 git clone https://github.com/Bioconductor/bioc-common-python.git
 git -C bioc-common-python checkout python3  # temporarily needed
 
-git clone https://github.com/Bioconductor/BBS.git
+mkdir log
 
 cd packagebuilder
 ```
@@ -183,7 +188,7 @@ on the same server), you'll need to create a virtual environment.
    install the the dependencies:
    
 ```
-   pip install stomp.py pytz stompy
+   pip install stomp.py pytz
    
    cd ../bioc-common-python
    pip install --upgrade -r PIP-DEPENDENCIES--bioc-common-python.txt
@@ -193,9 +198,6 @@ on the same server), you'll need to create a virtual environment.
    pip install --upgrade -r PIP-DEPENDENCIES--packagebuilder.txt
 ```
    
-   **Note:** The `stompy` module doesn't seem to be available for Python 3
-   at the moment (Nov 2019) so skip it. It doesn't seem to be needed anyway.
-
    **Note**: For now (Nov 2019), the first line in
    `packagebuilder/PIP-DEPENDENCIES--packagebuilder.txt` has been modified
    to install the `python3` branch of bioc-common-python from GitHub.
@@ -243,8 +245,22 @@ github.token=
   daily builder (biocbuild) mainly the same R. It may be necessary to have 
   an Administrator change permissions of these directories to allow read and 
   execute by pkgbuild 
-  
-  
+
+
+4. Modify server.py
+
+  As of June 2021, subscripts run through the task schedule do not inherit the
+  virtualenv that the original server.py script is run under. To accomodate the
+  subscripts change around line 202 in the server.py script that launches the
+  builder.py script to explicitly call the python in the virtualenv. So this
+  line:
+
+   `shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]`
+
+   becomes something like:
+
+   `shell_cmd = ["D:\pkgbuild\packagebuilder\env\Scripts\python.exe", "-m", "workers.builder", jobfilename, bioc_version]`
+
 #### Test server
 You can test if the server will run by the following:
 cd into the `~\pkgbuilder\packagebuilder`
@@ -262,11 +278,23 @@ Set up a task scheduler to automate the launch of the server and clean up script
 
 Log in as an Administrator account. 
 
+Before creating the SPB server task, we need to create the do_nothing_forever
+task. This is the same setup used for the biocbuild account but using
+pkgbuild. The pkgbuild uses the BBS/utils/do_nothing_forever.py script. See
+[biocbuild
+setup](https://github.com/Bioconductor/BBS/blob/master/Doc/Prepare-Windows-Server-2019-HOWTO.md#22-add-loggon_biocbuild_at_startup-task-to-task-scheduler)
+for Add loggon_biocbuild_at_startup task to Task Scheduler. It should run as
+pkgbuild and the log should go into `D:\pkgbuild\log` that we created in the
+first step.
+
+
 Navigate the Serve Manager Dashboard, in the right top there is Tools, select Task Scheduler. Once this opens navigate down task scheduler -> Task Scheduler Library -> BBS.  On the right hand side select `create task`. We will now go through the details of the last setup in each of the tabs for a create task. 
 
 1. General. Name your task. We generally have used spb\_server. Under Security Options, select Change User or Groups. In our case we will be running our tasks as the pkgbuild account. When set correctly this should show \<host name\>\\pkgbuild. This account will need to have `log on as batch job rights`. Make sure the "Run whether user is logged in or not" is selected and Change the "configure for"" to match the system. Our last deployment was `Windows Server 2012 R2` 
-2. Triggers. Set the trigger to whatever is appropriate for your task. For the server task we will set the trigger to `At System Startup`. 
-3. Actions. The following are the entries for the last set up of the spb_server task. Program/Script: `C:\Windows\System32\cmd.exe`.  Additional Arguments: `/C ".\env\Scripts\activate && python -m workers.server >> server.log 2>&1"` Start In: `C:\Users\pkgbuild\packagebuilder`.  Again these may differe depending on your locations and system setup. 
+2. Triggers. Set the trigger to whatever is appropriate for your task. For the
+server task we will set the trigger to `At System Startup` and choose a delay of
+30 seconds or 1 minute to have the do_nothing_forever.py start first. 
+3. Actions. The following are the entries for the last set up of the spb_server task. Program/Script: `C:\Windows\System32\cmd.exe`.  Additional Arguments: `/C ".\env\Scripts\activate && python -m workers.server >> server.log 2>&1"` Start In: `D:\pkgbuild\packagebuilder`.  Again these may differe depending on your locations and system setup. 
 4. Conditions. All that should be selected are the following "Start task only if the computer is on AC power" and "Stop if computer switches to battery power".
 5. Settings. All that should be selected are the following: "Allow task to be run on demand" and "If the running task does not end when requested force to stop"
 
