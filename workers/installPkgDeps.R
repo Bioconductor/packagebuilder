@@ -76,7 +76,7 @@ SPB_pkgs <- c(
    "graph", "biocViews", "knitr", "knitrBootstrap",
    "devtools", "codetools", "httr", "curl", "optparse",
    "GenomicFeatures", "ShortRead", "VariantAnnotation",
-   "dplyr", "biocViews")
+   "dplyr", "biocViews", "BiocCheck")
 pkgs_already <- dir(R_libdir)
 needed_pkgs<- SPB_pkgs[!SPB_pkgs %in% pkgs_already]
 
@@ -99,12 +99,11 @@ if(length(needed_pkgs) != 0L){
 }
 
 opaths <- .libPaths()
-.libPaths(pkg_libdir) # FIXME: source() & devtools don't obey lib=
-#devtools::install_github("Bioconductor/BiocCheck", lib=pkg_libdir, force=TRUE)
-BiocManager::install("Bioconductor/BiocCheck", lib=pkg_libdir, force=TRUE)
+.libPaths(pkg_libdir)
+## This is not always ideal. Change back to using what is on the daily builder
+#BiocManager::install("Bioconductor/BiocCheck", lib=pkg_libdir, force=TRUE)
 .libPaths(opaths)
-
-validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
+#validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
 
 
 ##
