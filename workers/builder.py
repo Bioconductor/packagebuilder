@@ -329,50 +329,6 @@ def get_r_version():
     return r_version_line.replace("R version ", "")
 
 
-def git_info():
-    logging.info("git_info():")
-    logging.info("git_url is %s" % manifest['svn_url'])
-    url_name = manifest['svn_url'].split("/")
-    url_user = url_name[3]
-    url_pkg = url_name[4]
-    cmd = "/".join(["https://api.github.com/repos",url_user,
-                       url_pkg, "commits/HEAD"])
-    #request = Request(cmd)
-    send_message({
-        "body": "Accessing git_info. ",
-        "status": "preprocessing",
-        "retcode": 0
-    })
-    try:
-        request = requests.get(cmd)
-        res = request.text
-        #response = urlopen(request)
-        #res = response.read()
-        git_dir = json.loads(res)
-        sha = git_dir['sha']
-        last_auth = git_dir['commit']['author']['name']
-        last_date = git_dir['commit']['author']['date']
-        commit_msg = git_dir['commit']['message']
-        files_mod = ''
-        for dic in git_dir['files']:
-            files_mod = files_mod + " "  + dic['filename']
-        logging.info("\n Commit ID: " + sha + "\n Last Change Author: " +
-                      last_auth + "\n Last Chage Date: " + last_date +
-                      "\n Last Commit Message: \n" + commit_msg +
-                      "\n Files Changes: " + files_mod)
-        send_message({
-        "body": "Accessing git_info complete. ",
-        "status": "post_processing",
-        "retcode": 0
-        })
-    except URLError as err_url:
-        logging.info('Cannot access github log: %s', err_url)
-        send_message({
-            "body": "Accessing git_info failed. ",
-            "status": "post_processing",
-            "retcode": -1
-        })
-
 
 def get_dcf_info():
     global svn_url_global
@@ -586,12 +542,7 @@ def install_pkg():
     r_cmd = ENVIR['bbs_R_cmd']
     lib_dir = os.path.join(package_dir, "R-libs")
 
-    if ((platform.system() == "Windows") and (isUnsupported("Windows", "win32"))):
-        cmd = "%s --arch x64 CMD INSTALL --no-multiarch --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
-    elif ((platform.system() == "Windows") and (isUnsupported("Windows", "win64"))):
-        cmd = "%s --arch i386 CMD INSTALL --no-multiarch --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
-    else:
-        cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
+    cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
 
     send_message({
         "body": "Installing package: " + package_name + ". ",
@@ -658,14 +609,7 @@ def build_package(source_build):
 
     if (source_build):
         package_name = manifest['job_id'].split("_")[0]
-        if ((platform.system() == "Windows") and (isUnsupported("Windows", "win32"))):
-            r_cmd = "%s --arch x64 CMD build %s %s" % \
-                    (ENVIR['bbs_R_cmd'], flags, package_name)
-        elif ((platform.system() == "Windows") and (isUnsupported("Windows", "win64"))):
-            r_cmd = "%s --arch i386 CMD build %s %s" % \
-                    (ENVIR['bbs_R_cmd'], flags, package_name)
-        else:
-            r_cmd = "%s CMD build %s %s" % \
+        r_cmd = "%s CMD build %s %s" % \
                     (ENVIR['bbs_R_cmd'], flags, package_name)
     else:
         if pkg_type == "mac.binary":
@@ -694,7 +638,7 @@ def build_package(source_build):
     })
     start_time = datetime.datetime.now()
     if ((not source_build) and pkg_type == "win.binary"):
-        retcode = win_multiarch_buildbin(buildmsg)
+        retcode = win_buildbin(buildmsg)
     else:
         send_message({"status": status, "body": r_cmd})
         retcode = do_build(r_cmd, buildmsg, source_build)
@@ -817,28 +761,21 @@ def do_build(cmd, message_stream, source):
     return(retcode)
 
 
-def win_multiarch_buildbin(message_stream):
-    logging.info("Starting win_multiarch_buildbin")
+def win_buildbin(message_stream):
+    logging.info("Starting win_buildbin")
     tarball = get_source_tarball_name()
     pkg = tarball.split("_")[0]
     libdir = "%s.buildbin-libdir" % pkg
     if (os.path.exists(libdir)):
         _call("rm -rf %s" % libdir, False)
-    logging.debug("win_multiarch_buildbin() Does %s exist? %s." %
+    logging.debug("win_buildbin() Does %s exist? %s." %
                   (libdir, os.path.exists(libdir)))
     if not (os.path.exists(libdir)):
         os.mkdir(libdir)
-    logging.debug("win_multiarch_buildbin() After mkdir: does %s exist? %s" %
+    logging.debug("win_buildbin() After mkdir: does %s exist? %s" %
                   (libdir, os.path.exists(libdir)))
     time.sleep(1)
-    if (isUnsupported("Windows", "win32")):
-        cmd = "{R} --arch x64 CMD INSTALL --build --no-multiarch --library={libdir} {tarball}".format(
-            R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
-    elif (isUnsupported("Windows", "win64")):
-        cmd = "{R} --arch i386 CMD INSTALL --build --no-multiarch --library={libdir} {tarball}".format(
-            R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
-    else:
-        cmd = "{R} CMD INSTALL --build --merge-multiarch --library={libdir} {tarball}".format(
+    cmd = "{R} CMD INSTALL --build --library={libdir} {tarball}".format(
             R=ENVIR['bbs_R_cmd'], libdir=libdir, tarball=tarball)
 
     send_message({"status": "r_buildbin_cmd", "body": cmd})
@@ -853,10 +790,14 @@ def check_package():
         return(win_multiarch_check())
 
     tarball = get_source_tarball_name()
-
+    pkg = tarball.split("_")[0]
+    libdir = "%s.buildbin-libdir" % pkg
+  
+ 
     extra_flags = ""
-    if (platform.system() == "Darwin"):
-        extra_flags = " --no-multiarch "
+    if (platform.system() == "Windows"):
+        extra_flags = ('--no-multiarch --library=%s.buildbin-libdir'
+                       ' --install="check:%s-install.out"' % (pkg, pkg))
 
     cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
 
@@ -872,13 +813,14 @@ def check_package():
     cmdMessage = "BiocCheckGitClone('" + package_name + "')  &&  " + cmdCheck + "  &&  BiocCheck('" + tarball + "',  `new-package`=TRUE)"
 
     send_message({"status": "check_cmd", "body": cmdMessage})
-    logging.info("R Check Command:\n" + cmdCheck)
-    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
     send_message({
         "body": "Starting Check package. ",
         "status": "preprocessing",
         "retcode": 0
     })
+    logging.info("R Check Command:\n" + cmdCheck)
+    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
+
     retcode = do_check(cmdCheck, cmdBiocCheck)
     logging.info("do_check result: " + str(retcode))
     if (retcode == -4):
@@ -944,16 +886,10 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     logging.info("The timeout_limit is: " + str(timeout_limit))
 
-    if ("multiarch" in cmdCheck):
-        if ((1200 <= time_dif.seconds) & (pkg_type_views == "Software")):
-            logging.info("Build time indicates longer than 20 min requirement")
-            warntime = 20
-            retcode1 = -4
-    else:
-        if ((600 <= time_dif.seconds) & (pkg_type_views == "Software")):
-            logging.info("Build time indicates longer than 10 min requirement")
-            warntime = 10
-            retcode1 = -4
+    if ((600 <= time_dif.seconds) & (pkg_type_views == "Software")):
+        logging.info("Build time indicates longer than 10 min requirement")
+        warntime = 10
+        retcode1 = -4
 
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
@@ -1038,102 +974,6 @@ def do_check(cmdCheck, cmdBiocCheck):
                  ". \n BiocCheck completed with status: " +
                  str(retcode2)+ " Elapsed time: " + elapsed_time2)
 
-    return (retcode)
-
-
-def win_multiarch_check():
-    tarball = get_source_tarball_name()
-    pkg = tarball.split("_")[0]
-    libdir = "%s.buildbin-libdir" % pkg
-    if (os.path.exists(libdir)):
-        retcode = _call("rm -rf %s" % libdir, False)
-    if (not os.path.exists(libdir)):
-        os.mkdir(libdir)
-
-    r = ENVIR['bbs_R_cmd']
-
-    if (isUnsupported("Windows", "win32")):
-        cmd = ("%s --arch x64 CMD INSTALL --build --no-multiarch --library=%s.buildbin-libdir"
-               " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
-        cmdCheck = ('%s --arch x64 CMD check --library=%s.buildbin-libdir'
-            ' --install="check:%s-install.out" --no-multiarch --no-vignettes'
-            ' --timings %s' % (r, pkg, pkg, tarball))
-    elif (isUnsupported("Windows", "win64")):
-        cmd = ("%s --arch i386 CMD INSTALL --build --no-multiarch --library=%s.buildbin-libdir"
-               " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
-        cmdCheck = ('%s --arch i386 CMD check --library=%s.buildbin-libdir'
-            ' --install="check:%s-install.out" --no-multiarch --no-vignettes'
-            ' --timings %s' % (r, pkg, pkg, tarball))
-    else:
-        cmd = ("%s CMD INSTALL --build --merge-multiarch --library=%s.buildbin-libdir"
-               " %s >%s-install.out 2>&1" % (r, pkg, tarball, pkg))
-        cmdCheck = ('%s CMD check --library=%s.buildbin-libdir'
-            ' --install="check:%s-install.out" --force-multiarch --no-vignettes'
-            ' --timings %s' % (r, pkg, pkg, tarball))
-
-
-    newpackage = True
-    if ('newpackage' in manifest.keys()):
-        newpackage = manifest['newpackage']
-
-    r_cmd = os.path.join(os.path.dirname(ENVIR['bbs_R_cmd']), "Rscript")
-    r_script = os.path.join(ENVIR['spb_home'], "BiocCheckScript.R")
-    cmdBiocCheck = "%s %s %s %s" % (r_cmd, r_script, tarball, newpackage)
-
-    cmdMessage = cmd + "  &&  " + cmdCheck +  "  &&  BiocCheck('" + tarball + "',  `new-package`=TRUE)"
-
-    send_message({"status": "check_cmd", "body": cmdMessage})
-    send_message({
-        "body": "Starting Check package. ",
-        "status": "preprocessing",
-        "retcode": 0
-    })
-    logging.info("R Install Command:\n" + cmd)
-    logging.info("R Check Command:\n" + cmdCheck)
-    logging.info("R BiocCheck Command:\n" + cmdBiocCheck)
-    send_message({
-        "status": "checking",
-        "sequence": 0,
-        "body": "Installing package prior to check...\n\n"
-    })
-    logging.info("Installing package prior to check...\n\n")
-    retcode = win_multiarch_buildbin("checking")
-    send_message({
-        "body": "Checking Package status: " + str(retcode) + ". ",
-        "status": "post_processing",
-        "retcode": retcode
-    })
-    if (retcode == 0):
-           send_message({"status": "clear_check_console"})
-
-           # run install
-           outfileI = "Rinstall.out"
-           if (os.path.exists(outfileI)):
-             os.remove(outfileI)
-           out_fh = open(outfileI, "w")
-           pope = subprocess.Popen(cmd, stdout=out_fh,
-                                   stderr=subprocess.STDOUT,
-                                   shell=True)
-           retcode1 = pope.wait()
-           out_fh.close()
-           if (retcode1 != 0):
-               logging.info("Install cmd failed")
-           # run check
-           retcode = do_check(cmdCheck, cmdBiocCheck)
-           if (retcode == -4):
-               send_message({
-                   "body": "WARNING: check time exceeded 20 min. ",
-                   "status": "post_processing",
-                   "retcode": retcode
-               })
-    else:
-        send_message({
-            "status": "check_complete",
-            "retcode": retcode,
-            "warnings": False,
-            "body": "Pre-check installation failed with status %d" % retcode,
-            "elapsed_time": 999
-        })
     return (retcode)
 
 
@@ -1266,9 +1106,6 @@ if __name__ == "__main__":
     get_node_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
 
-#    git_info()
-#    logging.info("\n\n" + log_highlighter + "\n\n")
-
     git_clone()
     get_dcf_info()
     logging.info("\n\n" + log_highlighter + "\n\n")
@@ -1276,8 +1113,7 @@ if __name__ == "__main__":
     exitOut = False
     if ((isUnsupported(platform.system(), BUILDER_ID)) or
        (isUnsupported("Linux","linux")) or (isUnsupported("Darwin","mac")) or
-       (isUnsupported("Windows","win")) or
-       ((isUnsupported("Windows","win64")) and (isUnsupported("Windows","win32")))):
+       (isUnsupported("Windows","win"))):
             exitOut = True
 
     if (exitOut):

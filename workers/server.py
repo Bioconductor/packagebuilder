@@ -199,7 +199,7 @@ def do_work(body):
             os.environ['BIOC_DEVEL_PASSWORD'] = ENVIR['bioc_devel_password']
 
 
-            shell_cmd = ["python", "-m", "workers.builder", jobfilename, bioc_version]
+            shell_cmd = ["F:\pkgbuild\packagebuilder\env\Scripts\python.exe", "-m", "workers.builder", jobfilename, bioc_version]
 
             builder_log = open(os.path.join(job_dir, "builder.log"), "w")
 
