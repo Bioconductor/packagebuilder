@@ -538,11 +538,13 @@ def install_pkg():
     package_name = manifest['job_id'].split("_")[0]
     package_dir = os.path.dirname(working_dir)
     pkg_git_clone = os.path.join(working_dir, package_name)
-
+    install_name = package_name + ".install-out.txt"
+    install_output_file = os.path.join(working_dir, install_name)
+    
     r_cmd = ENVIR['bbs_R_cmd']
     lib_dir = os.path.join(package_dir, "R-libs")
 
-    cmd = "%s CMD INSTALL --library=%s %s" % (r_cmd, lib_dir, pkg_git_clone)
+    cmd = "%s CMD INSTALL --library=%s %s > %s 2>&1" % (r_cmd, lib_dir, pkg_git_clone, install_output_file)
 
     send_message({
         "body": "Installing package: " + package_name + ". ",
@@ -786,20 +788,21 @@ def win_buildbin(message_stream):
 def check_package():
     send_message({"status": "starting_check", "body": ""})
 
-    if (platform.system() == "Windows"):
-        return(win_multiarch_check())
+    package_name = manifest['job_id'].split("_")[0]
+    package_dir = os.path.dirname(working_dir)
+    lib_dir = os.path.join(package_dir, "R-libs")
+    install_name = package_name + ".install-out.txt"
+    install_output_file = os.path.join(working_dir, install_name)
 
     tarball = get_source_tarball_name()
     pkg = tarball.split("_")[0]
-    libdir = "%s.buildbin-libdir" % pkg
   
  
     extra_flags = ""
     if (platform.system() == "Windows"):
-        extra_flags = ('--no-multiarch --library=%s.buildbin-libdir'
-                       ' --install="check:%s-install.out"' % (pkg, pkg))
+        extra_flags = '--no-multiarch'
 
-    cmdCheck = ("%s CMD check --no-vignettes --timings %s %s") % (ENVIR['bbs_R_cmd'], extra_flags, tarball)
+    cmdCheck = ('%s CMD check --no-vignettes --timings --library=%s --install=check:%s %s %s') % (ENVIR['bbs_R_cmd'], lib_dir, install_out_file, extra_flags, tarball)
 
     newpackage = True
     if ('newpackage' in manifest.keys()):

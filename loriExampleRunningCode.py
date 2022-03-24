@@ -154,9 +154,12 @@ log_highlighter = "***************"
 
 
 ## loriBuilder.py is copy of builder.py
-## removes main and disables send.stomp in send_message
+##
+## removes main and disables stomp.send in send_message
+##
 ## allows functions to be defined/called
-builderfile = open("loriBuilder.py")
+
+builderfile = open("loribuilder.py")
 exec(builderfile.read())
 builderfile.close()
 
@@ -203,5 +206,3 @@ global warnings
 warnings = False
 check_result = check_package()
 buildbin_result = build_package(False)
-
-/build_pa
