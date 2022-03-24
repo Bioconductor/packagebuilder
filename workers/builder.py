@@ -802,7 +802,7 @@ def check_package():
     if (platform.system() == "Windows"):
         extra_flags = '--no-multiarch'
 
-    cmdCheck = ('%s CMD check --no-vignettes --timings --library=%s --install=check:%s %s %s') % (ENVIR['bbs_R_cmd'], lib_dir, install_out_file, extra_flags, tarball)
+    cmdCheck = ('%s CMD check --no-vignettes --timings --library=%s --install=check:%s %s %s') % (ENVIR['bbs_R_cmd'], lib_dir, install_output_file, extra_flags, tarball)
 
     newpackage = True
     if ('newpackage' in manifest.keys()):
