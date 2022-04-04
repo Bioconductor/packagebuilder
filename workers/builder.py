@@ -116,9 +116,9 @@ class Tailer(threading.Thread):
 
             if (st.st_size > 0) and (st.st_size > prevsize):
                 num_bytes_to_read = st.st_size - prevsize
-                f = open(self.filename, 'r')
+                f = open(self.filename, 'rb')
                 f.seek(prevsize)
-                bytes = f.read(num_bytes_to_read)
+                bytes = bbs.parse.bytes2str(f.read(num_bytes_to_read))
                 f.close()
                 logging.debug("Tailer.run() read %d bytes" % len(bytes))
                 send_message({
@@ -942,11 +942,12 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     background.join()
     # check for warnings from R CMD check/BiocCheck
-    out_fh = open(outfile)
+    out_fh = open(outfile, 'rb')
     warnings = False
     for line in out_fh:
-        if line.rstrip().endswith("WARNING") or \
-             "* WARNING:" in line:
+        lineStr = bbs.parse.bytes2str(line)
+        if lineStr.rstrip().endswith("WARNING") or \
+             "* WARNING:" in lineStr:
             warnings = True
             break
     out_fh.close()
