@@ -855,9 +855,8 @@ def do_check(cmdCheck, cmdBiocCheck):
     out_fh = open(outfile, "w")
     out_fh.write("\n===============================\n\n BiocCheckGitClone('" + package_name + "')\n\n===============================\n\n")
     # copy BiocCheckGitClone results
-    gitcheckfile = open("CheckGitClone.out", 'rb')
+    gitcheckfile = open("CheckGitClone.out")
     for line in gitcheckfile:
-        lineSt = bbs.parse.bytes2str(line)
         out_fh.write(line)
     gitcheckfile.close()
     out_fh.write("\n\n\n")
