@@ -96,9 +96,9 @@ class Tailer(threading.Thread):
                     logging.debug("Tailer.run() 0 bytes to read; exiting.")
                     return()
 
-                f = open(self.filename, 'r')
+                f = open(self.filename, 'rb')
                 f.seek(prevsize)
-                bytes = f.read(num_bytes_to_read)
+                bytes = bbs.parse.bytes2str(f.read(num_bytes_to_read))
                 f.close()
                 logging.debug("Tailer.run() stopped; read %d bytes." % len(bytes))
                 send_message({
@@ -236,8 +236,8 @@ def setup():
             logging.warning("Empty manifest file in setup().")
             break
     time.sleep(1)
-    manifest_fh = open(sys.argv[1], "r")
-    manifest_json = manifest_fh.read()
+    manifest_fh = open(sys.argv[1], "rb")
+    manifest_json = bbs.parse.bytes2str(manifest_fh.read())
     manifest_fh.close()
     logging.debug("Reading manifest_json = %s" % manifest_json)
     manifest = json.loads(manifest_json)
@@ -657,12 +657,13 @@ def build_package(source_build):
     })
 
     # check for warnings
-    out_fh = open(outfile)
+    out_fh = open(outfile, 'rb')
     warnings = False
     for line in out_fh:
-        if line.lower().startswith("warning:"):
+        lineStr = bbs.parse.bytes2str(line)
+        if lineStr.lower().startswith("warning:"):
             warnings = True
-        if line.lower().startswith("error:"):
+        if lineStr.lower().startswith("error:"):
             retcode = 1
     out_fh.close()
 
@@ -854,8 +855,9 @@ def do_check(cmdCheck, cmdBiocCheck):
     out_fh = open(outfile, "w")
     out_fh.write("\n===============================\n\n BiocCheckGitClone('" + package_name + "')\n\n===============================\n\n")
     # copy BiocCheckGitClone results
-    gitcheckfile = open("CheckGitClone.out")
+    gitcheckfile = open("CheckGitClone.out", 'rb')
     for line in gitcheckfile:
+        lineSt = bbs.parse.bytes2str(line)
         out_fh.write(line)
     gitcheckfile.close()
     out_fh.write("\n\n\n")
