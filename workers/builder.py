@@ -57,79 +57,6 @@ gitclone_retcode = None
 
 log_highlighter = "***************"
 
-# This class is meant to behave like Linux/Unix `tail -f <file>`.
-#
-#    Usage example :
-# Run a command that continuously emits output, capture the output as soon as possible
-# and sent it in a stomp message.  We inspect the output every .2 seconds and handle it.
-class Tailer(threading.Thread):
-    def __init__(self, filename, status):
-        logging.info("Attempting to tail file {fname}".format(fname = filename))
-        threading.Thread.__init__(self)
-        self.filename = filename
-        self.status = status
-        self.message_sequence = 1
-        self._stopper = threading.Event()
-    def stop(self):
-        self._stopper.set()
-    def stopped(self):
-        return self._stopper.is_set()
-    def run(self):
-        prevsize = 0
-        while True:
-            time.sleep(0.2)
-            if not os.path.isfile(self.filename):
-                continue
-            st = os.stat(self.filename)
-            if st.st_size == 0:
-                continue
-
-            if self.stopped():
-                logging.debug("Tailer.run() stopped: %s." % self.status)
-                if (st.st_size == 0):
-                    logging.debug("Tailer.run() 0 bytes in output; exiting.")
-                    return()
-                num_bytes_to_read = st.st_size - prevsize
-                logging.debug("Tailer.run() num_bytes_to_read = %d." %
-                              num_bytes_to_read)
-                if (num_bytes_to_read == 0):
-                    logging.debug("Tailer.run() 0 bytes to read; exiting.")
-                    return()
-
-                f = open(self.filename, 'rb')
-                f.seek(prevsize)
-                bytes = bbs.parse.bytes2str(f.read(num_bytes_to_read))
-                f.close()
-                logging.debug("Tailer.run() stopped; read %d bytes." % len(bytes))
-                send_message({
-                    "status": self.status,
-                    "sequence": self.message_sequence,
-                    "body": bytes
-                })
-                logging.info(self.status + ":\n" + bytes)
-                prevsize = st.st_size
-                logging.debug("Tailer.run() done %s" % self.status)
-                break
-                # not needed here but might be needed if program was
-                # to continue doing other stuff and we wanted the
-                # thread to exit
-
-            if (st.st_size > 0) and (st.st_size > prevsize):
-                num_bytes_to_read = st.st_size - prevsize
-                f = open(self.filename, 'rb')
-                f.seek(prevsize)
-                bytes = bbs.parse.bytes2str(f.read(num_bytes_to_read))
-                f.close()
-                logging.debug("Tailer.run() read %d bytes" % len(bytes))
-                send_message({
-                    "status": self.status,
-                    "sequence": self.message_sequence,
-                    "body": bytes
-                })
-                logging.info(self.status + ":\n" + bytes)
-                self.message_sequence += 1
-                prevsize = st.st_size
-
 # Since we're modifying encoding in this function, it's important that we're consistent
 # (as unicode) when attempting to write to the log file.
 def send_message(msg, status=None):
@@ -558,7 +485,8 @@ def install_pkg():
         "status": "post_processing",
         "retcode": retcode
     })
-    logging.info("Finished Installing Package.\n completed with status: " + str(retcode))
+    logging.info("Finished Installing Package.\n completed with status: " +
+        str(retcode))
     return retcode
 
 
@@ -606,7 +534,6 @@ def build_package(source_build):
 
     global message_sequence
     global warnings
-    message_sequence = 1
     flags = "--keep-empty-dirs --no-resave-data"
 
     if (source_build):
@@ -700,12 +627,13 @@ def build_package(source_build):
 
     # build output printed entirely here
     # changed from interactively during build
-    background = Tailer(outfile, buildmsg)
-    background.start()
-    out_fh = open(outfile, "r")
-    out_fh.flush()
+    out_fh = open(outfile, "rb")
+    out_str = bbs.parse.bytes2str(out_fh.read())
     out_fh.close()
-    background.stop()
+    send_message({
+        "status": buildmsg,
+        "body": out_str
+    })
 
     send_message({
         "status": complete_status,
@@ -715,6 +643,8 @@ def build_package(source_build):
         "elapsed_time": elapsed_time})
     logging.info(complete_status + "\n Build completed with status: " +
                  str(retcode) + " Elapsed time: " + elapsed_time)
+
+    logging.info("Build output: \n" + out_str)
 
     # gave specific retcode to trigger warning but
     # still want to proceed with rest of build/check after reporting
@@ -852,6 +782,10 @@ def do_check(cmdCheck, cmdBiocCheck):
     if (os.path.exists(outfile)):
         os.remove(outfile)
 
+    send_message({
+        "status": "write_gitclone",
+        "body": "writing bioccheckgitclone results"
+    })
     out_fh = open(outfile, "w")
     out_fh.write("\n===============================\n\n BiocCheckGitClone('" + package_name + "')\n\n===============================\n\n")
     # copy BiocCheckGitClone results
@@ -860,11 +794,12 @@ def do_check(cmdCheck, cmdBiocCheck):
         out_fh.write(line)
     gitcheckfile.close()
     out_fh.write("\n\n\n")
+    send_message({
+        "status": "r_check",
+        "body": "starting R CMD check"
+    })
     out_fh.write("\n===============================\n\n R CMD CHECK\n\n===============================\n\n")
     out_fh.flush()
-
-    background = Tailer(outfile, "checking")
-    background.start()
 
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
@@ -911,6 +846,10 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     out_fh.flush()
     out_fh.write("\n\n\n")
+    send_message({
+        "status": "bioc_check",
+        "body": "starting BiocCheck"
+    })
     out_fh.write("\n===============================\n\n BiocCheck('" + cmdCheck.split(" ")[-1] + "')\n\n===============================\n\n")
     out_fh.flush()
 
@@ -939,9 +878,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     out_fh.flush()
     out_fh.close()
-    background.stop()
 
-    background.join()
     # check for warnings from R CMD check/BiocCheck
     out_fh = open(outfile, 'rb')
     warnings = False
@@ -979,6 +916,14 @@ def do_check(cmdCheck, cmdBiocCheck):
                  ". \n BiocCheck completed with status: " +
                  str(retcode2)+ " Elapsed time: " + elapsed_time2)
 
+    out_fh = open(outfile, "rb")
+    out_str = bbs.parse.bytes2str(out_fh.read())
+    out_fh.close()
+    logging.info("Check output: \n" + out_str)
+    send_message({
+        "status": "checking",
+        "body": out_str
+    })
     return (retcode)
 
 
@@ -1079,7 +1024,6 @@ if __name__ == "__main__":
     if (len(sys.argv) < 2):
         logging.error("main() Missing manifest and R version arguments.")
         sys.exit("missing manifest and R version arguments")
-    logging.info("Starting builder.py.")
 
     logging.info("\n\n" + log_highlighter + "\n\n")
 
