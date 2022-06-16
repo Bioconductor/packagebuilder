@@ -12,7 +12,7 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s - %(message)
                     level=log_level)
 
 
-logging.getLogger("stomp.py").setLevel(logging.WARNING)
+logging.getLogger("stomp.py").setLevel(logging.DEBUG)
 
 logging.info("log" + str(log_level))
 

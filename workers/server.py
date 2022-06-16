@@ -26,7 +26,7 @@ logging.basicConfig(format='%(levelname)s: %(asctime)s %(filename)s:%(lineno)s -
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=log_level)
 
-logging.getLogger("stomp.py").setLevel(logging.WARNING)
+logging.getLogger("stomp.py").setLevel(logging.DEBUG)
 
 logging.info("log" + str(log_level))
 
@@ -57,8 +57,10 @@ class MyListener(stomp.ConnectionListener):
     def on_connecting(self, host_and_port):
         logging.debug('on_connecting() %s %s.' % host_and_port)
 
-    def on_connected(self, headers, body):
-        logging.debug('on_connected() %s %s.' % (headers, body))
+##    def on_connected(self, headers, body):
+##        logging.debug('on_connected() %s %s.' % (headers, body))
+    def on_connected(self, frame):
+        logging.debug('on_connected() %s .' % (frame.headers))
 
     def on_disconnected(self):
         logging.debug('on_disconnected().')
@@ -66,12 +68,15 @@ class MyListener(stomp.ConnectionListener):
     def on_heartbeat_timeout(self):
         logging.debug('on_heartbeat_timeout().')
 
-    def on_before_message(self, headers, body):
-        logging.debug('on_before_message() %s %s.' % (headers, body))
-        return headers, body
+##    def on_before_message(self, headers, body):
+##        logging.debug('on_before_message() %s %s.' % (headers, body))
+##        return headers, body
+    def on_before_message(self, frame):
+        logging.debug('on_before_message() %s .' % frame)
+        return frame
 
-    def on_receipt(self, headers, body):
-        logging.debug('on_receipt() %s %s.' % (headers, body))
+    def on_receipt(self, frame):
+        logging.debug('on_receipt() %s %s.' % (frame.headers, frame.body))
 
     def on_send(self, frame):
         logging.debug('on_send() %s %s %s.' %
@@ -80,12 +85,12 @@ class MyListener(stomp.ConnectionListener):
     def on_heartbeat(self):
         logging.debug('on_heartbeat().')
 
-    def on_error(self, headers, message):
-        logging.debug('on_error(): "%s".' % message)
+    def on_error(self, frame):
+        logging.debug('on_error(): "%s".' % frame.message)
 
-
-
-    def on_message(self, headers, body):
+    def on_message(self, frame):
+        headers = frame.headers
+        body = frame.body
         # FIXME, don't hardcode keepalive topic name:
         if headers['destination'] == '/topic/keepalive':
             # by default this log message will not
