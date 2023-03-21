@@ -188,8 +188,12 @@ def setup():
 
     # system-lib
     sysLib = os.path.join(os.environ['BBS_R_HOME'], "library")
-    
-    AllLibs = expectedRLibsUser + os.pathsep + sysLib
+    BBSLib = os.path.join(os.environ['BBS_R_HOME'], "site-library")
+
+    if os.path.exists(BBSLib):
+        AllLibs = expectedRLibsUser + os.pathsep + BBSLib + os.pathsep + sysLib
+    else:
+        AllLibs = expectedRLibsUser + os.pathsep + sysLib
 
     os.environ['R_LIBS_USER'] = AllLibs
     logging.info("New R_LIBS_USER: {rLibsUser}".format(
