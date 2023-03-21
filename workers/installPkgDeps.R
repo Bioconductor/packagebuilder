@@ -47,10 +47,8 @@ print(.libPaths())
                                 # 2: R_HOME/library         (read-only)
                                 # 3. R_HOME/site-library    (read-only)
 pkg_libdir <- .libPaths()[1]
-R_libdir <- .libPaths()[3]
+R_libdir <- .libPaths()[-1]
 
-print(pkg_libdir)
-print(R_libdir)
 
 #
 # Try to install (but will it cause issues with daily builder)
