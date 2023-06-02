@@ -103,9 +103,15 @@ opaths <- .libPaths()
 .libPaths(pkg_libdir)
 ## This is not always ideal. Change back to using what is on the daily builder
 #BiocManager::install("Bioconductor/BiocCheck", lib=pkg_libdir, force=TRUE)
+if(!("remotes" %in% pkgs_already)){
+    pkgs_already2 <- dir(pkg_libdir)
+    if(!("remotes" %in% pkgs_already2)){
+        BiocManager::install("remotes", lib=pkg_libdir)
+    }
+}
+remotes::install_git("https://git.bioconductor.org/packages/BiocCheck", lib=pkg_libdir)
 .libPaths(opaths)
 #validateInstallation("BiocCheck", pkg_libdir, "BiocCheck")
-
 
 ##
 ## repository and options setup
