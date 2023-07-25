@@ -510,6 +510,7 @@ def get_source_tarball_name():
 def build_package(source_build):
     global pkg_type_views
     global longBuild
+    global packagebuilder_scp_cmd
 
     pkg_type = BBSutils.getNodeSpec(BUILDER_ID, "pkgType")
 
@@ -619,6 +620,22 @@ def build_package(source_build):
             "status": "post_processing",
             "retcode": retcode,
             "filesize": filesize
+        })
+        url = "webadmin@master.bioconductor.org:/extra/www/bioc/spb_reports"
+        scp_cmd = "%s %s %s/%s" % \
+            (packagebuilder_scp_cmd, tarname, url, tarname)
+        logging.info("Copying build product: " + scp_cmd)
+        scp_code = 0
+        if (not (tarname == None)):
+            scp_code = subprocess.call(scp_cmd, shell=True)
+        else:
+            scp_code = -9
+            tarname = ""
+        send_message({
+            "body": "Adding Build Product Information to Database.",
+            "status": "post_processing",
+            "retcode": scp_code,
+            "build_product": tarname
         })
 
 
