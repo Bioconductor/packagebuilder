@@ -602,7 +602,7 @@ def build_package(source_build):
     # to catch windows timeout
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
-        timeout_limit = int(7200)
+        timeout_limit = int(10800)
     if (timeout_limit <= time_dif.seconds):
         logging.info("Build time indicates TIMEOUT")
         retcode = -9
@@ -694,7 +694,7 @@ def do_build(cmd, message_stream, source):
 
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
-        timeout_limit = int(7200)
+        timeout_limit = int(10800)
     min_time, sec_time = divmod(timeout_limit, 60)
 
     kill = lambda process: process.kill()
@@ -824,7 +824,7 @@ def do_check(cmdCheck, cmdBiocCheck):
 
     timeout_limit = int(ENVIR['timeout_limit'])
     if longBuild:
-        timeout_limit = int(7200)
+        timeout_limit = int(10800)
     min_time, sec_time = divmod(timeout_limit, 60)
 
     start_time = datetime.datetime.now()

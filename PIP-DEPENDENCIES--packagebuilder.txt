@@ -1,4 +1,4 @@
-git+https://git@github.com/bioconductor/bioc-common-python.git@UpdateVersions#bioconductor==bioconductor
+#git+https://git@github.com/bioconductor/bioc-common-python.git@UpdateVersions#bioconductor==bioconductor
 argparse
 mechanize
 pytz
