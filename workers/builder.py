@@ -906,7 +906,7 @@ def do_check(cmdCheck, cmdBiocCheck):
     for line in out_fh:
         lineStr = bbs.parse.bytes2str(line)
         if lineStr.rstrip().endswith("WARNING") or \
-             "* WARNING:" or "! WARNING" in lineStr:
+             "* WARNING:" in lineStr or "! WARNING:" in lineStr:
             warnings = True
             break
     out_fh.close()
