@@ -24,7 +24,7 @@ from bioconductor.config import BUILDER_ID
 from bioconductor.communication import getNewStompConnection
 
 
-example_json = '{"job_id":"spbtest3_20220311133725","time":"Fri Mar 11 2022 13:37:25 GMT-0800 (UTC)","client_id":"single_package_builder_github:51:spbtest3","force":true,"bioc_version":"3.15","r_version":"4.2","svn_url":"https://git.bioconductor.org/packages/spbtest3","repository":"scratch","commit_id":"d148999ba9d931fc5ae41c10a36ee147da9c3a86","newpackage":true}'
+example_json = '{"job_id":"spbtest5","time":"Wed Feb 08 2023 18:39:43 GMT-0800 (UTC)","client_id":"single_package_builder_github:3145:spbtest5","force":true,"bioc_version":"3.20","r_version":"4.4","svn_url":"https://git.bioconductor.org/packages/spbtest5","repository":"scratch","commit_id":"17ff114b18edb687a503f80e56492cf83dda5821","newpackage":true}'
 
 
 received_obj = json.loads(example_json)
