@@ -593,9 +593,9 @@ def build_package(source_build):
     warnings = False
     for line in out_fh:
         lineStr = bbs.parse.bytes2str(line)
-        if lineStr.lower().startswith("warning:"):
+        if "WARNING:" in lineStr:
             warnings = True
-        if lineStr.lower().startswith("error:"):
+        if "ERROR:" in lineStr:
             retcode = 1
     out_fh.close()
 
@@ -905,8 +905,7 @@ def do_check(cmdCheck, cmdBiocCheck):
     warnings = False
     for line in out_fh:
         lineStr = bbs.parse.bytes2str(line)
-        if lineStr.rstrip().endswith("WARNING") or \
-             "* WARNING:" in lineStr or "! WARNING:" in lineStr:
+        if lineStr.rstrip().endswith("WARNING") or "WARNING:" in lineStr:
             warnings = True
             break
     out_fh.close()
