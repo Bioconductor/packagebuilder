@@ -96,10 +96,22 @@ def send_message(msg, status=None):
     logging.debug("JSON json_str: '{json_str}'".format(json_str=json_str))
 
     logging.debug("Sending message: %s" % json_str)
-    stomp.send(destination=TOPICS['events'], body=json_str,
-               headers={"persistent": "true"})
-    logging.debug("send_message(): Message sent.")
+    try:
+        stomp.send(destination=TOPICS['events'], body=json_str,
+                   headers={"persistent": "true"})
+        logging.debug("send_message(): Message sent.")
+    except (BrokenPipeError, stomp.exception.ConnectionClosedException) as e:
+        logging.warning(f"send_message(): Send failed due to connection issue: {e}")
+        try:
+            setup_stomp()  # Attempt reconnect
+            stomp.send(destination=TOPICS['events'], body=json_str,
+                       headers={"persistent": "true"})
+            logging.info("send_message(): Message sent after reconnect.")
+        except Exception as e2:
+            logging.error(f"send_message(): Reconnect/send failed: {e2}")
+            raise  # Optional: propagate or silently handle
 
+        
 
 def send_dcf_info(DESCRIPTION):
     try:
