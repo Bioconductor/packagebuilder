@@ -32,6 +32,7 @@ import requests
 #from stomp.listener import PrintingListener
 from stomp.listener import StatsListener
 from stomp.exception import ConnectionClosedException
+from stomp.exception import NotConnectedException
 from urllib.error import URLError
 from threading import Timer
 
@@ -101,7 +102,7 @@ def send_message(msg, status=None):
         stomp.send(destination=TOPICS['events'], body=json_str,
                    headers={"persistent": "true"})
         logging.debug("send_message(): Message sent.")
-    except (BrokenPipeError, ConnectionClosedException) as e:
+    except (BrokenPipeError, ConnectionClosedException, NotConnectedException) as e:
         logging.warning(f"send_message(): Send failed due to connection issue: {e}")
         try:
             setup_stomp()  # Attempt reconnect
@@ -111,6 +112,9 @@ def send_message(msg, status=None):
         except Exception as e2:
             logging.error(f"send_message(): Reconnect/send failed: {e2}")
             raise  # Optional: propagate or silently handle
+    except Exception as unexpected:
+        logging.exception(f"Unexpected error during message send: {unexpected}")
+        raise
 
         
 
